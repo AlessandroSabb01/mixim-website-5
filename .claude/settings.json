@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "remotion@remotion": true
+  },
+  "extraKnownMarketplaces": {
+    "remotion": {
+      "source": {
+        "source": "github",
+        "repo": "remotion-dev/claude-code-plugin"
+      }
+    }
+  }
+}
