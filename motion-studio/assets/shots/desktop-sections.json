@@ -1,0 +1,101 @@
+[
+ {
+  "i": 0,
+  "tag": "HEADER",
+  "id": "",
+  "cls": "fixed inset-x-0 top-0 z-50 transition-all duration-300 border-b border-line bg-i",
+  "top": 13239,
+  "h": 65,
+  "text": "Accueil | À propos | Services | Nous joindre | Discutons de votre pr"
+ },
+ {
+  "i": 1,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24",
+  "top": 0,
+  "h": 762.25,
+  "text": "Agence de production vidéo à Québec | Création de contenu vidé"
+ },
+ {
+  "i": 2,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 762.25,
+  "h": 821.3125,
+  "text": "Notre force | Du contenu authentique, | créatif et pensé | pour le"
+ },
+ {
+  "i": 3,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "overflow-hidden py-20 md:py-28",
+  "top": 1583.5625,
+  "h": 1262.625,
+  "text": "Notre savoir-faire | Votre entreprise, c'est notre matière pre"
+ },
+ {
+  "i": 4,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 2846.1875,
+  "h": 995.640625,
+  "text": "Bénéfice | Du contenu qui vend et qui capte l'attention. | Stopp"
+ },
+ {
+  "i": 5,
+  "tag": "SECTION",
+  "id": "resultats",
+  "cls": "border-t border-line",
+  "top": 3841.828125,
+  "h": 3601,
+  "text": "Résultat client | · | Mexicanos | Avant, ça démarrait. | Avec nous, "
+ },
+ {
+  "i": 6,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative overflow-hidden border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 7442.828125,
+  "h": 1351.5625,
+  "text": "Résultat : Expert SES | Plus de 250 soumissions | en deux mois. | "
+ },
+ {
+  "i": 7,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "py-20 md:py-28",
+  "top": 8794.390625,
+  "h": 2277.96875,
+  "text": "Notre approche | Une stratégiederrière chaquecontenu. |  | Chaque "
+ },
+ {
+  "i": 8,
+  "tag": "SECTION",
+  "id": "equipe",
+  "cls": "border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 11072.359375,
+  "h": 1894.1875,
+  "text": "Notre équipe | L'équipe derrière votre contenu. |  | Derrière chaq"
+ },
+ {
+  "i": 9,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "container-page pt-16 pb-16 md:pt-20",
+  "top": 12966.546875,
+  "h": 826.46875,
+  "text": "Et si votre prochaine vidéo changeait tout ? |  | Parlons de vos"
+ },
+ {
+  "i": 10,
+  "tag": "FOOTER",
+  "id": "",
+  "cls": "border-t border-line bg-ink-2",
+  "top": 13793.015625,
+  "h": 346,
+  "text": "Votre entreprise, c'est notre matière première. |  | MENU |  | Accue"
+ }
+]

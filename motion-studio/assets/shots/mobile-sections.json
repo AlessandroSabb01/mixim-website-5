@@ -1,0 +1,101 @@
+[
+ {
+  "i": 0,
+  "tag": "HEADER",
+  "id": "",
+  "cls": "fixed inset-x-0 top-0 z-50 transition-all duration-300 border-b border-line bg-i",
+  "top": 17100,
+  "h": 65,
+  "text": ""
+ },
+ {
+  "i": 1,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24",
+  "top": 0,
+  "h": 971.75,
+  "text": "Agence de production vidéo à Québec | Création de contenu vidé"
+ },
+ {
+  "i": 2,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 971.75,
+  "h": 1206.140625,
+  "text": "Notre force | Du contenu authentique, | créatif et pensé | pour le"
+ },
+ {
+  "i": 3,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "overflow-hidden py-20 md:py-28",
+  "top": 2177.890625,
+  "h": 1043.15625,
+  "text": "Notre savoir-faire | Votre entreprise, c'est notre matière pre"
+ },
+ {
+  "i": 4,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 3221.046875,
+  "h": 1652.015625,
+  "text": "Bénéfice | Du contenu qui vend et qui capte l'attention. | Stopp"
+ },
+ {
+  "i": 5,
+  "tag": "SECTION",
+  "id": "resultats",
+  "cls": "border-t border-line",
+  "top": 4873.0625,
+  "h": 2163.625,
+  "text": "Résultat client | · | Sushi X | Avant, ça stagnait. | Avec nous, ça "
+ },
+ {
+  "i": 6,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "relative overflow-hidden border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 7036.6875,
+  "h": 2982.890625,
+  "text": "Résultat : Expert SES | Plus de 250 soumissions | en deux mois. | "
+ },
+ {
+  "i": 7,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "py-20 md:py-28",
+  "top": 10019.578125,
+  "h": 2291.09375,
+  "text": "Notre approche | Une stratégiederrière chaquecontenu. |  | Chaque "
+ },
+ {
+  "i": 8,
+  "tag": "SECTION",
+  "id": "equipe",
+  "cls": "border-y border-line bg-ink-2 py-20 md:py-28",
+  "top": 12310.671875,
+  "h": 3902.96875,
+  "text": "Notre équipe | L'équipe derrière votre contenu. |  | Derrière chaq"
+ },
+ {
+  "i": 9,
+  "tag": "SECTION",
+  "id": "",
+  "cls": "container-page pt-16 pb-16 md:pt-20",
+  "top": 16213.640625,
+  "h": 1001.265625,
+  "text": "Et si votre prochaine vidéo changeait tout ? |  | Parlons de vos"
+ },
+ {
+  "i": 10,
+  "tag": "FOOTER",
+  "id": "",
+  "cls": "border-t border-line bg-ink-2",
+  "top": 17214.90625,
+  "h": 817.5,
+  "text": "Votre entreprise, c'est notre matière première. |  | MENU |  | Accue"
+ }
+]
