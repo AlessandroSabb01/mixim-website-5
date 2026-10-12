@@ -131,7 +131,7 @@ tailwind.config = { theme: { extend: {
 <script>
 (() => {
 'use strict';
-const STORE = 'warroom_crm_v1';
+const STORE = 'warroom_crm_v2';
 const STATUSES = ['To be called','Called','Follow-up','Meeting booked','Client'];
 const TEMPS = ['Cold','Warm','Hot'];
 
@@ -267,8 +267,8 @@ function seed() {
   s = 42;
   return RAW.map(([name, cat, hood, street], i) => {
     const c = CATS[cat], sl = slug(name), f = pick(FIRST), l = pick(LAST);
-    const st = STATUSES[Math.min(4, Math.floor(Math.pow(rnd(), 2.2) * 5))];
-    const temp = st === 'Client' || st === 'Meeting booked' ? 'Hot' : pick(['Cold','Cold','Warm','Warm','Hot']);
+    const st = 'To be called';
+    const temp = 'Cold';
     const ph = () => String(Math.floor(rnd()*900)+100);
     return {
       id: 'L' + (i + 1).toString().padStart(3, '0'),
@@ -277,12 +277,12 @@ function seed() {
       contact: `${f} ${l}`,
       phone: `${rnd() > .3 ? '418' : '581'}-${ph()}-${ph()}${Math.floor(rnd()*10)}`,
       email: `${slug(f).slice(0,1)}${slug(l)}@${sl.slice(0,18)}.ca`,
-      instagram: '@' + sl.slice(0, 22),
-      website: `https://www.${sl.slice(0,18)}.ca`,
+      instagram: '',
+      website: '',
       address: `${street}, ${hood}`, hood,
       status: st, temp,
       notes: pick(NOTES[c.tier]),
-      lastContact: st === 'To be called' ? null : new Date(Date.now() - Math.floor(rnd()*20)*864e5).toISOString(),
+      lastContact: null,
     };
   });
 }
@@ -313,6 +313,9 @@ const askConfirm = (msg, onYes) => {
   const close = () => d.classList.replace('flex','hidden');
   $('confirmNo').onclick = close; $('confirmYes').onclick = () => { close(); onYes(); };
 };
+const mapsUrl = l => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${l.name} ${l.address || l.hood || ''} Québec`);
+const igUrl = l => { const h = String(l.instagram || '').trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/.*$/, ''); return /^[A-Za-z0-9._]{1,30}$/.test(h) ? `https://www.instagram.com/${h}/` : ''; };
+const webUrl = l => { const w = String(l.website || '').trim(); if (!w || w === 'https://') return ''; return /^https?:\/\//.test(w) ? w : 'https://' + w; };
 const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); };
 
 function filtered() {
@@ -364,8 +367,9 @@ function render() {
       <td class="px-3 py-2"><div class="text-neutral-200">${esc(l.contact)}</div>
         <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
         <a href="mailto:${esc(l.email)}" class="text-xs text-muted hover:text-white">${esc(l.email)}</a></td>
-      <td class="px-3 py-2 text-xs"><a target="_blank" rel="noopener" href="https://instagram.com/${esc(l.instagram.replace('@',''))}" class="text-accent-soft hover:underline">${esc(l.instagram)}</a><br>
-        <a target="_blank" rel="noopener" href="${esc(l.website)}" class="text-muted hover:text-white">Site web ↗</a></td>
+      <td class="px-3 py-2 text-xs leading-5"><a target="_blank" rel="noopener" href="${mapsUrl(l)}" class="text-white hover:underline">Google Maps ↗</a><br>
+        ${igUrl(l) ? `<a target="_blank" rel="noopener" href="${esc(igUrl(l))}" class="text-accent-soft hover:underline">${esc(l.instagram)}</a><br>` : ''}
+        ${webUrl(l) ? `<a target="_blank" rel="noopener" href="${esc(webUrl(l))}" class="text-muted hover:text-white">Site web ↗</a>` : ''}</td>
       <td class="px-3 py-2 text-xs"><div class="text-neutral-200">${esc(l.hood)}</div><div class="text-neutral-500">${esc(l.address.split(',')[0])}</div></td>
       <td class="px-3 py-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status])}</td>
       <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
@@ -395,7 +399,7 @@ const FIELDS = [
 ];
 function openModal(lead) {
   editing = lead ? lead.id : null;
-  const d = lead || { category:'Food', score:CATS.Food.base, status:'To be called', temp:'Cold', instagram:'@', website:'https://' };
+  const d = lead || { category:'Food', score:CATS.Food.base, status:'To be called', temp:'Cold', instagram:'', website:'' };
   $('mTitle').textContent = lead ? `Éditer · ${lead.name}` : 'Nouveau lead';
   const inp = 'mt-1 w-full rounded-xl border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent';
   const opts = (arr, v) => arr.map(o => `<option ${o===v?'selected':''}>${o}</option>`).join('');
@@ -418,7 +422,7 @@ $('form').addEventListener('submit', e => {
   const data = Object.fromEntries(new FormData(e.target));
   data.score = Math.max(1, Math.min(100, parseInt(data.score) || CATS[data.category].base));
   data.tier = CATS[data.category].tier;
-  if (data.instagram && !data.instagram.startsWith('@')) data.instagram = '@' + data.instagram;
+  if (data.instagram && !/^@|instagram\.com/.test(data.instagram)) data.instagram = '@' + data.instagram;
   if (editing) { update(editing, data); toast('Lead mis à jour'); }
   else {
     const n = Math.max(0, ...leads.map(l => parseInt(l.id.slice(1)) || 0)) + 1;
