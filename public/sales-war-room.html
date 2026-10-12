@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="fr-CA" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sales War-Room CRM</title>
+<script src="https://cdn.tailwindcss.com/3.4.5"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: Inter, system-ui, sans-serif; background:#020617; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .glow-emerald { box-shadow: 0 0 18px -4px rgba(16,185,129,.55); }
+  .glow-amber { box-shadow: 0 0 18px -4px rgba(245,158,11,.55); }
+  .glow-cyan { box-shadow: 0 0 18px -4px rgba(6,182,212,.55); }
+  .glow-fuchsia { box-shadow: 0 0 18px -4px rgba(217,70,239,.55); }
+  select, input, textarea { color-scheme: dark; }
+  ::-webkit-scrollbar { height:8px; width:8px } ::-webkit-scrollbar-thumb { background:#334155; border-radius:8px }
+  .row-enter { animation: fade .25s ease; } @keyframes fade { from {opacity:0; transform:translateY(4px)} to {opacity:1} }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 antialiased">
+
+<!-- Sticky stats header -->
+<header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+  <div class="mx-auto max-w-[1600px] px-4 py-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 grid place-items-center font-black text-slate-950">W</div>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight">Sales War-Room <span class="text-emerald-400">CRM</span></h1>
+          <p class="text-xs text-slate-400">Prospection locale · rayon 50 km du Vieux-Québec</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-400"><span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span><span id="clock" class="mono"></span></div>
+    </div>
+    <div id="stats" class="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5"></div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-[1600px] px-4 py-4">
+  <!-- Toolbar -->
+  <section class="mb-4 grid gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-3 lg:grid-cols-[1fr_auto]">
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <input id="q" type="search" placeholder="🔍 Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
+      <select id="fCat" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
+      <select id="fTemp" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
+      <select id="fStatus" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button id="sortToggle" class="rounded-lg border border-fuchsia-500/50 bg-fuchsia-500/10 px-3 py-2 text-sm font-semibold text-fuchsia-300 hover:bg-fuchsia-500/20"></button>
+      <button id="btnReset" class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800">Réinitialiser filtres</button>
+      <button id="btnCsv" class="rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20">⬇ Export CSV</button>
+      <button id="btnAdd" class="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400">+ Nouveau lead</button>
+    </div>
+  </section>
+
+  <div class="mb-2 flex items-center justify-between text-xs text-slate-400">
+    <span id="countLbl"></span>
+    <button id="btnSeed" class="hover:text-rose-400">↺ Restaurer données de départ</button>
+  </div>
+
+  <!-- Table -->
+  <section class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40">
+    <table class="w-full min-w-[1200px] text-sm">
+      <thead class="bg-slate-900 text-left text-[11px] uppercase tracking-wider text-slate-400">
+        <tr>
+          <th class="px-3 py-3">#</th>
+          <th class="px-3 py-3">Entreprise</th>
+          <th class="px-3 py-3">Virality</th>
+          <th class="px-3 py-3">Contact</th>
+          <th class="px-3 py-3">Liens</th>
+          <th class="px-3 py-3">Quartier</th>
+          <th class="px-3 py-3">Statut</th>
+          <th class="px-3 py-3">Temp.</th>
+          <th class="px-3 py-3">Notes</th>
+          <th class="px-3 py-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody" class="divide-y divide-slate-800/80"></tbody>
+    </table>
+    <div id="empty" class="hidden p-10 text-center text-slate-500">Aucun lead ne correspond aux filtres.</div>
+  </section>
+</main>
+
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+  <form id="form" class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 id="mTitle" class="text-lg font-bold"></h2>
+      <button type="button" data-close class="text-2xl leading-none text-slate-400 hover:text-white">×</button>
+    </div>
+    <div class="grid gap-3 sm:grid-cols-2" id="formFields"></div>
+    <div class="mt-5 flex justify-end gap-2">
+      <button type="button" data-close class="rounded-lg border border-slate-700 px-4 py-2 text-sm">Annuler</button>
+      <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400">Enregistrer</button>
+    </div>
+  </form>
+</div>
+
+<div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-50 translate-y-4 rounded-lg border border-emerald-500/40 bg-slate-900 px-4 py-2 text-sm text-emerald-300 opacity-0 transition"></div>
+
+<script>
+(() => {
+'use strict';
+const STORE = 'warroom_crm_v1';
+const STATUSES = ['To be called','Called','Follow-up','Meeting booked','Client'];
+const TEMPS = ['Cold','Warm','Hot'];
+
+// Macro category -> tier + base virality score
+const CATS = {
+  'Real Estate':   { tier:1, base:96 }, 'Barbers':       { tier:1, base:94 },
+  'Aesthetics':    { tier:1, base:92 }, 'Fitness':       { tier:1, base:90 },
+  'Clothing':      { tier:1, base:88 }, 'Food':          { tier:1, base:86 },
+  'Health/Clinic': { tier:2, base:66 }, 'Events':        { tier:2, base:64 },
+  'Hotels/Tourism':{ tier:2, base:62 }, 'Automotive':    { tier:2, base:58 },
+  'Plumbing':      { tier:3, base:30 }, 'HVAC':          { tier:3, base:26 },
+  'Construction':  { tier:3, base:22 },
+};
+
+// [name, category, neighborhood, street]
+const RAW = [
+ ['Groupe Immobilier Capitale','Real Estate','Sainte-Foy','2600 boul. Laurier'],
+ ['Équipe Lachance Courtiers','Real Estate','Charlesbourg','8500 boul. Henri-Bourassa'],
+ ['Royal Vieux-Québec Immobilier','Real Estate','Vieux-Québec','35 rue Saint-Louis'],
+ ['Les Courtiers du Fleuve','Real Estate','Lévis','5700 boul. Guillaume-Couture'],
+ ['Maison Prestige Montcalm','Real Estate','Montcalm','1100 av. Cartier'],
+ ['Immo Rive-Sud Plus','Real Estate','Saint-Romuald','2200 boul. de la Rive-Sud'],
+ ['Habitations Beauport Pro','Real Estate','Beauport','800 boul. Raymond'],
+ ['Condos Saint-Roch Realty','Real Estate','Saint-Roch','400 boul. Charest Est'],
+ ['Barbier Le Coin Saint-Jean','Barbers','Saint-Jean-Baptiste','780 rue Saint-Jean'],
+ ['Fade Factory Québec','Barbers','Saint-Roch','320 rue Saint-Joseph Est'],
+ ['Barbershop Limoilou Gentlemen','Barbers','Limoilou','1200 3e Avenue'],
+ ['Le Barbier du Vieux-Port','Barbers','Vieux-Québec','95 rue Saint-Paul'],
+ ['Clipper Club Sainte-Foy','Barbers','Sainte-Foy','2450 ch. Sainte-Foy'],
+ ['Barberie Lévisienne','Barbers','Lévis','45 av. Bégin'],
+ ['Sharp Cuts Charlesbourg','Barbers','Charlesbourg','7600 1re Avenue'],
+ ['Rasoir & Co. Beauport','Barbers','Beauport','3300 av. Royale'],
+ ['Spa Urbain Laurier','Aesthetics','Sainte-Foy','2700 boul. Laurier'],
+ ['Clinique Beauté Éclat','Aesthetics','Montcalm','1050 av. Cartier'],
+ ['Salon Mèche Rebelle','Aesthetics','Saint-Roch','550 rue Saint-Joseph Est'],
+ ['Studio Cils & Sourcils QC','Aesthetics','Lebourgneuf','900 boul. Lebourgneuf'],
+ ['Ongles Glam Lévis','Aesthetics','Lévis','60 route du Président-Kennedy'],
+ ['Institut Lumière Esthétique','Aesthetics','Charlesbourg','4500 boul. Henri-Bourassa'],
+ ['Coiffure L’Atelier Limoilou','Aesthetics','Limoilou','1500 3e Avenue'],
+ ['Médispa Rive-Sud','Aesthetics','Saint-Nicolas','800 route des Rivières'],
+ ['Spa Nordique Beauport','Aesthetics','Beauport','2000 boul. des Chutes'],
+ ['CrossFit Vieille Capitale','Fitness','Saint-Roch','265 rue de la Couronne'],
+ ['Studio Yoga Sainte-Foy','Fitness','Sainte-Foy','3000 ch. des Quatre-Bourgeois'],
+ ['Gym Énergie Lévis','Fitness','Lévis','1450 boul. Alphonse-Desjardins'],
+ ['Boxe Club Limoilou','Fitness','Limoilou','700 8e Avenue'],
+ ['Pilates Montcalm Studio','Fitness','Montcalm','1200 ch. Sainte-Foy'],
+ ['Fit Lab Charlesbourg','Fitness','Charlesbourg','8000 boul. Henri-Bourassa'],
+ ['Spin Cycle Québec','Fitness','Saint-Jean-Baptiste','600 rue Saint-Jean'],
+ ['Escalade Le Bloc QC','Fitness','Vanier','350 boul. Wilfrid-Hamel'],
+ ['Boutique Fleur de Lys Mode','Clothing','Vieux-Québec','15 rue du Petit-Champlain'],
+ ['Friperie Saint-Roch Vintage','Clothing','Saint-Roch','480 rue Saint-Joseph Est'],
+ ['Atelier Nordik Apparel','Clothing','Saint-Jean-Baptiste','820 rue Saint-Jean'],
+ ['Mode Laurier Élégance','Clothing','Sainte-Foy','2700 boul. Laurier'],
+ ['Streetwear Capitale','Clothing','Lebourgneuf','1000 boul. Lebourgneuf'],
+ ['Boutique Lévis Chic','Clothing','Lévis','50 rue Saint-Louis'],
+ ['Denim & Laine Montcalm','Clothing','Montcalm','1150 av. Cartier'],
+ ['Café Fleuve Saint-Roch','Food','Saint-Roch','420 rue Saint-Joseph Est'],
+ ['Bistro Le Petit Champlain','Food','Vieux-Québec','70 rue du Petit-Champlain'],
+ ['Microbrasserie Limoilou Houblon','Food','Limoilou','1400 3e Avenue'],
+ ['Pâtisserie Cartier Gourmand','Food','Montcalm','1080 av. Cartier'],
+ ['Poutinerie Capitale','Food','Sainte-Foy','2900 ch. Sainte-Foy'],
+ ['Sushi Mer & Riz','Food','Lebourgneuf','800 boul. Lebourgneuf'],
+ ['Resto Le Quai Lévis','Food','Lévis','5 rue William-Tremblay'],
+ ['Boulangerie Charlesbourg','Food','Charlesbourg','7800 1re Avenue'],
+ ['Taqueria Saint-Jean','Food','Saint-Jean-Baptiste','730 rue Saint-Jean'],
+ ['Crêperie Beauport','Food','Beauport','3500 av. Royale'],
+ ['Cabane Érable & Co.','Food','Île d’Orléans','2000 ch. Royal'],
+ ['Clinique Dentaire Laurier','Health/Clinic','Sainte-Foy','2600 boul. Laurier'],
+ ['Centre Dentaire Lévis Sourire','Health/Clinic','Lévis','1300 boul. Alphonse-Desjardins'],
+ ['Physio Santé Charlesbourg','Health/Clinic','Charlesbourg','4400 boul. Henri-Bourassa'],
+ ['Clinique Chiro Montcalm','Health/Clinic','Montcalm','1250 ch. Sainte-Foy'],
+ ['Orthodontie Beauport','Health/Clinic','Beauport','700 boul. Raymond'],
+ ['Clinique Vétérinaire Limoilou','Health/Clinic','Limoilou','1600 3e Avenue'],
+ ['Optométrie Saint-Roch','Health/Clinic','Saint-Roch','360 boul. Charest Est'],
+ ['Clinique Médicale Lebourgneuf','Health/Clinic','Lebourgneuf','750 boul. Lebourgneuf'],
+ ['Festival Sons d’Hiver QC','Events','Vieux-Québec','1 Côte de la Fabrique'],
+ ['Salle Réception Le Grand Hall','Events','Sainte-Foy','3100 ch. des Quatre-Bourgeois'],
+ ['Événements Rive-Sud','Events','Lévis','100 rue Saint-Laurent'],
+ ['Marché Nocturne Saint-Roch','Events','Saint-Roch','300 rue Saint-Vallier Est'],
+ ['Noces & Co. Planification','Events','Charlesbourg','7900 1re Avenue'],
+ ['DJ Pro Capitale','Events','Vanier','400 boul. Wilfrid-Hamel'],
+ ['Hôtel Boutique Saint-Louis','Hotels/Tourism','Vieux-Québec','60 rue Saint-Louis'],
+ ['Auberge du Petit Champlain','Hotels/Tourism','Vieux-Québec','40 rue du Petit-Champlain'],
+ ['Hôtel Laurier Suites','Hotels/Tourism','Sainte-Foy','2800 boul. Laurier'],
+ ['Croisières Fleuve QC','Hotels/Tourism','Vieux-Port','84 rue Dalhousie'],
+ ['Gîte Île d’Orléans','Hotels/Tourism','Île d’Orléans','1500 ch. Royal'],
+ ['Tours Chute Montmorency','Hotels/Tourism','Beauport','5300 boul. Sainte-Anne'],
+ ['Hôtel Lévis Panorama','Hotels/Tourism','Lévis','5800 boul. Guillaume-Couture'],
+ ['Capitale Toyota Sainte-Foy','Automotive','Sainte-Foy','2500 boul. Wilfrid-Hamel'],
+ ['Lévis Hyundai','Automotive','Lévis','5500 boul. de la Rive-Sud'],
+ ['Beauport Mazda','Automotive','Beauport','600 boul. Raymond'],
+ ['Charlesbourg Kia','Automotive','Charlesbourg','9000 boul. Henri-Bourassa'],
+ ['Moto Sport Québec','Automotive','Vanier','500 boul. Wilfrid-Hamel'],
+ ['Esthétique Auto Pro QC','Automotive','Lebourgneuf','1100 boul. Lebourgneuf'],
+ ['Garage Mécanique Limoilou','Automotive','Limoilou','1800 3e Avenue'],
+ ['Plomberie Capitale Express','Plumbing','Charlesbourg','5000 boul. Henri-Bourassa'],
+ ['Plombier Lévis 24/7','Plumbing','Lévis','3000 route des Rivières'],
+ ['Plomberie Beauport Inc.','Plumbing','Beauport','900 boul. Raymond'],
+ ['Drain Pro Sainte-Foy','Plumbing','Sainte-Foy','3200 ch. Sainte-Foy'],
+ ['Plomberie Vanier & Fils','Plumbing','Vanier','600 boul. Wilfrid-Hamel'],
+ ['Climatisation Québec Air','HVAC','Lebourgneuf','1200 boul. Lebourgneuf'],
+ ['Thermo Confort Lévis','HVAC','Lévis','2500 boul. Alphonse-Desjardins'],
+ ['Chauffage Charlesbourg','HVAC','Charlesbourg','6000 boul. Henri-Bourassa'],
+ ['Thermopompes Rive-Nord','HVAC','Beauport','1100 boul. Raymond'],
+ ['Ventilation Pro Capitale','HVAC','Vanier','700 boul. Wilfrid-Hamel'],
+ ['Constructions Bérubé','Construction','Charlesbourg','6500 boul. Henri-Bourassa'],
+ ['Rénovations Capitale','Construction','Sainte-Foy','3400 ch. Sainte-Foy'],
+ ['Toitures Lévis Pro','Construction','Lévis','4000 boul. Guillaume-Couture'],
+ ['Excavation Beauport','Construction','Beauport','1500 boul. Raymond'],
+ ['Électricité Limoilou','Construction','Limoilou','2000 3e Avenue'],
+ ['Peinture Pro Québec','Construction','Vanier','800 boul. Wilfrid-Hamel'],
+ ['Cuisines Sur Mesure QC','Construction','Lebourgneuf','1300 boul. Lebourgneuf'],
+ ['Paysagement Rive-Sud','Construction','Saint-Nicolas','900 route des Rivières'],
+ ['Béton Saint-Romuald','Construction','Saint-Romuald','2300 boul. de la Rive-Sud'],
+ ['Fenêtres & Portes Capitale','Construction','Charlesbourg','6700 boul. Henri-Bourassa'],
+ ['Menuiserie Île d’Orléans','Construction','Île d’Orléans','2500 ch. Royal'],
+];
+
+const FIRST = ['Marc-André','Isabelle','Jean-François','Catherine','Mathieu','Geneviève','Simon','Marie-Ève','Alexandre','Julie','Olivier','Valérie','Philippe','Annie','Maxime','Sophie','Étienne','Mélanie','Guillaume','Nathalie','Kevin','Audrey','Samuel','Émilie'];
+const LAST = ['Tremblay','Gagnon','Roy','Côté','Bouchard','Gauthier','Morin','Lavoie','Fortin','Gagné','Ouellet','Pelletier','Bélanger','Lévesque','Bergeron','Leblanc','Paquette','Girard','Simard','Boucher','Caron','Beaulieu','Cloutier','Dubé'];
+const NOTES = {
+  1:['Actif sur IG mais faible fréquence vidéo','Reels amateurs, bon potentiel UGC','Aucun Reel depuis 3 mois','Gros engagement, contenu non-pro','Veut lancer TikTok, pas de ressource','Concurrence locale très active en vidéo'],
+  2:['Site daté, pas de vidéo','Publie surtout des photos stock','Intéressé par pubs Meta saisonnières','Budget marketing géré par siège social','Besoin vidéo visite des lieux'],
+  3:['Présence sociale quasi nulle','Facebook seulement, posts rares','Mise sur le bouche-à-oreille','Pourrait tester pubs avant/après chantier'],
+};
+
+// Deterministic PRNG so the seed is stable
+let s = 42; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+const pick = a => a[Math.floor(rnd() * a.length)];
+const slug = n => n.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+
+function seed() {
+  s = 42;
+  return RAW.map(([name, cat, hood, street], i) => {
+    const c = CATS[cat], sl = slug(name), f = pick(FIRST), l = pick(LAST);
+    const st = STATUSES[Math.min(4, Math.floor(Math.pow(rnd(), 2.2) * 5))];
+    const temp = st === 'Client' || st === 'Meeting booked' ? 'Hot' : pick(['Cold','Cold','Warm','Warm','Hot']);
+    const ph = () => String(Math.floor(rnd()*900)+100);
+    return {
+      id: 'L' + (i + 1).toString().padStart(3, '0'),
+      name, category: cat, tier: c.tier,
+      score: Math.max(1, Math.min(100, c.base + Math.round(rnd()*8 - 4))),
+      contact: `${f} ${l}`,
+      phone: `${rnd() > .3 ? '418' : '581'}-${ph()}-${ph()}${Math.floor(rnd()*10)}`,
+      email: `${slug(f).slice(0,1)}${slug(l)}@${sl.slice(0,18)}.ca`,
+      instagram: '@' + sl.slice(0, 22),
+      website: `https://www.${sl.slice(0,18)}.ca`,
+      address: `${street}, ${hood}`, hood,
+      status: st, temp,
+      notes: pick(NOTES[c.tier]),
+      lastContact: st === 'To be called' ? null : new Date(Date.now() - Math.floor(rnd()*20)*864e5).toISOString(),
+    };
+  });
+}
+
+// ---------- State ----------
+let leads = load();
+const ui = { q:'', cat:'', temp:'', status:'', sort:'virality' };
+function load() { try { const d = JSON.parse(localStorage.getItem(STORE)); if (Array.isArray(d) && d.length) return d; } catch {} return seed(); }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(leads)); } catch {} }
+save();
+
+// ---------- Helpers ----------
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const isToday = iso => iso && new Date(iso).toDateString() === new Date().toDateString();
+const STATUS_CLS = {
+  'To be called':'bg-slate-700/40 text-slate-300 border-slate-600',
+  'Called':'bg-cyan-500/10 text-cyan-300 border-cyan-500/40',
+  'Follow-up':'bg-amber-500/10 text-amber-300 border-amber-500/40',
+  'Meeting booked':'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/40',
+  'Client':'bg-emerald-500/15 text-emerald-300 border-emerald-500/50',
+};
+const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-cyan-500/10 text-cyan-300 border-cyan-500/40' };
+const TEMP_ICON = { Hot:'🔥', Warm:'☀️', Cold:'❄️' };
+const TIER_CLS = { 1:'text-emerald-300', 2:'text-amber-300', 3:'text-slate-400' };
+const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); };
+
+function filtered() {
+  const q = ui.q.toLowerCase().trim();
+  let out = leads.filter(l =>
+    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) &&
+    (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email].join(' ').toLowerCase().includes(q)));
+  if (ui.sort === 'virality') out.sort((a,b) => a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
+  else out.sort((a,b) => a.name.localeCompare(b.name, 'fr'));
+  return out;
+}
+
+// ---------- Render ----------
+function stat(label, value, sub, glow, color) {
+  return `<div class="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 ${glow}">
+    <div class="text-[10px] uppercase tracking-widest text-slate-400">${label}</div>
+    <div class="mono text-2xl font-bold ${color}">${value}</div>
+    <div class="text-[11px] text-slate-500">${sub}</div></div>`;
+}
+function renderStats(view) {
+  const total = leads.length, hot = leads.filter(l => l.temp === 'Hot').length;
+  const contacted = leads.filter(l => l.status !== 'To be called').length;
+  const today = leads.filter(l => isToday(l.lastContact)).length;
+  const conv = leads.filter(l => l.status === 'Meeting booked' || l.status === 'Client').length;
+  const rate = contacted ? (conv / contacted * 100).toFixed(1) : '0.0';
+  $('stats').innerHTML =
+    stat('Total leads', total, `${view.length} dans la vue`, '', 'text-white') +
+    stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, 'glow-emerald', 'text-emerald-400') +
+    stat("Appels aujourd'hui", today, `${contacted} contactés au total`, 'glow-cyan', 'text-cyan-400') +
+    stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-fuchsia', 'text-fuchsia-400') +
+    stat('Clients signés', leads.filter(l => l.status === 'Client').length, 'issus de la prospection', 'glow-amber', 'text-amber-400');
+}
+const selectHtml = (field, id, opts, cur, cls) =>
+  `<select data-inline="${field}" data-id="${id}" class="rounded-md border px-2 py-1 text-xs font-semibold outline-none ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
+
+function render() {
+  const view = filtered();
+  renderStats(view);
+  $('countLbl').textContent = `${view.length} / ${leads.length} leads affichés · tri: ${ui.sort === 'virality' ? 'Virality Ratio' : 'A → Z'}`;
+  $('sortToggle').textContent = ui.sort === 'virality' ? '⚡ Ordre Virality: ON' : '⚡ Ordre Virality: OFF';
+  $('empty').classList.toggle('hidden', view.length > 0);
+  $('tbody').innerHTML = view.map((l, i) => `
+    <tr class="row-enter hover:bg-slate-800/40">
+      <td class="px-3 py-2 mono text-xs text-slate-500">${i + 1}</td>
+      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-slate-400">${esc(l.category)}</div></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono font-bold ${TIER_CLS[l.tier]}">${l.score}</span>
+        <div class="h-1.5 w-14 rounded bg-slate-800"><div class="h-1.5 rounded bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400" style="width:${l.score}%"></div></div></div>
+        <div class="text-[10px] uppercase tracking-wider text-slate-500">Tier ${l.tier}</div></td>
+      <td class="px-3 py-2"><div class="text-slate-200">${esc(l.contact)}</div>
+        <a href="tel:${esc(l.phone)}" class="mono text-xs text-cyan-300 hover:underline">${esc(l.phone)}</a><br>
+        <a href="mailto:${esc(l.email)}" class="text-xs text-slate-400 hover:text-white">${esc(l.email)}</a></td>
+      <td class="px-3 py-2 text-xs"><a target="_blank" rel="noopener" href="https://instagram.com/${esc(l.instagram.replace('@',''))}" class="text-fuchsia-300 hover:underline">${esc(l.instagram)}</a><br>
+        <a target="_blank" rel="noopener" href="${esc(l.website)}" class="text-slate-400 hover:text-white">Site web ↗</a></td>
+      <td class="px-3 py-2 text-xs"><div class="text-slate-200">${esc(l.hood)}</div><div class="text-slate-500">${esc(l.address.split(',')[0])}</div></td>
+      <td class="px-3 py-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status])}</td>
+      <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
+      <td class="px-3 py-2 max-w-[240px]"><div contenteditable="true" data-note="${l.id}" class="rounded px-1 text-xs text-slate-300 outline-none focus:bg-slate-800 focus:ring-1 focus:ring-emerald-500">${esc(l.notes)}</div></td>
+      <td class="px-3 py-2 text-right whitespace-nowrap">
+        <button data-edit="${l.id}" class="rounded-md border border-slate-700 px-2 py-1 text-xs hover:border-emerald-500 hover:text-emerald-300">Éditer</button>
+        <button data-del="${l.id}" class="rounded-md border border-slate-700 px-2 py-1 text-xs hover:border-rose-500 hover:text-rose-400">✕</button></td>
+    </tr>`).join('');
+}
+
+// ---------- Mutations ----------
+function update(id, patch) {
+  const l = leads.find(x => x.id === id); if (!l) return;
+  if (patch.status && patch.status !== l.status && patch.status !== 'To be called') patch.lastContact = new Date().toISOString();
+  if (patch.status === 'Client' || patch.status === 'Meeting booked') patch.temp = 'Hot';
+  if (patch.category) patch.tier = CATS[patch.category].tier;
+  Object.assign(l, patch); save(); render();
+}
+
+// ---------- Modal ----------
+let editing = null;
+const FIELDS = [
+  ['name','Entreprise','text',true],['category','Catégorie','cat'],['score','Virality score (1-100)','number'],
+  ['contact','Contact','text'],['phone','Téléphone','tel'],['email','Courriel','email'],
+  ['instagram','Instagram','text'],['website','Site web','url'],['hood','Quartier','text'],['address','Adresse','text'],
+  ['status','Statut','status'],['temp','Température','temp'],['notes','Notes d’appel','textarea'],
+];
+function openModal(lead) {
+  editing = lead ? lead.id : null;
+  const d = lead || { category:'Food', score:CATS.Food.base, status:'To be called', temp:'Cold', instagram:'@', website:'https://' };
+  $('mTitle').textContent = lead ? `Éditer · ${lead.name}` : 'Nouveau lead';
+  const inp = 'w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-emerald-500';
+  const opts = (arr, v) => arr.map(o => `<option ${o===v?'selected':''}>${o}</option>`).join('');
+  $('formFields').innerHTML = FIELDS.map(([k, label, type, req]) => {
+    let ctl;
+    if (type === 'cat') ctl = `<select name="${k}" class="${inp}">${opts(Object.keys(CATS), d[k])}</select>`;
+    else if (type === 'status') ctl = `<select name="${k}" class="${inp}">${opts(STATUSES, d[k])}</select>`;
+    else if (type === 'temp') ctl = `<select name="${k}" class="${inp}">${opts(TEMPS, d[k])}</select>`;
+    else if (type === 'textarea') ctl = `<textarea name="${k}" rows="3" class="${inp}">${esc(d[k])}</textarea>`;
+    else ctl = `<input name="${k}" type="${type}" ${type==='number'?'min="1" max="100"':''} ${req?'required':''} value="${esc(d[k])}" class="${inp}">`;
+    return `<label class="text-xs text-slate-400 ${type==='textarea'?'sm:col-span-2':''}">${label}${ctl}</label>`;
+  }).join('');
+  $('modal').classList.replace('hidden','flex');
+  $('form').name.focus();
+}
+const closeModal = () => $('modal').classList.replace('flex','hidden');
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.score = Math.max(1, Math.min(100, parseInt(data.score) || CATS[data.category].base));
+  data.tier = CATS[data.category].tier;
+  if (data.instagram && !data.instagram.startsWith('@')) data.instagram = '@' + data.instagram;
+  if (editing) { update(editing, data); toast('Lead mis à jour'); }
+  else {
+    const n = Math.max(0, ...leads.map(l => parseInt(l.id.slice(1)) || 0)) + 1;
+    leads.unshift({ id:'L' + String(n).padStart(3,'0'), lastContact: data.status !== 'To be called' ? new Date().toISOString() : null, ...data });
+    save(); render(); toast('Lead ajouté');
+  }
+  closeModal();
+});
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.hasAttribute('data-close')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); if (e.key === '/' && document.activeElement.tagName === 'BODY') { e.preventDefault(); $('q').focus(); } });
+
+// ---------- Table events (delegated) ----------
+$('tbody').addEventListener('change', e => {
+  const el = e.target.closest('[data-inline]'); if (!el) return;
+  update(el.dataset.id, { [el.dataset.inline]: el.value }); toast('Enregistré');
+});
+$('tbody').addEventListener('focusout', e => {
+  const el = e.target.closest('[data-note]'); if (!el) return;
+  const l = leads.find(x => x.id === el.dataset.note);
+  if (l && l.notes !== el.innerText.trim()) { l.notes = el.innerText.trim(); save(); toast('Note enregistrée'); }
+});
+$('tbody').addEventListener('keydown', e => { if (e.target.dataset.note !== undefined && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.target.blur(); } });
+$('tbody').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
+  if (ed) openModal(leads.find(l => l.id === ed.dataset.edit));
+  if (del) { const l = leads.find(x => x.id === del.dataset.del); if (l && confirm(`Supprimer « ${l.name} » ?`)) { leads = leads.filter(x => x !== l); save(); render(); toast('Lead supprimé'); } }
+});
+
+// ---------- Toolbar ----------
+const fill = (el, label, arr) => el.innerHTML = `<option value="">${label}</option>` + arr.map(o => `<option>${o}</option>`).join('');
+fill($('fCat'), 'Toutes catégories', Object.keys(CATS));
+fill($('fTemp'), 'Toutes températures', TEMPS);
+fill($('fStatus'), 'Tous statuts', STATUSES);
+let qt; $('q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { ui.q = e.target.value; render(); }, 80); });
+$('fCat').onchange = e => { ui.cat = e.target.value; render(); };
+$('fTemp').onchange = e => { ui.temp = e.target.value; render(); };
+$('fStatus').onchange = e => { ui.status = e.target.value; render(); };
+$('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
+$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'' }); ['q','fCat','fTemp','fStatus'].forEach(i => $(i).value = ''); render(); };
+$('btnAdd').onclick = () => openModal(null);
+$('btnSeed').onclick = () => { if (confirm('Effacer toutes les modifications et restaurer les 100 leads de départ ?')) { leads = seed(); save(); render(); toast('Données restaurées'); } };
+$('btnCsv').onclick = () => {
+  const cols = ['id','name','category','tier','score','contact','phone','email','instagram','website','hood','address','status','temp','notes','lastContact'];
+  const cell = v => { const t = String(v ?? ''); return /[",\n;]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t; };
+  const csv = '﻿' + [cols.join(','), ...filtered().map(l => cols.map(c => cell(l[c])).join(','))].join('\r\n');
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' })), download: `warroom-leads-${new Date().toISOString().slice(0,10)}.csv` });
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`${filtered().length} leads exportés`);
+};
+const tick = () => $('clock').textContent = new Date().toLocaleString('fr-CA', { weekday:'short', hour:'2-digit', minute:'2-digit' });
+tick(); setInterval(tick, 30000);
+
+render();
+})();
+</script>
+</body>
+</html>
