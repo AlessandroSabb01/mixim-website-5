@@ -580,7 +580,7 @@
   function buildLogo(svgText) {
     const root = layer(10);
     const disc = el(root, { width: "200px", height: "200px", borderRadius: "50%", background: C.acc });
-    const fill = el(root, { width: W + "px", height: H + "px", background: C.acc });
+    const fill = el(root, { width: W + "px", height: H + "px", background: `radial-gradient(120% 60% at 50% 0%, #0c1022 0%, ${C.bg} 60%)` });
     const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
     const paths = [...doc.querySelectorAll("path")].map((p) => p.outerHTML);
     const mk = (vb, inner, w) => { const h = (w * vb[3]) / vb[2]; const d = el(root, { width: w + "px", height: h + "px", overflow: "hidden" }); d.innerHTML = `<svg viewBox="${vb.join(" ")}" width="${w}" height="${h}" style="display:block">${inner}</svg>`; return { d, h }; };
@@ -588,7 +588,7 @@
     const board = mk([0, 0, 221, 98], `${paths[0]}${paths[1]}${paths[4]}<g id="arm">${paths[2]}${paths[3]}</g><g id="boom">${paths.slice(5).join("")}</g>`, Lw);
     const wordm = mk([0, 98, 221, 42], paths[4], Lw);
     const subm = mk([0, 140, 221, 20], paths[4], Lw);
-    const tag = words(root, [["Et", "si", "votre"], ["prochaine", "vidéo"], ["changeait", "tout ?"]], { size: 100, weight: 700, track: -0.035, lh: 1.04, w: W - 140, align: "center" });
+    const tag = words(root, [["Et", "si", "votre"], ["prochaine", "vidéo"], ["changeait", "tout ?"]], { size: 100, weight: 700, track: -0.035, lh: 1.04, w: W - 140, align: "center", color: (w, i) => (i >= 5 ? C.acc : C.white) });
     const url = words(root, [["creationvirale.com"]], { size: 40, weight: 500, family: '"Geist Mono"', track: 0.02, w: W - 140, align: "center" });
     const total = board.h + wordm.h + subm.h, stack = total + 90 + tag.height;
     const by = (H - stack) / 2 - 120;
@@ -603,7 +603,7 @@
     const okX = fs.F ? fs.F.X + fs.F.pad + fs.F.iw / 2 : W / 2, okY = fs.F ? fs.F.fy + fs.F.by + px(25) : H / 2;
     const g = ez.inOutExpo(pb(t, 53.85, 54.35));
     const r = lerp(px(25), Math.hypot(W, H), g);
-    T(Lg.disc, { x: okX - r, y: okY - r, op: g > 0 && g < 1 ? 1 : 0 }); Lg.disc.style.width = Lg.disc.style.height = 2 * r + "px";
+    T(Lg.disc, { x: okX - r, y: okY - r, op: g > 0 && g < 1 ? 1 : 0 }); { const c = Math.round(lerp(1, 0, clamp(g * 1.4))); const k = clamp(g * 1.4); Lg.disc.style.background = `rgb(${Math.round(lerp(44, 5, k))},${Math.round(lerp(91, 5, k))},${Math.round(lerp(255, 5, k))})`; } Lg.disc.style.width = Lg.disc.style.height = 2 * r + "px";
     vis(Lg.fill, g >= 1);
     const dt = t - bt(54.25) + 0.02, e = spring(dt, 2.2, 7);
     T(Lg.board.d, { x: Lg.bx + (Lg.Lw * (1 - (0.55 + 0.45 * e))) / 2, y: Lg.by + (1 - ez.outExpo(clamp(dt / 0.5))) * 200, s: 0.55 + 0.45 * e, r: (1 - e) * -6, op: dt > 0 ? 1 : 0 });
