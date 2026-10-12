@@ -105,6 +105,43 @@ tailwind.config = { theme: { extend: {
   </form>
 </div>
 
+<div id="outreach" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="flex max-h-[92vh] w-full max-w-3xl flex-col rounded-3xl border border-line bg-surface">
+    <div class="flex items-start justify-between gap-4 border-b border-line p-5">
+      <div class="min-w-0"><p class="eyebrow">Prospection</p><h2 id="oTitle" class="display mt-1 text-2xl"></h2><p id="oMeta" class="mt-1 text-xs text-muted"></p></div>
+      <div class="flex items-center gap-2"><button id="oSettingsBtn" class="rounded-full border border-line px-3 py-1.5 text-xs text-muted hover:text-white">⚙ Paramètres</button><button id="oClose" class="text-2xl leading-none text-muted hover:text-white">×</button></div>
+    </div>
+    <div id="oTabs" class="flex flex-wrap gap-2 px-5 pt-4"></div>
+    <div class="min-h-0 flex-1 overflow-y-auto p-5">
+      <div id="oWarn" class="mb-3 hidden rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300"></div>
+      <label id="oSubjectWrap" class="mb-2 block text-xs text-muted">Objet<input id="oSubject" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white outline-none focus:border-accent"></label>
+      <label class="block text-xs text-muted">Message<textarea id="oBody" rows="14" class="mt-1 w-full rounded-xl border border-line bg-ink-2 p-3 text-sm leading-6 text-neutral-200 outline-none focus:border-accent"></textarea></label>
+      <p id="oTo" class="mono mt-2 text-xs text-muted"></p>
+    </div>
+    <div class="flex flex-wrap justify-end gap-2 border-t border-line p-5">
+      <a id="oMailto" target="_blank" rel="noopener" class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">Ouvrir dans ma messagerie ↗</a>
+      <button id="oCopy" class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">Copier</button>
+      <button id="oSent" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Marquer comme envoyé</button>
+    </div>
+  </div>
+</div>
+
+<div id="oSettings" class="fixed inset-0 z-[55] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <form id="oSettingsForm" class="w-full max-w-lg rounded-3xl border border-line bg-surface p-6">
+    <h2 class="display text-2xl">Paramètres d'envoi</h2>
+    <p class="mt-1 text-xs text-muted">Utilisés dans chaque message. La loi anti-pourriel (LCAP) exige le nom, une adresse postale et un moyen de se désabonner dans chaque courriel.</p>
+    <div class="mt-4 grid gap-3">
+      <label class="text-xs text-muted">Signature<input id="sSign" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white"></label>
+      <label class="text-xs text-muted">Courriel de réponse<input id="sEmail" type="email" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white"></label>
+      <label class="text-xs text-muted">Téléphone<input id="sPhone" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white"></label>
+      <label class="text-xs text-muted">Adresse postale (obligatoire LCAP)<input id="sAddress" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white"></label>
+      <label class="text-xs text-muted">Lien portfolio / vidéos démo<input id="sPortfolio" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white"></label>
+      <label class="text-xs text-muted">Lien de prise de rendez-vous (15 min, optionnel)<input id="sBooking" class="mt-1 w-full rounded-xl border border-line bg-ink-2 px-3 py-2 text-sm text-white" placeholder="ex. Calendly"></label>
+    </div>
+    <div class="mt-5 flex justify-end"><button class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Enregistrer</button></div>
+  </form>
+</div>
+
 <div id="confirm" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
   <div class="w-full max-w-sm rounded-3xl border border-line bg-surface p-6">
     <p id="confirmMsg" class="whitespace-pre-line text-sm text-neutral-200"></p>
@@ -253,6 +290,7 @@ function render() {
       <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
       <td class="px-3 py-2 max-w-[240px]"><div contenteditable="true" data-note="${l.id}" class="rounded px-1 text-xs text-neutral-300 outline-none focus:bg-surface-2 focus:ring-1 focus:ring-accent">${esc(l.notes)}</div></td>
       <td class="px-3 py-2 text-right whitespace-nowrap">
+        <button data-msg="${l.id}" class="rounded-full bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-neutral-200">✉ Message</button>
         <button data-edit="${l.id}" class="rounded-full border border-line px-3 py-1 text-xs hover:border-neutral-500 hover:text-white">Éditer</button>
         <button data-del="${l.id}" class="rounded-full border border-line px-3 py-1 text-xs hover:border-rose-500 hover:text-rose-400">✕</button></td>
     </tr>`).join('');
@@ -311,7 +349,7 @@ $('form').addEventListener('submit', e => {
 });
 $('exportClose').onclick = () => $('exportDlg').classList.replace('flex','hidden');
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.hasAttribute('data-close')) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('exportDlg').classList.replace('flex','hidden'); $('confirm').classList.replace('flex','hidden'); } if (e.key === '/' && document.activeElement.tagName === 'BODY') { e.preventDefault(); $('q').focus(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('outreach').classList.replace('flex','hidden'); $('oSettings').classList.replace('flex','hidden'); $('exportDlg').classList.replace('flex','hidden'); $('confirm').classList.replace('flex','hidden'); } if (e.key === '/' && document.activeElement.tagName === 'BODY') { e.preventDefault(); $('q').focus(); } });
 
 // ---------- Table events (delegated) ----------
 $('tbody').addEventListener('change', e => {
@@ -325,7 +363,8 @@ $('tbody').addEventListener('focusout', e => {
 });
 $('tbody').addEventListener('keydown', e => { if (e.target.dataset.note !== undefined && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.target.blur(); } });
 $('tbody').addEventListener('click', e => {
-  const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
+  const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]'), msg = e.target.closest('[data-msg]');
+  if (msg) openOutreach(leads.find(l => l.id === msg.dataset.msg));
   if (ed) openModal(leads.find(l => l.id === ed.dataset.edit));
   if (del) { const l = leads.find(x => x.id === del.dataset.del); if (l) askConfirm(`Supprimer « ${l.name} » ?`, () => { leads = leads.filter(x => x !== l); save(); render(); toast('Lead supprimé'); }); }
 });
@@ -343,6 +382,156 @@ $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : '
 $('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'' }); ['q','fCat','fTemp','fStatus'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
 $('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
+
+// ---------- Outreach messages ----------
+const OKEY = 'warroom_outreach_v1';
+const DEF_SETTINGS = { sign:"L'équipe Création Virale", email:'', phone:'', address:'', portfolio:'https://creationvirale.com', booking:'' };
+let oset = (() => { try { return { ...DEF_SETTINGS, ...JSON.parse(localStorage.getItem(OKEY) || '{}') }; } catch { return { ...DEF_SETTINGS }; } })();
+const TU_CATS = new Set(['Barbers','Aesthetics','Fitness','Food','Clothing','Tattoo/Jewelry']);
+// Per-category angle: what we'd film, and why it matters for them.
+const ANGLES = {
+  'Real Estate':    { idea:'des visites de propriétés en format Reels et des capsules « courtier » qui bâtissent votre image', why:'les vendeurs choisissent le courtier qu’ils ont déjà vu en vidéo' },
+  'Barbers':        { idea:'des transformations avant/après et des coupes filmées en 15 secondes', why:'une bonne coupe en Reel, c’est la vitrine qui ramène des nouveaux clients chaque semaine' },
+  'Aesthetics':     { idea:'des transformations avant/après et les coulisses du salon en Reels', why:'les clientes choisissent leur salon sur Instagram avant de réserver' },
+  'Med Aesthetics': { idea:'des capsules éducatives et des résultats avant/après tournés de façon professionnelle', why:'la vidéo rassure les nouvelles clientes avant un premier traitement' },
+  'Fitness':        { idea:'l’énergie des cours, vos coachs et les histoires de membres en Reels', why:'les gens s’inscrivent là où ils se voient déjà s’entraîner' },
+  'Clothing':       { idea:'des essayages, des nouveautés et des looks de la semaine en Reels', why:'chaque nouvel arrivage peut devenir une vidéo qui fait entrer du monde en boutique' },
+  'Tattoo/Jewelry': { idea:'le processus de création filmé de près, du croquis au résultat', why:'le processus captive et donne envie de réserver' },
+  'Food':           { idea:'vos plats, la préparation en cuisine et l’ambiance du service en Reels', why:'la bouffe est le contenu le plus regardé sur Instagram et TikTok à Québec' },
+  'Health/Clinic':  { idea:'des capsules qui présentent l’équipe et rassurent les nouveaux patients', why:'un nouveau patient choisit une clinique où il se sent déjà en confiance' },
+  'Wellness/Physio':{ idea:'des capsules éducatives courtes (conseils, exercices, mythes)', why:'le contenu éducatif fait de vous la référence dans votre secteur' },
+  'Hotels/Tourism': { idea:'des vidéos immersives de l’expérience sur place, en toutes saisons', why:'les voyageurs réservent l’expérience qu’ils ont vue en vidéo' },
+  'Events':         { idea:'des montages d’événements et des coulisses de vos réalisations', why:'vos futurs clients veulent voir l’émotion d’un événement réussi' },
+  'Automotive':     { idea:'des présentations de véhicules et des publicités vidéo pour votre inventaire', why:'la vidéo fait vendre l’inventaire plus vite que les photos' },
+  'Education':      { idea:'des vidéos qui montrent la vie à l’école et les témoignages', why:'les familles choisissent après avoir « vu » l’endroit' },
+  'Plumbing':       { idea:'des vidéos de chantiers et des capsules de recrutement', why:'la vidéo aide autant à trouver des clients qu’à recruter de la main-d’œuvre' },
+  'HVAC':           { idea:'des capsules saisonnières et des vidéos de recrutement', why:'la vidéo aide autant à vendre en haute saison qu’à recruter' },
+  'Construction':   { idea:'des timelapses de chantiers et des avant/après de projets', why:'un avant/après bien filmé vend vos prochains projets' },
+  'Professional':   { idea:'des capsules courtes qui mettent un visage sur votre expertise', why:'les clients choisissent un professionnel en qui ils ont déjà confiance' },
+  'Other':          { idea:'du contenu vidéo court pensé pour Instagram et les publicités', why:'la vidéo courte est le format qui rejoint le plus de monde localement' },
+};
+const because = (w, cap) => (cap ? 'P' : 'p') + (/^[aeéèêiouyh]/i.test(w) ? 'arce qu’' : 'arce que ') + w;
+function hooks(l, tu) {
+  const v = (a, b) => tu ? a : b;
+  if (l.reviews >= 100 && l.rating >= 4.5) return v(`Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, c’est clair que tes clients t’adorent. Le défi, c’est que ça paraisse autant sur les réseaux.`, `Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, vos clients vous apprécient clairement. Le défi, c’est que ça paraisse autant sur les réseaux.`);
+  if (!l.instagram) return v(`Je n’ai pas trouvé de compte Instagram actif pour ${l.name}, et c’est souvent là que les nouveaux clients te découvrent.`, `Je n’ai pas trouvé de compte Instagram actif pour ${l.name}, et c’est souvent là que les nouveaux clients vous découvrent.`);
+  return v(`J’ai jeté un œil à ${l.name} en ligne et je pense qu’il y a une belle occasion avec la vidéo courte.`, `J’ai regardé la présence en ligne de ${l.name} et je pense qu’il y a une belle occasion avec la vidéo courte.`);
+}
+function footer(tu) {
+  const lines = [oset.sign, 'Création Virale · creationvirale.com'];
+  if (oset.phone) lines.push(oset.phone);
+  if (oset.email) lines.push(oset.email);
+  if (oset.address) lines.push(oset.address);
+  lines.push('', tu ? 'Si tu préfères ne plus recevoir de messages de notre part, réponds simplement « désabonner ».' : 'Si vous préférez ne plus recevoir de messages de notre part, répondez simplement « désabonner ».');
+  return lines.join('\n');
+}
+function buildMessages(l) {
+  const tu = TU_CATS.has(l.category), a = ANGLES[l.category] || ANGLES.Other, v = (x, y) => tu ? x : y;
+  const hi = tu ? 'Salut' : 'Bonjour', cta = oset.booking ? v(`\n\nTu peux choisir un moment ici : ${oset.booking}`, `\n\nVous pouvez choisir un moment ici : ${oset.booking}`) : '';
+  const proof = v(`Tu peux voir nos vidéos ici : ${oset.portfolio}`, `Vous pouvez voir nos réalisations ici : ${oset.portfolio}`);
+  return {
+    email1: { label:'Courriel 1', subject: v(`Une idée vidéo pour ${l.name}`, `Une idée vidéo pour ${l.name}`), body:
+`${hi},
+
+${hooks(l, tu)}
+
+Chez Création Virale, on est une agence de Québec : on écrit le script, on se déplace pour tourner, on monte et on publie. Pour ${l.name}, je verrais ${a.idea}. Pourquoi ? ${because(a.why, true)}.
+
+${proof}
+
+${v('Aurais-tu 15 minutes cette semaine pour un appel rapide ? Je te montre 2-3 idées concrètes pour ta business, sans engagement.', 'Auriez-vous 15 minutes cette semaine pour un appel ? Je vous présente 2-3 idées concrètes pour votre entreprise, sans engagement.')}${cta}
+
+${footer(tu)}` },
+    email2: { label:'Relance J+4', subject: v(`Re: Une idée vidéo pour ${l.name}`, `Re: Une idée vidéo pour ${l.name}`), body:
+`${hi},
+
+${v('Je me permets de revenir vers toi', 'Je me permets de revenir vers vous')} au sujet de la vidéo pour ${l.name}. Concrètement, une première journée de tournage nous donne assez de matériel pour plusieurs semaines de Reels.
+
+${v('Est-ce que 15 minutes au téléphone cette semaine ou la semaine prochaine te conviendraient ?', 'Est-ce que 15 minutes au téléphone cette semaine ou la semaine prochaine vous conviendraient ?')}${cta}
+
+${footer(tu)}` },
+    email3: { label:'Dernier suivi J+10', subject: v(`Je ferme le dossier ?`, `Dernier suivi`), body:
+`${hi},
+
+${v('Je ne veux pas remplir ta boîte, donc c’est mon dernier message.', 'Je ne veux pas encombrer votre boîte, donc c’est mon dernier message.')} Si la vidéo pour ${l.name} devient une priorité plus tard, ${v('tu peux me répondre ici en tout temps', 'vous pouvez me répondre ici en tout temps')}.
+
+${proof}
+
+${footer(tu)}` },
+    dm: { label:'DM Instagram', subject:null, body:
+`${hi} ! 👋 ${tu ? 'On est' : 'Nous sommes'} Création Virale, une agence vidéo de Québec. ${hooks(l, tu)}
+
+${v('J’ai une idée', 'J’aurais une idée')} pour ${l.name} : ${a.idea}. ${v('Ça te dirait qu’on en jase 15 min ?', 'Seriez-vous ouvert à en discuter 15 minutes ?')} 🎬` },
+    call: { label:'Script d’appel', subject:null, body:
+`OUVERTURE
+« ${tu ? 'Salut' : 'Bonjour'}, ici [prénom] de Création Virale, une agence vidéo de Québec. ${v('Est-ce que je parle au propriétaire ou à la personne qui gère vos réseaux ?', 'Est-ce que je parle au propriétaire ou à la personne qui s’occupe des réseaux sociaux ?')} »
+
+RAISON DE L'APPEL (20 sec)
+« ${hooks(l, tu)} On fait le script, le tournage, le montage et la publication. ${v('Pour toi', 'Pour vous')}, je verrais ${a.idea}, ${because(a.why)}. »
+
+QUESTIONS
+• Qui s’occupe de votre contenu en ce moment ?
+• Combien de vidéos publiez-vous par mois ?
+• Avez-vous déjà fait des publicités sur Instagram ou Facebook ?
+
+OBJECTIONS
+• « Pas le budget » → « On commence souvent par une seule journée de tournage pour tester. »
+• « On le fait déjà nous-mêmes » → « Parfait, on peut vous fournir du matériel pro pour compléter. »
+• « Envoyez-moi un courriel » → confirmer l’adresse, envoyer le Courriel 1 le jour même.
+
+CLÔTURE
+« ${v('Est-ce qu’on peut se garder 15 minutes cette semaine pour que je te montre 2-3 idées ?', 'Pourrait-on se garder 15 minutes cette semaine pour que je vous présente 2-3 idées ?')} »
+
+INFOS
+${l.phone || 'téléphone inconnu'} · ${l.address || ''}` },
+  };
+}
+let oLead = null, oTab = 'email1', oMsgs = null;
+function renderOutreach() {
+  const m = oMsgs[oTab];
+  $('oTabs').innerHTML = Object.entries(oMsgs).map(([k, x]) => `<button data-otab="${k}" class="rounded-full border px-3 py-1.5 text-xs ${k === oTab ? 'border-white bg-white text-ink' : 'border-line text-muted hover:text-white'}">${x.label}</button>`).join('');
+  $('oSubjectWrap').classList.toggle('hidden', m.subject === null); $('oSubject').value = m.subject || ''; $('oBody').value = m.body;
+  const isEmail = oTab.startsWith('email'), to = (oLead.email || '').split(',')[0].trim();
+  $('oTo').textContent = isEmail ? (to ? `À : ${to}` : 'Aucun courriel connu pour ce lead.') : oTab === 'dm' ? (oLead.instagram ? `Instagram : ${oLead.instagram}` : 'Aucun Instagram connu pour ce lead.') : '';
+  $('oMailto').classList.toggle('hidden', !(isEmail && to));
+  const miss = [!oset.address && 'adresse postale', !oset.email && 'courriel de réponse'].filter(Boolean);
+  $('oWarn').classList.toggle('hidden', !(isEmail && miss.length));
+  $('oWarn').textContent = `À compléter dans ⚙ Paramètres avant d’envoyer : ${miss.join(', ')} (exigé par la loi anti-pourriel).`;
+  updateMailto();
+}
+function updateMailto() {
+  const to = (oLead.email || '').split(',')[0].trim();
+  $('oMailto').href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent($('oSubject').value)}&body=${encodeURIComponent($('oBody').value)}`;
+}
+function openOutreach(l) {
+  if (!l) return; oLead = l; oMsgs = buildMessages(l);
+  oTab = l.email ? 'email1' : l.instagram ? 'dm' : 'call';
+  $('oTitle').textContent = l.name;
+  $('oMeta').textContent = `${l.category} · ${TU_CATS.has(l.category) ? 'tutoiement' : 'vouvoiement'} · ${[l.email && 'courriel', l.instagram && 'Instagram', l.phone && 'téléphone'].filter(Boolean).join(' / ') || 'aucun contact'}`;
+  renderOutreach(); $('outreach').classList.replace('hidden', 'flex');
+}
+$('oTabs').addEventListener('click', e => { const b = e.target.closest('[data-otab]'); if (b) { oTab = b.dataset.otab; renderOutreach(); } });
+$('oSubject').addEventListener('input', updateMailto); $('oBody').addEventListener('input', updateMailto);
+$('oClose').onclick = () => $('outreach').classList.replace('flex', 'hidden');
+$('outreach').addEventListener('click', e => { if (e.target.id === 'outreach') $('outreach').classList.replace('flex', 'hidden'); });
+$('oCopy').onclick = () => {
+  const txt = ($('oSubjectWrap').classList.contains('hidden') ? '' : `Objet : ${$('oSubject').value}\n\n`) + $('oBody').value;
+  navigator.clipboard.writeText(txt).then(() => toast('Message copié'), () => { $('oBody').focus(); $('oBody').select(); toast('Texte sélectionné, faites Ctrl/Cmd+C'); });
+};
+$('oSent').onclick = () => {
+  const d = new Date().toLocaleDateString('fr-CA'), label = oTab === 'call' ? 'Appel fait' : oMsgs[oTab].label + ' envoyé';
+  const next = oLead.status === 'To be called' ? (oTab === 'call' ? 'Called' : 'Follow-up') : oLead.status;
+  update(oLead.id, { status: next, notes: `${oLead.notes ? oLead.notes + ' · ' : ''}${label} ${d}` });
+  $('outreach').classList.replace('flex', 'hidden'); toast(`${label} : noté`);
+};
+const SFIELDS = { sSign:'sign', sEmail:'email', sPhone:'phone', sAddress:'address', sPortfolio:'portfolio', sBooking:'booking' };
+$('oSettingsBtn').onclick = () => { Object.entries(SFIELDS).forEach(([id, k]) => $(id).value = oset[k] || ''); $('oSettings').classList.replace('hidden', 'flex'); };
+$('oSettings').addEventListener('click', e => { if (e.target.id === 'oSettings') $('oSettings').classList.replace('flex', 'hidden'); });
+$('oSettingsForm').addEventListener('submit', e => {
+  e.preventDefault(); Object.entries(SFIELDS).forEach(([id, k]) => oset[k] = $(id).value.trim());
+  try { localStorage.setItem(OKEY, JSON.stringify(oset)); } catch {}
+  $('oSettings').classList.replace('flex', 'hidden'); if (oLead) { oMsgs = buildMessages(oLead); renderOutreach(); } toast('Paramètres enregistrés');
+});
 
 // ---------- CSV import (Google Maps Scraper Kit format) ----------
 function parseCsv(text) {
