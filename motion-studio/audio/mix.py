@@ -114,7 +114,43 @@ def clap():
     return x * 1.1, 0.0
 
 
-GEN = {"click": click, "press": press, "release": release, "tick": tick, "wheel": wheel, "blip": blip, "pop": pop,
+def key(var=0):
+    """Soft keyboard tap: tiny noise transient + a damped 'tock'; var detunes each keystroke."""
+    L = 0.05
+    f = 1800 + 260 * ((var * 7919) % 5)
+    x = filt(noise(L), "bandpass", [2500, 9000]) * np.exp(-t_(L) / 0.0018) * 0.5
+    x += sine(f, L) * np.exp(-t_(L) / 0.006) * 0.18
+    return x * (0.8 + 0.08 * (var % 3)), 0.0
+
+
+def select():
+    L = 0.08
+    return (sine(2600, L) * np.exp(-t_(L) / 0.01) * 0.3 + sine(1300, L) * np.exp(-t_(L) / 0.02) * 0.2), 0.0
+
+
+def send():
+    """Glassy rising swoosh that peaks on the beat."""
+    L = 0.6
+    p = np.linspace(0, 1, n(L))
+    x = sweep(noise(L), "bandpass", 900, 9000) * (p ** 2.5) * np.exp(-np.maximum(0, p - 0.85) / 0.04) * 0.6
+    x += sine(midi(84) * (1 + 0.5 * p), L) * (p ** 3) * 0.08
+    return x, L * 0.85
+
+
+def ding():
+    """Success chime: two soft partials (C6 + G6), Apple-ish."""
+    L = 1.4
+    x = sine(midi(84), L) * np.exp(-t_(L) / 0.45) * 0.22 + sine(midi(91), L) * np.exp(-t_(L) / 0.35) * 0.15
+    x += sine(midi(96), L) * np.exp(-t_(L) / 0.12) * 0.06
+    return x * adsr(L, 0.004, 0.2), 0.0
+
+
+def glass():
+    s, a = whoosh(0.45, 2.2)
+    return filt(s, "highpass", 900) * 0.7, a
+
+
+GEN = {"key": key, "select": select, "send": send, "ding": ding, "glass": glass,"click": click, "press": press, "release": release, "tick": tick, "wheel": wheel, "blip": blip, "pop": pop,
        "whoosh": whoosh, "whoosh-s": whoosh_s, "whoosh-long": lambda: whoosh(1.1), "swipe": swipe, "open": open_,
        "impact": impact, "clap": clap}
 
@@ -125,6 +161,8 @@ for c in cues:
     kw = {}
     if c["type"] == "blip":
         kw["step"] = c.get("step", 0)
+    if c["type"] == "key":
+        kw["var"] = c.get("var", 0)
     if c["type"] == "whoosh" and "len" in c:
         kw["len"] = c["len"]
     sig, anchor = g(**kw)
@@ -150,7 +188,7 @@ def true_peak_db(x):
 y = mix.copy()
 for _ in range(4):
     y = y * db(target - meter.integrated_loudness(y))
-    y = limiter(y, ceiling_db=-1.9)
+    y = limiter(y, ceiling_db=-2.4)
 lufs, tp = meter.integrated_loudness(y), true_peak_db(y)
 write_wav(out_path, y)
 json.dump({"lufs": round(lufs, 2), "true_peak_dbtp": round(tp, 2), "cues": log}, open(out_path.replace(".wav", ".json"), "w"), indent=1)

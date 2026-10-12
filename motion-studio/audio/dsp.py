@@ -5,7 +5,8 @@ from scipy.signal import butter, sosfilt, fftconvolve
 SR = 48000
 BPM = 120
 BEAT = 60 / BPM
-LENGTH = 20.0
+import os
+LENGTH = float(os.environ.get("FILM_LEN", "20"))
 rng = np.random.default_rng(20261011)  # seeded: identical output every run
 
 

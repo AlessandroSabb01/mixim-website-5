@@ -16,6 +16,12 @@ const fmtArg = opt("format", "9x16");
 const formats = fmtArg === "all" ? Object.keys(FORMATS) : String(fmtArg).split(",");
 const FPS = +opt("fps", 30), SUB = +opt("sub", 4), SHUTTER = 0.5;
 const CONTACT = !!opt("contact", false);
+const FILM = String(opt("film", "film"));          // film | film2
+const V2 = FILM === "film2";
+const SCORE = V2 ? "audio/music2.py" : "audio/music.py", LEN = V2 ? 30 : 20;
+const TAG = V2 ? "-v2" : "";
+const MUSIC = `build/music${V2 ? 2 : ""}.wav`, BEATS = V2 ? "beats2.json" : "beats.json", MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
+process.env.FILM_LEN = String(LEN);
 const BUILD = path.join(ROOT, "build"), OUT = path.join(ROOT, "out");
 fs.mkdirSync(BUILD, { recursive: true }); fs.mkdirSync(OUT, { recursive: true });
 const run = (cmd, a) => { const r = execFileSync(cmd, a, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); if (r.trim()) console.log(r.trim()); };
@@ -33,8 +39,8 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 
 // ---------- audio: score + measured grid ----------
 if (!opt("skip-audio", false)) {
-  console.log("score…"); run("python3", ["audio/music.py", "build/music.wav"]);
-  console.log("beat grid…"); run("python3", ["audio/beats.py", "build/music.wav", "beats.json"]);
+  console.log("score…"); run("python3", [SCORE, MUSIC]);
+  console.log("beat grid…"); run("python3", ["audio/beats.py", MUSIC, BEATS]);
 }
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--force-color-profile=srgb", "--disable-lcd-text", "--font-render-hinting=none"] });
@@ -43,7 +49,7 @@ async function openFilm(w, h) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   page.on("pageerror", (e) => console.error("page error:", e.message));
   page.on("console", (m) => { if (m.type() === "error") console.error("console:", m.text()); });
-  await page.goto(`${BASE}/film/index.html?w=${w}&h=${h}`);
+  await page.goto(`${BASE}/${FILM}/index.html?w=${w}&h=${h}`);
   const info = await page.evaluate(() => window.ready);
   const cdp = await page.context().newCDPSession(page);
   const shot = async (t) => {
@@ -59,9 +65,9 @@ let mixed = false;
 async function ensureMix(film) {
   if (mixed || opt("skip-audio", false)) return;
   const cues = await film.page.evaluate(() => window.CUES);
-  fs.writeFileSync(path.join(BUILD, "cues.json"), JSON.stringify(cues, null, 1));
+  fs.writeFileSync(path.join(ROOT, CUESF), JSON.stringify(cues, null, 1));
   console.log(`mix (${cues.length} cues)…`);
-  run("python3", ["audio/mix.py", "build/music.wav", "beats.json", "build/cues.json", "build/mix.wav"]);
+  run("python3", ["audio/mix.py", MUSIC, BEATS, CUESF, MIX]);
   mixed = true;
 }
 
@@ -70,13 +76,13 @@ for (const f of formats) {
   const film = await openFilm(w, h);
   console.log(`${f}: ${w}x${h} ${film.info.FMT}`);
   await ensureMix(film);
-  const beats = JSON.parse(fs.readFileSync(path.join(ROOT, "beats.json"))).beats;
+  const beats = JSON.parse(fs.readFileSync(path.join(ROOT, BEATS))).beats;
 
   if (CONTACT) {
     // one frame per beat, sampled 0.4 beat after the hit (once the move has landed)
-    const dir = path.join(BUILD, `contact-${f}`); fs.mkdirSync(dir, { recursive: true });
+    const dir = path.join(BUILD, `contact${TAG}-${f}`); fs.mkdirSync(dir, { recursive: true });
     const per = beats[1] - beats[0];
-    const scenes = (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
+    const scenes = V2 ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Burst" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Logo") : (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
     const cells = [];
     const strip = opt("strip", null);   // --strip from,to,step : dense filmstrip to judge motion
     const times = strip ? (() => { const [a, z, st] = String(strip).split(",").map(Number); const r = []; for (let x = a; x < z - 1e-9; x += st) r.push(x); return r; })() : beats.map((b) => b + 0.4 * per);
@@ -85,17 +91,17 @@ for (const f of formats) {
       fs.writeFileSync(path.join(dir, `b${String(b).padStart(2, "0")}.png`), await film.shot(t));
       cells.push({ b, t, s: strip ? "" : scenes(b) });
     }
-    const cols = f === "16x9" ? 5 : 8, cw = f === "16x9" ? 384 : f === "1x1" ? 260 : 216;
+    const cols = f === "16x9" ? 5 : V2 ? 10 : 8, cw = f === "16x9" ? 384 : f === "1x1" ? 260 : 216;
     const ch = Math.round((cw * h) / w);
     const sheet = await browser.newPage({ viewport: { width: cols * (cw + 12) + 12, height: 400 }, deviceScaleFactor: 1 });
     const html = `<html><head><style>@font-face{font-family:M;src:url(${BASE}/assets/fonts/GeistMono-latin.woff2)}
       body{margin:0;background:#111;color:#bbb;font:12px M;padding:12px}
       .g{display:grid;grid-template-columns:repeat(${cols},${cw}px);gap:12px}
       .c img{width:${cw}px;height:${ch}px;display:block;border-radius:4px} .c div{padding:4px 0 0} b{color:#fff;font-weight:400}</style></head>
-      <body><div class=g>${cells.map((c) => `<div class=c><img src="${BASE}/build/contact-${f}/b${String(c.b).padStart(2, "0")}.png"><div><b>b${c.b}</b> ${c.t.toFixed(2)}s · ${c.s}</div></div>`).join("")}</div></body></html>`;
+      <body><div class=g>${cells.map((c) => `<div class=c><img src="${BASE}/build/contact${TAG}-${f}/b${String(c.b).padStart(2, "0")}.png"><div><b>b${c.b}</b> ${c.t.toFixed(2)}s · ${c.s}</div></div>`).join("")}</div></body></html>`;
     await sheet.setContent(html, { waitUntil: "networkidle" });
     await sheet.evaluate(() => document.fonts.ready);
-    const sheetName = strip ? `strip-${f}.png` : `contact-${f}.png`;
+    const sheetName = strip ? `strip${TAG}-${f}.png` : `contact${TAG}-${f}.png`;
     await sheet.screenshot({ path: path.join(strip ? BUILD : OUT, sheetName), fullPage: true });
     await sheet.close();
     console.log(`  -> ${strip ? "build" : "out"}/${sheetName}`);
@@ -104,14 +110,14 @@ for (const f of formats) {
   }
 
   // ---------- video ----------
-  const from = +opt("from", 0), to = +opt("to", 20);
+  const from = +opt("from", 0), to = +opt("to", LEN);
   const n0 = Math.round(from * FPS), n1 = Math.round(to * FPS);
-  const name = opt("out", `creation-virale-${f}`);
+  const name = opt("out", `creation-virale${TAG}-${f}`);
   const outFile = path.join(OUT, `${name}.mp4`);
   const vf = SUB > 1 ? [`tmix=frames=${SUB}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`, `setpts=N/(${FPS}*TB)`] : [`setpts=N/(${FPS}*TB)`];
   const ff = spawn("ffmpeg", ["-y", "-loglevel", "error",
     "-f", "image2pipe", "-c:v", "png", "-framerate", String(FPS * SUB), "-i", "-",
-    ...(fs.existsSync(path.join(BUILD, "mix.wav")) ? ["-ss", String(from), "-t", String(to - from), "-i", path.join(BUILD, "mix.wav")] : []),
+    ...(fs.existsSync(path.join(ROOT, MIX)) ? ["-ss", String(from), "-t", String(to - from), "-i", path.join(ROOT, MIX)] : []),
     "-vf", [...vf, "format=yuv420p"].join(","), "-r", String(FPS),
     "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", "-profile:v", "high", "-movflags", "+faststart",
     "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-shortest", outFile], { stdio: ["pipe", "inherit", "inherit"] });
