@@ -5,64 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sales War-Room CRM</title>
 <script src="https://cdn.tailwindcss.com/3.4.5"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { ink:'#050505', 'ink-2':'#0a0a0a', surface:'#141414', 'surface-2':'#1c1c1c', line:'#262626', muted:'#8f8f8f', accent:'#2c5bff', 'accent-soft':'#6389ff' },
+  fontFamily: { sans:['Geist','system-ui','sans-serif'], mono:['"Geist Mono"','ui-monospace','monospace'] } } } };
+</script>
 <style>
-  body { font-family: Inter, system-ui, sans-serif; background:#020617; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .glow-emerald { box-shadow: 0 0 18px -4px rgba(16,185,129,.55); }
-  .glow-amber { box-shadow: 0 0 18px -4px rgba(245,158,11,.55); }
-  .glow-cyan { box-shadow: 0 0 18px -4px rgba(6,182,212,.55); }
-  .glow-fuchsia { box-shadow: 0 0 18px -4px rgba(217,70,239,.55); }
+  body { background:#050505; }
+  .mono { font-family:'Geist Mono', ui-monospace, monospace; }
+  .display { letter-spacing:-.035em; font-weight:700; line-height:.98; }
+  .eyebrow { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8f8f8f; }
+  .glow-accent { background: radial-gradient(120% 120% at 0% 0%, rgba(44,91,255,.18), transparent 60%), #141414; }
   select, input, textarea { color-scheme: dark; }
-  ::-webkit-scrollbar { height:8px; width:8px } ::-webkit-scrollbar-thumb { background:#334155; border-radius:8px }
+  select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238f8f8f' fill='none' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right .7rem center; padding-right:1.9rem !important; }
+  ::-webkit-scrollbar { height:8px; width:8px } ::-webkit-scrollbar-thumb { background:#262626; border-radius:8px }
   .row-enter { animation: fade .25s ease; } @keyframes fade { from {opacity:0; transform:translateY(4px)} to {opacity:1} }
+  .grain:before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background:radial-gradient(60% 40% at 80% -10%, rgba(44,91,255,.22), transparent 70%); }
 </style>
 </head>
-<body class="min-h-screen text-slate-100 antialiased">
+<body class="grain min-h-screen font-sans text-white antialiased">
 
 <!-- Sticky stats header -->
-<header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+<header class="sticky top-0 z-30 border-b border-line bg-ink/80 backdrop-blur-xl">
   <div class="mx-auto max-w-[1600px] px-4 py-3">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 grid place-items-center font-black text-slate-950">W</div>
+        <div class="grid size-10 place-items-center rounded-full bg-accent font-bold text-white shadow-[0_0_30px_-6px_#2c5bff]">CV</div>
         <div>
-          <h1 class="text-lg font-extrabold tracking-tight">Sales War-Room <span class="text-emerald-400">CRM</span></h1>
-          <p class="text-xs text-slate-400">Prospection locale · rayon 50 km du Vieux-Québec</p>
+          <p class="eyebrow">Création Virale · Sales War-Room</p>
+          <h1 class="display text-2xl">Prospection <span class="text-accent-soft">virale</span>.</h1>
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs text-slate-400"><span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span><span id="clock" class="mono"></span></div>
+      <div class="flex items-center gap-2 text-xs text-muted"><span class="rounded-full border border-line bg-surface px-3 py-1.5 flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-accent animate-pulse"></span><span id="clock" class="mono"></span><span class="text-muted">· Rayon 50 km Vieux-Québec</span></span></div>
     </div>
     <div id="stats" class="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5"></div>
   </div>
 </header>
 
-<main class="mx-auto max-w-[1600px] px-4 py-4">
+<main class="relative z-10 mx-auto max-w-[1600px] px-4 py-4">
   <!-- Toolbar -->
-  <section class="mb-4 grid gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-3 lg:grid-cols-[1fr_auto]">
+  <section class="mb-4 grid gap-2 rounded-2xl border border-line bg-surface/80 p-3 lg:grid-cols-[1fr_auto]">
     <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-      <input id="q" type="search" placeholder="🔍 Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
-      <select id="fCat" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
-      <select id="fTemp" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
-      <select id="fStatus" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></select>
+      <input id="q" type="search" placeholder="Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-full border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent" />
+      <select id="fCat" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
+      <select id="fTemp" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
+      <select id="fStatus" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
     </div>
     <div class="flex flex-wrap gap-2">
-      <button id="sortToggle" class="rounded-lg border border-fuchsia-500/50 bg-fuchsia-500/10 px-3 py-2 text-sm font-semibold text-fuchsia-300 hover:bg-fuchsia-500/20"></button>
-      <button id="btnReset" class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800">Réinitialiser filtres</button>
-      <button id="btnCsv" class="rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20">⬇ Export CSV</button>
-      <button id="btnAdd" class="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400">+ Nouveau lead</button>
+      <button id="sortToggle" class="rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-sm font-medium text-accent-soft hover:bg-accent/20"></button>
+      <button id="btnReset" class="rounded-full border border-line bg-surface px-4 py-2 text-sm text-muted hover:border-neutral-500 hover:text-white">Réinitialiser filtres</button>
+      <button id="btnCsv" class="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-white hover:border-neutral-500 hover:bg-surface-2">⬇ Export CSV</button>
+      <button id="btnAdd" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">+ Nouveau lead</button>
     </div>
   </section>
 
-  <div class="mb-2 flex items-center justify-between text-xs text-slate-400">
+  <div class="mb-2 flex items-center justify-between text-xs text-muted">
     <span id="countLbl"></span>
     <button id="btnSeed" class="hover:text-rose-400">↺ Restaurer données de départ</button>
   </div>
 
   <!-- Table -->
-  <section class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40">
+  <section class="overflow-x-auto rounded-2xl border border-line bg-ink-2">
     <table class="w-full min-w-[1200px] text-sm">
-      <thead class="bg-slate-900 text-left text-[11px] uppercase tracking-wider text-slate-400">
+      <thead class="border-b border-line bg-surface text-left text-[11px] uppercase tracking-[.14em] text-muted">
         <tr>
           <th class="px-3 py-3">#</th>
           <th class="px-3 py-3">Entreprise</th>
@@ -76,28 +82,28 @@
           <th class="px-3 py-3 text-right">Actions</th>
         </tr>
       </thead>
-      <tbody id="tbody" class="divide-y divide-slate-800/80"></tbody>
+      <tbody id="tbody" class="divide-y divide-line"></tbody>
     </table>
-    <div id="empty" class="hidden p-10 text-center text-slate-500">Aucun lead ne correspond aux filtres.</div>
+    <div id="empty" class="hidden p-10 text-center text-neutral-500">Aucun lead ne correspond aux filtres.</div>
   </section>
 </main>
 
 <!-- Modal -->
-<div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
-  <form id="form" class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">
+<div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <form id="form" class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-line bg-surface p-6 shadow-2xl">
     <div class="mb-4 flex items-center justify-between">
-      <h2 id="mTitle" class="text-lg font-bold"></h2>
-      <button type="button" data-close class="text-2xl leading-none text-slate-400 hover:text-white">×</button>
+      <h2 id="mTitle" class="display text-2xl"></h2>
+      <button type="button" data-close class="text-2xl leading-none text-muted hover:text-white">×</button>
     </div>
     <div class="grid gap-3 sm:grid-cols-2" id="formFields"></div>
     <div class="mt-5 flex justify-end gap-2">
-      <button type="button" data-close class="rounded-lg border border-slate-700 px-4 py-2 text-sm">Annuler</button>
-      <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400">Enregistrer</button>
+      <button type="button" data-close class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">Annuler</button>
+      <button class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Enregistrer</button>
     </div>
   </form>
 </div>
 
-<div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-50 translate-y-4 rounded-lg border border-emerald-500/40 bg-slate-900 px-4 py-2 text-sm text-emerald-300 opacity-0 transition"></div>
+<div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-50 translate-y-4 rounded-full border border-line bg-surface px-5 py-2.5 text-sm text-white shadow-[0_10px_40px_-10px_#2c5bff] opacity-0 transition"></div>
 
 <script>
 (() => {
@@ -270,15 +276,15 @@ const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const isToday = iso => iso && new Date(iso).toDateString() === new Date().toDateString();
 const STATUS_CLS = {
-  'To be called':'bg-slate-700/40 text-slate-300 border-slate-600',
-  'Called':'bg-cyan-500/10 text-cyan-300 border-cyan-500/40',
+  'To be called':'bg-surface-2 text-muted border-line',
+  'Called':'bg-white/5 text-neutral-200 border-neutral-600',
   'Follow-up':'bg-amber-500/10 text-amber-300 border-amber-500/40',
-  'Meeting booked':'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/40',
+  'Meeting booked':'bg-accent/15 text-accent-soft border-accent/50',
   'Client':'bg-emerald-500/15 text-emerald-300 border-emerald-500/50',
 };
-const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-cyan-500/10 text-cyan-300 border-cyan-500/40' };
-const TEMP_ICON = { Hot:'🔥', Warm:'☀️', Cold:'❄️' };
-const TIER_CLS = { 1:'text-emerald-300', 2:'text-amber-300', 3:'text-slate-400' };
+const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-accent/10 text-accent-soft border-accent/40' };
+const TEMP_ICON = { Hot:'●', Warm:'●', Cold:'○' };
+const TIER_CLS = { 1:'text-white', 2:'text-neutral-300', 3:'text-muted' };
 const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); };
 
 function filtered() {
@@ -293,10 +299,10 @@ function filtered() {
 
 // ---------- Render ----------
 function stat(label, value, sub, glow, color) {
-  return `<div class="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 ${glow}">
-    <div class="text-[10px] uppercase tracking-widest text-slate-400">${label}</div>
-    <div class="mono text-2xl font-bold ${color}">${value}</div>
-    <div class="text-[11px] text-slate-500">${sub}</div></div>`;
+  return `<div class="rounded-2xl border border-line ${glow || 'bg-surface'} px-4 py-3">
+    <div class="eyebrow">${label}</div>
+    <div class="display mt-1.5 text-3xl ${color}">${value}</div>
+    <div class="mt-1 text-[12px] text-muted">${sub}</div></div>`;
 }
 function renderStats(view) {
   const total = leads.length, hot = leads.filter(l => l.temp === 'Hot').length;
@@ -306,13 +312,13 @@ function renderStats(view) {
   const rate = contacted ? (conv / contacted * 100).toFixed(1) : '0.0';
   $('stats').innerHTML =
     stat('Total leads', total, `${view.length} dans la vue`, '', 'text-white') +
-    stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, 'glow-emerald', 'text-emerald-400') +
-    stat("Appels aujourd'hui", today, `${contacted} contactés au total`, 'glow-cyan', 'text-cyan-400') +
-    stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-fuchsia', 'text-fuchsia-400') +
-    stat('Clients signés', leads.filter(l => l.status === 'Client').length, 'issus de la prospection', 'glow-amber', 'text-amber-400');
+    stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, '', 'text-emerald-400') +
+    stat("Appels aujourd'hui", today, `${contacted} contactés au total`, '', 'text-white') +
+    stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-accent', 'text-accent-soft') +
+    stat('Clients signés', leads.filter(l => l.status === 'Client').length, 'issus de la prospection', '', 'text-white');
 }
 const selectHtml = (field, id, opts, cur, cls) =>
-  `<select data-inline="${field}" data-id="${id}" class="rounded-md border px-2 py-1 text-xs font-semibold outline-none ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
+  `<select data-inline="${field}" data-id="${id}" class="rounded-full border px-3 py-1 text-xs font-medium outline-none ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
 
 function render() {
   const view = filtered();
@@ -321,24 +327,24 @@ function render() {
   $('sortToggle').textContent = ui.sort === 'virality' ? '⚡ Ordre Virality: ON' : '⚡ Ordre Virality: OFF';
   $('empty').classList.toggle('hidden', view.length > 0);
   $('tbody').innerHTML = view.map((l, i) => `
-    <tr class="row-enter hover:bg-slate-800/40">
-      <td class="px-3 py-2 mono text-xs text-slate-500">${i + 1}</td>
-      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-slate-400">${esc(l.category)}</div></td>
+    <tr class="row-enter hover:bg-surface/70">
+      <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
+      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}</div></td>
       <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono font-bold ${TIER_CLS[l.tier]}">${l.score}</span>
-        <div class="h-1.5 w-14 rounded bg-slate-800"><div class="h-1.5 rounded bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400" style="width:${l.score}%"></div></div></div>
-        <div class="text-[10px] uppercase tracking-wider text-slate-500">Tier ${l.tier}</div></td>
-      <td class="px-3 py-2"><div class="text-slate-200">${esc(l.contact)}</div>
-        <a href="tel:${esc(l.phone)}" class="mono text-xs text-cyan-300 hover:underline">${esc(l.phone)}</a><br>
-        <a href="mailto:${esc(l.email)}" class="text-xs text-slate-400 hover:text-white">${esc(l.email)}</a></td>
-      <td class="px-3 py-2 text-xs"><a target="_blank" rel="noopener" href="https://instagram.com/${esc(l.instagram.replace('@',''))}" class="text-fuchsia-300 hover:underline">${esc(l.instagram)}</a><br>
-        <a target="_blank" rel="noopener" href="${esc(l.website)}" class="text-slate-400 hover:text-white">Site web ↗</a></td>
-      <td class="px-3 py-2 text-xs"><div class="text-slate-200">${esc(l.hood)}</div><div class="text-slate-500">${esc(l.address.split(',')[0])}</div></td>
+        <div class="h-1 w-14 rounded-full bg-line"><div class="h-1 rounded-full bg-gradient-to-r from-accent to-accent-soft" style="width:${l.score}%"></div></div></div>
+        <div class="text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier}</div></td>
+      <td class="px-3 py-2"><div class="text-neutral-200">${esc(l.contact)}</div>
+        <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
+        <a href="mailto:${esc(l.email)}" class="text-xs text-muted hover:text-white">${esc(l.email)}</a></td>
+      <td class="px-3 py-2 text-xs"><a target="_blank" rel="noopener" href="https://instagram.com/${esc(l.instagram.replace('@',''))}" class="text-accent-soft hover:underline">${esc(l.instagram)}</a><br>
+        <a target="_blank" rel="noopener" href="${esc(l.website)}" class="text-muted hover:text-white">Site web ↗</a></td>
+      <td class="px-3 py-2 text-xs"><div class="text-neutral-200">${esc(l.hood)}</div><div class="text-neutral-500">${esc(l.address.split(',')[0])}</div></td>
       <td class="px-3 py-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status])}</td>
       <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
-      <td class="px-3 py-2 max-w-[240px]"><div contenteditable="true" data-note="${l.id}" class="rounded px-1 text-xs text-slate-300 outline-none focus:bg-slate-800 focus:ring-1 focus:ring-emerald-500">${esc(l.notes)}</div></td>
+      <td class="px-3 py-2 max-w-[240px]"><div contenteditable="true" data-note="${l.id}" class="rounded px-1 text-xs text-neutral-300 outline-none focus:bg-surface-2 focus:ring-1 focus:ring-accent">${esc(l.notes)}</div></td>
       <td class="px-3 py-2 text-right whitespace-nowrap">
-        <button data-edit="${l.id}" class="rounded-md border border-slate-700 px-2 py-1 text-xs hover:border-emerald-500 hover:text-emerald-300">Éditer</button>
-        <button data-del="${l.id}" class="rounded-md border border-slate-700 px-2 py-1 text-xs hover:border-rose-500 hover:text-rose-400">✕</button></td>
+        <button data-edit="${l.id}" class="rounded-full border border-line px-3 py-1 text-xs hover:border-neutral-500 hover:text-white">Éditer</button>
+        <button data-del="${l.id}" class="rounded-full border border-line px-3 py-1 text-xs hover:border-rose-500 hover:text-rose-400">✕</button></td>
     </tr>`).join('');
 }
 
@@ -363,7 +369,7 @@ function openModal(lead) {
   editing = lead ? lead.id : null;
   const d = lead || { category:'Food', score:CATS.Food.base, status:'To be called', temp:'Cold', instagram:'@', website:'https://' };
   $('mTitle').textContent = lead ? `Éditer · ${lead.name}` : 'Nouveau lead';
-  const inp = 'w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-emerald-500';
+  const inp = 'mt-1 w-full rounded-xl border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent';
   const opts = (arr, v) => arr.map(o => `<option ${o===v?'selected':''}>${o}</option>`).join('');
   $('formFields').innerHTML = FIELDS.map(([k, label, type, req]) => {
     let ctl;
@@ -372,7 +378,7 @@ function openModal(lead) {
     else if (type === 'temp') ctl = `<select name="${k}" class="${inp}">${opts(TEMPS, d[k])}</select>`;
     else if (type === 'textarea') ctl = `<textarea name="${k}" rows="3" class="${inp}">${esc(d[k])}</textarea>`;
     else ctl = `<input name="${k}" type="${type}" ${type==='number'?'min="1" max="100"':''} ${req?'required':''} value="${esc(d[k])}" class="${inp}">`;
-    return `<label class="text-xs text-slate-400 ${type==='textarea'?'sm:col-span-2':''}">${label}${ctl}</label>`;
+    return `<label class="text-xs text-muted ${type==='textarea'?'sm:col-span-2':''}">${label}${ctl}</label>`;
   }).join('');
   $('modal').classList.replace('hidden','flex');
   $('form').name.focus();
