@@ -55,6 +55,8 @@ tailwind.config = { theme: { extend: {
     <div class="flex flex-wrap gap-2">
       <button id="sortToggle" class="rounded-full border border-accent/60 bg-accent/10 px-4 py-2 text-sm font-medium text-accent-soft hover:bg-accent/20"></button>
       <button id="btnReset" class="rounded-full border border-line bg-surface px-4 py-2 text-sm text-muted hover:border-neutral-500 hover:text-white">Réinitialiser filtres</button>
+      <button id="btnImport" class="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-white hover:border-neutral-500 hover:bg-surface-2">⬆ Importer CSV</button>
+      <input id="fileImport" type="file" accept=".csv,text/csv" hidden />
       <button id="btnCsv" class="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-white hover:border-neutral-500 hover:bg-surface-2">⬇ Export CSV</button>
       <button id="btnAdd" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">+ Nouveau lead</button>
     </div>
@@ -84,7 +86,7 @@ tailwind.config = { theme: { extend: {
       </thead>
       <tbody id="tbody" class="divide-y divide-line"></tbody>
     </table>
-    <div id="empty" class="hidden p-10 text-center text-neutral-500">Aucun lead ne correspond aux filtres.</div>
+    <div id="empty" class="hidden p-10 text-center text-neutral-500">Aucun lead ici. Importez le CSV du Google Maps Scraper Kit avec « ⬆ Importer CSV », ou ajustez les filtres.</div>
   </section>
 </main>
 
@@ -105,7 +107,7 @@ tailwind.config = { theme: { extend: {
 
 <div id="confirm" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
   <div class="w-full max-w-sm rounded-3xl border border-line bg-surface p-6">
-    <p id="confirmMsg" class="text-sm text-neutral-200"></p>
+    <p id="confirmMsg" class="whitespace-pre-line text-sm text-neutral-200"></p>
     <div class="mt-5 flex justify-end gap-2">
       <button id="confirmNo" class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">Annuler</button>
       <button id="confirmYes" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Confirmer</button>
@@ -131,7 +133,7 @@ tailwind.config = { theme: { extend: {
 <script>
 (() => {
 'use strict';
-const STORE = 'warroom_crm_v2';
+const STORE = 'warroom_crm_v3';
 const STATUSES = ['To be called','Called','Follow-up','Meeting booked','Client'];
 const TEMPS = ['Cold','Warm','Hot'];
 
@@ -142,149 +144,24 @@ const CATS = {
   'Clothing':      { tier:1, base:88 }, 'Food':          { tier:1, base:86 },
   'Health/Clinic': { tier:2, base:66 }, 'Events':        { tier:2, base:64 },
   'Hotels/Tourism':{ tier:2, base:62 }, 'Automotive':    { tier:2, base:58 },
+  'Med Aesthetics':{ tier:1, base:93 }, 'Tattoo/Jewelry':{ tier:1, base:87 },
+  'Wellness/Physio':{ tier:2, base:60 }, 'Education':    { tier:2, base:56 },
   'Plumbing':      { tier:3, base:30 }, 'HVAC':          { tier:3, base:26 },
-  'Construction':  { tier:3, base:22 },
+  'Construction':  { tier:3, base:22 }, 'Professional':  { tier:3, base:34 },
+  'Other':         { tier:3, base:20 },
 };
 
-// [name, category, neighborhood, street]
-const RAW = [
- ['Groupe Immobilier Capitale','Real Estate','Sainte-Foy','2600 boul. Laurier'],
- ['Équipe Lachance Courtiers','Real Estate','Charlesbourg','8500 boul. Henri-Bourassa'],
- ['Royal Vieux-Québec Immobilier','Real Estate','Vieux-Québec','35 rue Saint-Louis'],
- ['Les Courtiers du Fleuve','Real Estate','Lévis','5700 boul. Guillaume-Couture'],
- ['Maison Prestige Montcalm','Real Estate','Montcalm','1100 av. Cartier'],
- ['Immo Rive-Sud Plus','Real Estate','Saint-Romuald','2200 boul. de la Rive-Sud'],
- ['Habitations Beauport Pro','Real Estate','Beauport','800 boul. Raymond'],
- ['Condos Saint-Roch Realty','Real Estate','Saint-Roch','400 boul. Charest Est'],
- ['Barbier Le Coin Saint-Jean','Barbers','Saint-Jean-Baptiste','780 rue Saint-Jean'],
- ['Fade Factory Québec','Barbers','Saint-Roch','320 rue Saint-Joseph Est'],
- ['Barbershop Limoilou Gentlemen','Barbers','Limoilou','1200 3e Avenue'],
- ['Le Barbier du Vieux-Port','Barbers','Vieux-Québec','95 rue Saint-Paul'],
- ['Clipper Club Sainte-Foy','Barbers','Sainte-Foy','2450 ch. Sainte-Foy'],
- ['Barberie Lévisienne','Barbers','Lévis','45 av. Bégin'],
- ['Sharp Cuts Charlesbourg','Barbers','Charlesbourg','7600 1re Avenue'],
- ['Rasoir & Co. Beauport','Barbers','Beauport','3300 av. Royale'],
- ['Spa Urbain Laurier','Aesthetics','Sainte-Foy','2700 boul. Laurier'],
- ['Clinique Beauté Éclat','Aesthetics','Montcalm','1050 av. Cartier'],
- ['Salon Mèche Rebelle','Aesthetics','Saint-Roch','550 rue Saint-Joseph Est'],
- ['Studio Cils & Sourcils QC','Aesthetics','Lebourgneuf','900 boul. Lebourgneuf'],
- ['Ongles Glam Lévis','Aesthetics','Lévis','60 route du Président-Kennedy'],
- ['Institut Lumière Esthétique','Aesthetics','Charlesbourg','4500 boul. Henri-Bourassa'],
- ['Coiffure L’Atelier Limoilou','Aesthetics','Limoilou','1500 3e Avenue'],
- ['Médispa Rive-Sud','Aesthetics','Saint-Nicolas','800 route des Rivières'],
- ['Spa Nordique Beauport','Aesthetics','Beauport','2000 boul. des Chutes'],
- ['CrossFit Vieille Capitale','Fitness','Saint-Roch','265 rue de la Couronne'],
- ['Studio Yoga Sainte-Foy','Fitness','Sainte-Foy','3000 ch. des Quatre-Bourgeois'],
- ['Gym Énergie Lévis','Fitness','Lévis','1450 boul. Alphonse-Desjardins'],
- ['Boxe Club Limoilou','Fitness','Limoilou','700 8e Avenue'],
- ['Pilates Montcalm Studio','Fitness','Montcalm','1200 ch. Sainte-Foy'],
- ['Fit Lab Charlesbourg','Fitness','Charlesbourg','8000 boul. Henri-Bourassa'],
- ['Spin Cycle Québec','Fitness','Saint-Jean-Baptiste','600 rue Saint-Jean'],
- ['Escalade Le Bloc QC','Fitness','Vanier','350 boul. Wilfrid-Hamel'],
- ['Boutique Fleur de Lys Mode','Clothing','Vieux-Québec','15 rue du Petit-Champlain'],
- ['Friperie Saint-Roch Vintage','Clothing','Saint-Roch','480 rue Saint-Joseph Est'],
- ['Atelier Nordik Apparel','Clothing','Saint-Jean-Baptiste','820 rue Saint-Jean'],
- ['Mode Laurier Élégance','Clothing','Sainte-Foy','2700 boul. Laurier'],
- ['Streetwear Capitale','Clothing','Lebourgneuf','1000 boul. Lebourgneuf'],
- ['Boutique Lévis Chic','Clothing','Lévis','50 rue Saint-Louis'],
- ['Denim & Laine Montcalm','Clothing','Montcalm','1150 av. Cartier'],
- ['Café Fleuve Saint-Roch','Food','Saint-Roch','420 rue Saint-Joseph Est'],
- ['Bistro Le Petit Champlain','Food','Vieux-Québec','70 rue du Petit-Champlain'],
- ['Microbrasserie Limoilou Houblon','Food','Limoilou','1400 3e Avenue'],
- ['Pâtisserie Cartier Gourmand','Food','Montcalm','1080 av. Cartier'],
- ['Poutinerie Capitale','Food','Sainte-Foy','2900 ch. Sainte-Foy'],
- ['Sushi Mer & Riz','Food','Lebourgneuf','800 boul. Lebourgneuf'],
- ['Resto Le Quai Lévis','Food','Lévis','5 rue William-Tremblay'],
- ['Boulangerie Charlesbourg','Food','Charlesbourg','7800 1re Avenue'],
- ['Taqueria Saint-Jean','Food','Saint-Jean-Baptiste','730 rue Saint-Jean'],
- ['Crêperie Beauport','Food','Beauport','3500 av. Royale'],
- ['Cabane Érable & Co.','Food','Île d’Orléans','2000 ch. Royal'],
- ['Clinique Dentaire Laurier','Health/Clinic','Sainte-Foy','2600 boul. Laurier'],
- ['Centre Dentaire Lévis Sourire','Health/Clinic','Lévis','1300 boul. Alphonse-Desjardins'],
- ['Physio Santé Charlesbourg','Health/Clinic','Charlesbourg','4400 boul. Henri-Bourassa'],
- ['Clinique Chiro Montcalm','Health/Clinic','Montcalm','1250 ch. Sainte-Foy'],
- ['Orthodontie Beauport','Health/Clinic','Beauport','700 boul. Raymond'],
- ['Clinique Vétérinaire Limoilou','Health/Clinic','Limoilou','1600 3e Avenue'],
- ['Optométrie Saint-Roch','Health/Clinic','Saint-Roch','360 boul. Charest Est'],
- ['Clinique Médicale Lebourgneuf','Health/Clinic','Lebourgneuf','750 boul. Lebourgneuf'],
- ['Festival Sons d’Hiver QC','Events','Vieux-Québec','1 Côte de la Fabrique'],
- ['Salle Réception Le Grand Hall','Events','Sainte-Foy','3100 ch. des Quatre-Bourgeois'],
- ['Événements Rive-Sud','Events','Lévis','100 rue Saint-Laurent'],
- ['Marché Nocturne Saint-Roch','Events','Saint-Roch','300 rue Saint-Vallier Est'],
- ['Noces & Co. Planification','Events','Charlesbourg','7900 1re Avenue'],
- ['DJ Pro Capitale','Events','Vanier','400 boul. Wilfrid-Hamel'],
- ['Hôtel Boutique Saint-Louis','Hotels/Tourism','Vieux-Québec','60 rue Saint-Louis'],
- ['Auberge du Petit Champlain','Hotels/Tourism','Vieux-Québec','40 rue du Petit-Champlain'],
- ['Hôtel Laurier Suites','Hotels/Tourism','Sainte-Foy','2800 boul. Laurier'],
- ['Croisières Fleuve QC','Hotels/Tourism','Vieux-Port','84 rue Dalhousie'],
- ['Gîte Île d’Orléans','Hotels/Tourism','Île d’Orléans','1500 ch. Royal'],
- ['Tours Chute Montmorency','Hotels/Tourism','Beauport','5300 boul. Sainte-Anne'],
- ['Hôtel Lévis Panorama','Hotels/Tourism','Lévis','5800 boul. Guillaume-Couture'],
- ['Capitale Toyota Sainte-Foy','Automotive','Sainte-Foy','2500 boul. Wilfrid-Hamel'],
- ['Lévis Hyundai','Automotive','Lévis','5500 boul. de la Rive-Sud'],
- ['Beauport Mazda','Automotive','Beauport','600 boul. Raymond'],
- ['Charlesbourg Kia','Automotive','Charlesbourg','9000 boul. Henri-Bourassa'],
- ['Moto Sport Québec','Automotive','Vanier','500 boul. Wilfrid-Hamel'],
- ['Esthétique Auto Pro QC','Automotive','Lebourgneuf','1100 boul. Lebourgneuf'],
- ['Garage Mécanique Limoilou','Automotive','Limoilou','1800 3e Avenue'],
- ['Plomberie Capitale Express','Plumbing','Charlesbourg','5000 boul. Henri-Bourassa'],
- ['Plombier Lévis 24/7','Plumbing','Lévis','3000 route des Rivières'],
- ['Plomberie Beauport Inc.','Plumbing','Beauport','900 boul. Raymond'],
- ['Drain Pro Sainte-Foy','Plumbing','Sainte-Foy','3200 ch. Sainte-Foy'],
- ['Plomberie Vanier & Fils','Plumbing','Vanier','600 boul. Wilfrid-Hamel'],
- ['Climatisation Québec Air','HVAC','Lebourgneuf','1200 boul. Lebourgneuf'],
- ['Thermo Confort Lévis','HVAC','Lévis','2500 boul. Alphonse-Desjardins'],
- ['Chauffage Charlesbourg','HVAC','Charlesbourg','6000 boul. Henri-Bourassa'],
- ['Thermopompes Rive-Nord','HVAC','Beauport','1100 boul. Raymond'],
- ['Ventilation Pro Capitale','HVAC','Vanier','700 boul. Wilfrid-Hamel'],
- ['Constructions Bérubé','Construction','Charlesbourg','6500 boul. Henri-Bourassa'],
- ['Rénovations Capitale','Construction','Sainte-Foy','3400 ch. Sainte-Foy'],
- ['Toitures Lévis Pro','Construction','Lévis','4000 boul. Guillaume-Couture'],
- ['Excavation Beauport','Construction','Beauport','1500 boul. Raymond'],
- ['Électricité Limoilou','Construction','Limoilou','2000 3e Avenue'],
- ['Peinture Pro Québec','Construction','Vanier','800 boul. Wilfrid-Hamel'],
- ['Cuisines Sur Mesure QC','Construction','Lebourgneuf','1300 boul. Lebourgneuf'],
- ['Paysagement Rive-Sud','Construction','Saint-Nicolas','900 route des Rivières'],
- ['Béton Saint-Romuald','Construction','Saint-Romuald','2300 boul. de la Rive-Sud'],
- ['Fenêtres & Portes Capitale','Construction','Charlesbourg','6700 boul. Henri-Bourassa'],
- ['Menuiserie Île d’Orléans','Construction','Île d’Orléans','2500 ch. Royal'],
-];
-
-const FIRST = ['Marc-André','Isabelle','Jean-François','Catherine','Mathieu','Geneviève','Simon','Marie-Ève','Alexandre','Julie','Olivier','Valérie','Philippe','Annie','Maxime','Sophie','Étienne','Mélanie','Guillaume','Nathalie','Kevin','Audrey','Samuel','Émilie'];
-const LAST = ['Tremblay','Gagnon','Roy','Côté','Bouchard','Gauthier','Morin','Lavoie','Fortin','Gagné','Ouellet','Pelletier','Bélanger','Lévesque','Bergeron','Leblanc','Paquette','Girard','Simard','Boucher','Caron','Beaulieu','Cloutier','Dubé'];
-const NOTES = {
-  1:['Actif sur IG mais faible fréquence vidéo','Reels amateurs, bon potentiel UGC','Aucun Reel depuis 3 mois','Gros engagement, contenu non-pro','Veut lancer TikTok, pas de ressource','Concurrence locale très active en vidéo'],
-  2:['Site daté, pas de vidéo','Publie surtout des photos stock','Intéressé par pubs Meta saisonnières','Budget marketing géré par siège social','Besoin vidéo visite des lieux'],
-  3:['Présence sociale quasi nulle','Facebook seulement, posts rares','Mise sur le bouche-à-oreille','Pourrait tester pubs avant/après chantier'],
-};
-
-// Deterministic PRNG so the seed is stable
-let s = 42; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
-const pick = a => a[Math.floor(rnd() * a.length)];
-const slug = n => n.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+// Leads are not stored in the repo (they contain contact details).
+// Load them with "Importer CSV" (Google Maps Scraper Kit export); the published
+// dashboard build injects them between the markers below.
+const LEADS = /*LEADS*/[]/*END*/;
 
 function seed() {
-  s = 42;
-  return RAW.map(([name, cat, hood, street], i) => {
-    const c = CATS[cat], sl = slug(name), f = pick(FIRST), l = pick(LAST);
-    const st = 'To be called';
-    const temp = 'Cold';
-    const ph = () => String(Math.floor(rnd()*900)+100);
-    return {
-      id: 'L' + (i + 1).toString().padStart(3, '0'),
-      name, category: cat, tier: c.tier,
-      score: Math.max(1, Math.min(100, c.base + Math.round(rnd()*8 - 4))),
-      contact: `${f} ${l}`,
-      phone: `${rnd() > .3 ? '418' : '581'}-${ph()}-${ph()}${Math.floor(rnd()*10)}`,
-      email: `${slug(f).slice(0,1)}${slug(l)}@${sl.slice(0,18)}.ca`,
-      instagram: '',
-      website: '',
-      address: `${street}, ${hood}`, hood,
-      status: st, temp,
-      notes: pick(NOTES[c.tier]),
-      lastContact: null,
-    };
-  });
+  return LEADS.map((d, i) => ({
+    id: 'L' + String(i + 1).padStart(3, '0'),
+    ...d, tier: CATS[d.category].tier, contact: '',
+    status: 'To be called', temp: 'Cold', lastContact: null,
+  }));
 }
 
 // ---------- State ----------
@@ -360,16 +237,17 @@ function render() {
   $('tbody').innerHTML = view.map((l, i) => `
     <tr class="row-enter hover:bg-surface/70">
       <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
-      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}</div></td>
+      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div></td>
       <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono font-bold ${TIER_CLS[l.tier]}">${l.score}</span>
         <div class="h-1 w-14 rounded-full bg-line"><div class="h-1 rounded-full bg-gradient-to-r from-accent to-accent-soft" style="width:${l.score}%"></div></div></div>
         <div class="text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier}</div></td>
-      <td class="px-3 py-2"><div class="text-neutral-200">${esc(l.contact)}</div>
+      <td class="px-3 py-2">${l.contact ? `<div class="text-neutral-200">${esc(l.contact)}</div>` : ''}
         <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
         <a href="mailto:${esc(l.email)}" class="text-xs text-muted hover:text-white">${esc(l.email)}</a></td>
       <td class="px-3 py-2 text-xs leading-5"><a target="_blank" rel="noopener" href="${mapsUrl(l)}" class="text-white hover:underline">Google Maps ↗</a><br>
         ${igUrl(l) ? `<a target="_blank" rel="noopener" href="${esc(igUrl(l))}" class="text-accent-soft hover:underline">${esc(l.instagram)}</a><br>` : ''}
-        ${webUrl(l) ? `<a target="_blank" rel="noopener" href="${esc(webUrl(l))}" class="text-muted hover:text-white">Site web ↗</a>` : ''}</td>
+        ${webUrl(l) ? `<a target="_blank" rel="noopener" href="${esc(webUrl(l))}" class="text-muted hover:text-white">Site web ↗</a><br>` : ''}
+        ${/^https?:\/\//.test(l.facebook || '') ? `<a target="_blank" rel="noopener" href="${esc(l.facebook)}" class="text-muted hover:text-white">Facebook ↗</a>` : ''}</td>
       <td class="px-3 py-2 text-xs"><div class="text-neutral-200">${esc(l.hood)}</div><div class="text-neutral-500">${esc(l.address.split(',')[0])}</div></td>
       <td class="px-3 py-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status])}</td>
       <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
@@ -464,9 +342,100 @@ $('fStatus').onchange = e => { ui.status = e.target.value; render(); };
 $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
 $('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'' }); ['q','fCat','fTemp','fStatus'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
-$('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les 100 leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
+$('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
+
+// ---------- CSV import (Google Maps Scraper Kit format) ----------
+function parseCsv(text) {
+  const rows = []; let row = [], f = '', q = false;
+  text = text.replace(/^﻿/, '');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i+1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i+1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  const head = (rows.shift() || []).map(h => h.trim().toLowerCase());
+  return rows.filter(r => r.some(v => v.trim())).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] || '').trim()])));
+}
+// Google category text -> macro category (first match wins)
+const CAT_RULES = [
+  [/immobili|real estate|realtor|mortgage|hypoth/i, 'Real Estate'],
+  [/barb/i, 'Barbers'],
+  [/m[ée]d(ical)? ?(spa|esth)|laser|botox|injection|cosmetic surg|dermat/i, 'Med Aesthetics'],
+  [/hair|coiff|beaut|esth|nail|ongle|spa|lash|cils|makeup|maquill|wax|épil|epil/i, 'Aesthetics'],
+  [/gym|fitness|crossfit|yoga|pilates|martial|boxing|boxe|sport club|climb|escalade|dance|danse|training/i, 'Fitness'],
+  [/tattoo|tatou|jewel|bijou/i, 'Tattoo/Jewelry'],
+  [/cloth|vêtement|vetement|boutique|fashion|shoe|chaussure|apparel|lingerie/i, 'Clothing'],
+  [/restaurant|caf[eé]|coffee|bar\b|pub|brew|brasserie|bakery|boulang|pâtiss|patiss|bistro|pizza|sushi|food|traiteur|caterer|ice cream|glacier|sugar shack|cabane/i, 'Food'],
+  [/dent|orthodont|clinic|clinique|médic|medic|optom|veterin|vétérin|doctor|pharma/i, 'Health/Clinic'],
+  [/physio|chiro|massage|ostéo|osteo|naturo|acupunct|kin[ée]si/i, 'Wellness/Physio'],
+  [/hotel|hôtel|inn|auberge|gîte|gite|b&b|bed and breakfast|tour|cruise|croisi|attraction|museum|musée/i, 'Hotels/Tourism'],
+  [/event|événement|evenement|wedding|mariage|photograph|vidéograph|reception|réception|dj\b|banquet/i, 'Events'],
+  [/car dealer|concession|auto|motor|moto|garage|tire|pneu|detailing/i, 'Automotive'],
+  [/school|école|ecole|daycare|garderie|cpe|driving|conduite|tutor|academy|académie/i, 'Education'],
+  [/plumb|plomb|drain/i, 'Plumbing'],
+  [/hvac|heating|chauffage|climat|air condition|thermopomp|heat pump|ventilat/i, 'HVAC'],
+  [/contractor|entrepreneur|construct|renov|rénov|roof|toit|landscap|paysag|kitchen|cuisine|electric|électric|paint|peint|excavat|window|fenêtre|floor|plancher|carpent|menuis/i, 'Construction'],
+  [/lawyer|avocat|notar|notaire|account|comptab|financ|insurance|assurance|consult/i, 'Professional'],
+];
+// Postal-code prefix (FSA) -> neighbourhood, Québec City region within ~50 km of Vieux-Québec
+const FSA = {
+  G1R:'Vieux-Québec / Montcalm', G1K:'Saint-Roch / Saint-Sauveur', G1L:'Limoilou', G1J:'Limoilou / Maizerets',
+  G1S:'Montcalm / Sillery', G1T:'Sillery / Sainte-Foy', G1V:'Sainte-Foy', G1W:'Sainte-Foy', G1X:'Sainte-Foy / Cap-Rouge',
+  G1Y:'Cap-Rouge', G1M:'Vanier', G1N:'Vanier / Saint-Sauveur', G1P:'Les Saules / Duberger', G2A:'Neufchâtel', G2B:'Lebourgneuf',
+  G2C:'Lebourgneuf', G2E:'Ancienne-Lorette', G2G:'Sainte-Foy (ouest)', G2J:'Lebourgneuf', G2K:'Lebourgneuf / Neufchâtel',
+  G2L:'Charlesbourg', G2M:'Charlesbourg', G2N:'Charlesbourg', G1G:'Charlesbourg', G1H:'Charlesbourg',
+  G1B:'Beauport', G1C:'Beauport', G1E:'Beauport', G1A:'Colline Parlementaire', G3A:'Saint-Augustin-de-Desmaures',
+  G3B:'Lac-Beauport', G3C:'Stoneham', G3E:'Val-Bélair', G3G:'Val-Bélair', G3H:'Wendake / Loretteville', G3J:'Val-Bélair', G3K:'Val-Bélair',
+  G6V:'Lévis', G6W:'Lévis', G6X:'Saint-Romuald', G6Y:'Saint-Jean-Chrysostome', G6Z:'Saint-Rédempteur', G6J:'Lévis (Saint-Étienne)',
+  G7A:'Saint-Nicolas', G6K:'Lévis (Pintendre)', G0A:'Île d’Orléans / Côte-de-Beaupré / Rive-Nord', G0S:'Rive-Sud (périphérie)',
+};
+const JUNK_EMAIL = /sentry|wixpress|mystore\.com|example\.|domain\.com|tactikmedia|@2x|\.png$|\.jpg$/i;
+function leadFromRow(r) {
+  const name = r.title || r.name; if (!name) return null;
+  const m = (r.address || '').match(/\b(G\d[A-Z])\s?\d[A-Z]\d\b/i);
+  const fsa = m ? m[1].toUpperCase() : '';
+  if (!FSA[fsa]) return { skip: `${name} (hors zone: ${r.address || 'adresse inconnue'})` };
+  const gcat = r.category || '';
+  const category = (CAT_RULES.find(([re]) => re.test(gcat + ' ' + name)) || [null, 'Other'])[1];
+  const rating = parseFloat(r.review_rating) || 0, reviews = parseInt(r.review_count) || 0;
+  let website = r.website || '';
+  const fbSite = /facebook\.com/i.test(website);
+  if (fbSite || /411habitation|yellowpages|pagesjaunes|fresha\.com|booksy|planity/i.test(website)) website = '';
+  const notes = [reviews ? `Google ${rating.toFixed(1)}★ (${reviews} avis)` : 'Aucun avis Google', r.instagram ? 'IG trouvé' : 'IG non trouvé'];
+  if (!r.website) notes.push('pas de site web'); else if (fbSite) notes.push('site = page Facebook');
+  return {
+    name, category, tier: CATS[category].tier, score: CATS[category].base - 6 + Math.min(6, Math.floor(reviews / 100)),
+    contact: '', phone: r.phone || '', email: (r.emails || r.email || '').split(/[,;\s]+/).filter(e => e.includes('@') && !JUNK_EMAIL.test(e)).join(', '),
+    instagram: r.instagram || '', website, facebook: r.facebook || '', address: r.address || '', hood: FSA[fsa],
+    rating, reviews, gcategory: gcat, notes: notes.join(' · '), status: 'To be called', temp: 'Cold', lastContact: null,
+  };
+}
+const leadKey = l => (l.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + String(l.phone || '').replace(/\D/g, '').slice(-7));
+function importCsv(text) {
+  const rows = parseCsv(text), have = new Set(leads.map(leadKey)), skipped = [];
+  let added = 0, dup = 0, n = Math.max(0, ...leads.map(l => parseInt(String(l.id).slice(1)) || 0));
+  for (const r of rows) {
+    const l = leadFromRow(r); if (!l) continue;
+    if (l.skip) { skipped.push(l.skip); continue; }
+    const k = leadKey(l); if (have.has(k)) { dup++; continue; }
+    have.add(k); leads.push({ id: 'L' + String(++n).padStart(3, '0'), ...l }); added++;
+  }
+  save(); render();
+  askConfirm(`${added} leads ajoutés · ${dup} doublons ignorés · ${skipped.length} hors zone ignorés.` + (skipped.length ? `\n\nHors zone : ${skipped.slice(0, 8).join(' ; ')}${skipped.length > 8 ? '…' : ''}` : ''), () => {});
+}
+$('btnImport').onclick = () => $('fileImport').click();
+$('fileImport').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader(); rd.onload = () => { try { importCsv(String(rd.result)); } catch (err) { toast('Import impossible : fichier CSV illisible'); } e.target.value = ''; };
+  rd.readAsText(f, 'utf-8');
+};
+
 $('btnCsv').onclick = () => {
-  const cols = ['id','name','category','tier','score','contact','phone','email','instagram','website','hood','address','status','temp','notes','lastContact'];
+  const cols = ['id','name','category','gcategory','tier','score','contact','phone','email','instagram','website','facebook','rating','reviews','hood','address','status','temp','notes','lastContact'];
   const cell = v => { const t = String(v ?? ''); return /[",\n;]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t; };
   const rows = filtered(), csv = [cols.join(','), ...rows.map(l => cols.map(c => cell(l[c])).join(','))].join('\r\n');
   $('exportText').value = csv;

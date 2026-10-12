@@ -1,0 +1,20 @@
+café Beauport
+café Lebourgneuf
+café Lévis
+bar microbrasserie Vieux-Québec
+bar microbrasserie Saint-Roch
+bar microbrasserie Limoilou
+bar microbrasserie Sainte-Foy
+bar microbrasserie Charlesbourg
+bar microbrasserie Beauport
+bar microbrasserie Lebourgneuf
+bar microbrasserie Lévis
+barbier Vieux-Québec
+barbier Saint-Roch
+barbier Limoilou
+barbier Sainte-Foy
+barbier Charlesbourg
+barbier Beauport
+barbier Lebourgneuf
+salon de coiffure Vieux-Québec
+salon de coiffure Saint-Roch
