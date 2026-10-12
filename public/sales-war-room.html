@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sales War-Room CRM</title>
-<script src="https://cdn.tailwindcss.com/3.4.5"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <script>
 tailwind.config = { theme: { extend: {
@@ -12,7 +12,7 @@ tailwind.config = { theme: { extend: {
   fontFamily: { sans:['Geist','system-ui','sans-serif'], mono:['"Geist Mono"','ui-monospace','monospace'] } } } };
 </script>
 <style>
-  body { background:#050505; }
+  body { background:#050505; color:#fff; } :root { color-scheme: dark; }
   .mono { font-family:'Geist Mono', ui-monospace, monospace; }
   .display { letter-spacing:-.035em; font-weight:700; line-height:.98; }
   .eyebrow { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8f8f8f; }
@@ -27,7 +27,7 @@ tailwind.config = { theme: { extend: {
 <body class="grain min-h-screen font-sans text-white antialiased">
 
 <!-- Sticky stats header -->
-<header class="sticky top-0 z-30 border-b border-line bg-ink/80 backdrop-blur-xl">
+<header style="top:env(safe-area-inset-top,0px)" class="sticky z-30 border-b border-line bg-ink/80 backdrop-blur-xl">
   <div class="mx-auto max-w-[1600px] px-4 py-3">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -101,6 +101,29 @@ tailwind.config = { theme: { extend: {
       <button class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Enregistrer</button>
     </div>
   </form>
+</div>
+
+<div id="confirm" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="w-full max-w-sm rounded-3xl border border-line bg-surface p-6">
+    <p id="confirmMsg" class="text-sm text-neutral-200"></p>
+    <div class="mt-5 flex justify-end gap-2">
+      <button id="confirmNo" class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">Annuler</button>
+      <button id="confirmYes" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div id="exportDlg" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="w-full max-w-2xl rounded-3xl border border-line bg-surface p-6">
+    <div class="flex items-center justify-between"><h2 class="display text-2xl">Export CSV</h2><button id="exportClose" class="text-2xl leading-none text-muted hover:text-white">×</button></div>
+    <p id="exportInfo" class="mt-2 text-sm text-muted"></p>
+    <textarea id="exportText" readonly rows="8" class="mono mt-3 w-full rounded-xl border border-line bg-ink-2 p-3 text-xs text-neutral-300"></textarea>
+    <div class="mt-4 flex flex-wrap justify-end gap-2">
+      <button id="exportDownload" class="rounded-full border border-line bg-surface px-5 py-2 text-sm hover:border-neutral-500">⬇ Télécharger .csv</button>
+      <button id="exportCopy" class="rounded-full bg-white px-5 py-2 text-sm font-medium text-ink hover:bg-neutral-200">Copier le CSV</button>
+    </div>
+    <p class="mt-3 text-xs text-neutral-500">Si le téléchargement est bloqué, copiez puis collez dans Google Sheets ou Excel.</p>
+  </div>
 </div>
 
 <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-50 translate-y-4 rounded-full border border-line bg-surface px-5 py-2.5 text-sm text-white shadow-[0_10px_40px_-10px_#2c5bff] opacity-0 transition"></div>
@@ -285,6 +308,11 @@ const STATUS_CLS = {
 const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-accent/10 text-accent-soft border-accent/40' };
 const TEMP_ICON = { Hot:'●', Warm:'●', Cold:'○' };
 const TIER_CLS = { 1:'text-white', 2:'text-neutral-300', 3:'text-muted' };
+const askConfirm = (msg, onYes) => {
+  const d = $('confirm'); $('confirmMsg').textContent = msg; d.classList.replace('hidden','flex');
+  const close = () => d.classList.replace('flex','hidden');
+  $('confirmNo').onclick = close; $('confirmYes').onclick = () => { close(); onYes(); };
+};
 const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); };
 
 function filtered() {
@@ -399,8 +427,9 @@ $('form').addEventListener('submit', e => {
   }
   closeModal();
 });
+$('exportClose').onclick = () => $('exportDlg').classList.replace('flex','hidden');
 $('modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.hasAttribute('data-close')) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); if (e.key === '/' && document.activeElement.tagName === 'BODY') { e.preventDefault(); $('q').focus(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('exportDlg').classList.replace('flex','hidden'); $('confirm').classList.replace('flex','hidden'); } if (e.key === '/' && document.activeElement.tagName === 'BODY') { e.preventDefault(); $('q').focus(); } });
 
 // ---------- Table events (delegated) ----------
 $('tbody').addEventListener('change', e => {
@@ -416,7 +445,7 @@ $('tbody').addEventListener('keydown', e => { if (e.target.dataset.note !== unde
 $('tbody').addEventListener('click', e => {
   const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
   if (ed) openModal(leads.find(l => l.id === ed.dataset.edit));
-  if (del) { const l = leads.find(x => x.id === del.dataset.del); if (l && confirm(`Supprimer « ${l.name} » ?`)) { leads = leads.filter(x => x !== l); save(); render(); toast('Lead supprimé'); } }
+  if (del) { const l = leads.find(x => x.id === del.dataset.del); if (l) askConfirm(`Supprimer « ${l.name} » ?`, () => { leads = leads.filter(x => x !== l); save(); render(); toast('Lead supprimé'); }); }
 });
 
 // ---------- Toolbar ----------
@@ -431,14 +460,22 @@ $('fStatus').onchange = e => { ui.status = e.target.value; render(); };
 $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
 $('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'' }); ['q','fCat','fTemp','fStatus'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
-$('btnSeed').onclick = () => { if (confirm('Effacer toutes les modifications et restaurer les 100 leads de départ ?')) { leads = seed(); save(); render(); toast('Données restaurées'); } };
+$('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les 100 leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
 $('btnCsv').onclick = () => {
   const cols = ['id','name','category','tier','score','contact','phone','email','instagram','website','hood','address','status','temp','notes','lastContact'];
   const cell = v => { const t = String(v ?? ''); return /[",\n;]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t; };
-  const csv = '﻿' + [cols.join(','), ...filtered().map(l => cols.map(c => cell(l[c])).join(','))].join('\r\n');
-  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' })), download: `warroom-leads-${new Date().toISOString().slice(0,10)}.csv` });
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  toast(`${filtered().length} leads exportés`);
+  const rows = filtered(), csv = [cols.join(','), ...rows.map(l => cols.map(c => cell(l[c])).join(','))].join('\r\n');
+  $('exportText').value = csv;
+  $('exportInfo').textContent = `${rows.length} leads de la vue filtrée actuelle.`;
+  $('exportDlg').classList.replace('hidden','flex');
+  $('exportDownload').onclick = () => {
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' })), download: `warroom-leads-${new Date().toISOString().slice(0,10)}.csv` });
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('exportCopy').onclick = () => {
+    const ta = $('exportText');
+    navigator.clipboard.writeText(csv).then(() => toast('CSV copié'), () => { ta.focus(); ta.select(); toast('Texte sélectionné, faites Ctrl/Cmd+C'); });
+  };
 };
 const tick = () => $('clock').textContent = new Date().toLocaleString('fr-CA', { weekday:'short', hour:'2-digit', minute:'2-digit' });
 tick(); setInterval(tick, 30000);
