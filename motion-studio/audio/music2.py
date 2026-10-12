@@ -97,7 +97,7 @@ place(music, supersaw([41, 53, 56, 60, 67], 6 * B, cutoff=1900, voices=7, level=
 for k, m in enumerate([77, 80, 84, 89]):
     t = np.arange(n(1.6)) / SR
     bell = (sine(midi(m), 1.6) + 0.35 * sine(midi(m) * 2.76, 1.6) * np.exp(-t / 0.2)) * np.exp(-t / 0.5) * 0.09
-    place(music, pan(bell, -0.3 + 0.2 * k), (56 + k * 0.5) * B)
+    place(music, pan(bell, -0.3 + 0.2 * k), (54.5 + k * 0.5) * B)
 
 music *= duck[:, None]
 music = reverb(music, 2.2, 0.55, 0.28)

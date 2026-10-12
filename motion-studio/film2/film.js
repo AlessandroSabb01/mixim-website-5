@@ -543,7 +543,7 @@
 
   /* ===== cursor ===== */
   function buildCursor() {
-    const root = layer(9);
+    const root = layer(12);
     const k = 1.9;
     const c = el(root, { width: 24 * k + "px", height: 36 * k + "px" });
     c.innerHTML = `<svg viewBox="-1 -1 24 36" width="${24 * k}" height="${36 * k}"><path d="M1 1 L1 27 L7.4 21.2 L11.6 31 L15.8 29.2 L11.7 19.6 L20 19.6 Z" fill="#fff" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
@@ -553,6 +553,16 @@
   }
   function cursor(t, fs) {
     const Cu = S.cur;
+    if (tb(t) >= 58.3) {                                       // last moment: the cursor clicks the logo
+      disp(Cu.root, true);
+      const L_ = S.logo, cx = W / 2 + 40, cy = L_.by + L_.total * 0.45;
+      const e = ez.inOutCubic(pb(t, 58.3, 58.9));
+      const x = lerp(W * 0.92, cx, e), y = lerp(H * 1.02, cy, e);
+      const d = t - bt(59), press = d > -0.03 && d < 0.1 ? 1 : 0, ringP = d >= 0 && d < 0.4 ? d / 0.4 : -1;
+      T(Cu.c, { x, y, s: 1 - 0.16 * press });
+      T(Cu.ring, { x: x - 45 * (0.4 + ringP), y: y - 45 * (0.4 + ringP), s: 0.4 + ringP, op: ringP >= 0 ? 1 - ringP : 0 });
+      return;
+    }
     if (!fs.live || tb(t) < 44.6 || tb(t) > 54) { disp(Cu.root, false); return; }
     disp(Cu.root, true);
     const F = fs.F, fx = F.X, fy = F.fy + (1 - ez.outExpo(pr(t, 44.2, 0.6))) * 120;
@@ -590,9 +600,10 @@
     const subm = mk([0, 140, 221, 20], paths[4], Lw);
     const tag = words(root, [["Et", "si", "votre"], ["prochaine", "vidéo"], ["changeait", "tout ?"]], { size: 100, weight: 700, track: -0.035, lh: 1.04, w: W - 140, align: "center", color: (w, i) => (i >= 5 ? C.acc : C.white) });
     const url = words(root, [["creationvirale.com"]], { size: 40, weight: 500, family: '"Geist Mono"', track: 0.02, w: W - 140, align: "center" });
-    const total = board.h + wordm.h + subm.h, stack = total + 90 + tag.height;
-    const by = (H - stack) / 2 - 120;
-    S.logo = { root, disc, fill, board, wordm, subm, arm: board.d.querySelector("#arm"), boom: board.d.querySelector("#boom"), tag, url, Lw, bx: (W - Lw) / 2, by, ty: by + total + 90 };
+    disp(url.root, false);                                     // no URL in the ending
+    const total = board.h + wordm.h + subm.h;
+    const by = (H - total) / 2;
+    S.logo = { root, disc, fill, board, wordm, subm, arm: board.d.querySelector("#arm"), boom: board.d.querySelector("#boom"), tag, url, Lw, bx: (W - Lw) / 2, by, ty: (H - tag.height) / 2, total };
   }
   function lockup(t, fs) {
     const live = t >= bt(53.55);
@@ -605,30 +616,36 @@
     const r = lerp(px(25), Math.hypot(W, H), g);
     T(Lg.disc, { x: okX - r, y: okY - r, op: g > 0 && g < 1 ? 1 : 0 }); { const c = Math.round(lerp(1, 0, clamp(g * 1.4))); const k = clamp(g * 1.4); Lg.disc.style.background = `rgb(${Math.round(lerp(44, 5, k))},${Math.round(lerp(91, 5, k))},${Math.round(lerp(255, 5, k))})`; } Lg.disc.style.width = Lg.disc.style.height = 2 * r + "px";
     vis(Lg.fill, g >= 1);
-    const dt = t - bt(54.25) + 0.02, e = spring(dt, 2.2, 7);
-    T(Lg.board.d, { x: Lg.bx + (Lg.Lw * (1 - (0.55 + 0.45 * e))) / 2, y: Lg.by + (1 - ez.outExpo(clamp(dt / 0.5))) * 200, s: 0.55 + 0.45 * e, r: (1 - e) * -6, op: dt > 0 ? 1 : 0 });
-    const tc = t - bt(55);
+    // 1) tagline alone, centred (b54.5-57)
+    const tq = ez.inExpo(pb(t, 56.6, 57.0));
+    T(Lg.tag.root, { x: 70, y: Lg.ty - tq * 60 });
+    Lg.tag.words.forEach((w, i) => rise(w, clamp((t - bt(54.5 + i * 0.25) + 0.03) / 0.35), tq, 0.2));
+    // 2) logo alone, centred: board lands b57, clapper snaps on b57.5
+    const LB = 57, CL = 57.5;
+    const dt = t - bt(LB) + 0.02, e = spring(dt, 2.2, 7);
+    const click = t - bt(59), press = click >= 0 ? 1 - 0.05 * Math.exp(-click / 0.09) * Math.min(1, click / 0.03 + 0.2) : 1;
+    Lg.root.style.perspective = "none";
+    const lsc = (0.55 + 0.45 * e) * press;
+    T(Lg.board.d, { x: Lg.bx + (Lg.Lw * (1 - lsc)) / 2, y: Lg.by + (1 - ez.outExpo(clamp(dt / 0.5))) * 200 + Lg.board.h * (1 - press) * 0.5, s: lsc, r: (1 - e) * -6, op: dt > 0 ? 1 : 0 });
+    const tc = t - bt(CL);
     let ang;
-    if (tc < -0.07) ang = lerp(-12, -19, ez.outCubic(clamp((t - bt(54.5)) / (bt(55) - 0.07 - bt(54.5)))));
+    if (tc < -0.07) ang = lerp(-12, -19, ez.outCubic(clamp((t - bt(LB + 0.25)) / (bt(CL) - 0.07 - bt(LB + 0.25)))));
     else if (tc < 0) ang = lerp(-19, 24, ez.inExpo(clamp((tc + 0.07) / 0.07)));
     else if (tc < 0.08) ang = 24;
     else ang = 24 * (1 - spring(tc - 0.08, 2.0, 6.5));
     Lg.arm.setAttribute("transform", `rotate(${ang} 71 41)`);
     Lg.boom.setAttribute("transform", `translate(110 65) scale(${Math.max(0.0001, tc < 0 ? 0 : spring(tc, 2.6, 6))}) translate(-110 -65)`);
-    const wm = ez.outExpo(pr(t, 55.15, 0.5)), sm = ez.outExpo(pr(t, 55.5, 0.5));
-    T(Lg.wordm.d, { x: Lg.bx, y: Lg.by + Lg.board.h, op: t >= bt(55.15) ? 1 : 0 }); Lg.wordm.d.firstChild.style.transform = `translateY(${(1 - wm) * 105}%)`;
-    T(Lg.subm.d, { x: Lg.bx, y: Lg.by + Lg.board.h + Lg.wordm.h, op: t >= bt(55.5) ? 1 : 0 }); Lg.subm.d.firstChild.style.transform = `translateY(${(1 - sm) * 105}%)`;
-    T(Lg.tag.root, { x: 70, y: Lg.ty });
-    Lg.tag.words.forEach((w, i) => rise(w, clamp((t - bt(56 + i * 0.25) + 0.03) / 0.35), 0, 0.2));
-    T(Lg.url.root, { x: 70, y: H - 330 });
-    Lg.url.words.forEach((w) => rise(w, clamp((t - bt(58) + 0.03) / 0.4), 0, 0.1));
+    const wm = ez.outExpo(pr(t, CL + 0.15, 0.5)), sm = ez.outExpo(pr(t, CL + 0.5, 0.5));
+    const pw = (Lg.Lw * (1 - press)) / 2;
+    T(Lg.wordm.d, { x: Lg.bx + pw, y: Lg.by + Lg.board.h, s: press, op: t >= bt(CL + 0.15) ? 1 : 0 }); Lg.wordm.d.firstChild.style.transform = `translateY(${(1 - wm) * 105}%)`;
+    T(Lg.subm.d, { x: Lg.bx + pw, y: Lg.by + Lg.board.h + Lg.wordm.h, s: press, op: t >= bt(CL + 0.5) ? 1 : 0 }); Lg.subm.d.firstChild.style.transform = `translateY(${(1 - sm) * 105}%)`;
   }
 
   /* ---------- camera + grain ---------- */
   function camera(t, fs) {
     let s = 1, x = 0, y = 0, r = 0;
-    for (const [b, a] of [[0, 0.035], [1, 0.03], [2, 0.03], [3, 0.07], [8, 0.05], [30, 0.07], [31, 0.03], [32, 0.03], [32.5, 0.03], [43, 0.05], [55, 0.045]]) { const d = t - bt(b); if (d >= 0) s += a * Math.exp(-d / 0.13); }
-    for (const [b, a] of [[3, 16], [8, 12], [30, 24], [43, 14], [55, 16]]) { const d = t - bt(b); if (d >= 0 && d < 0.6) { const e = a * Math.exp(-d / 0.14); x += e * (vnoise(d * 30, b) - 0.5) * 2; y += e * (vnoise(d * 30, b + 50) - 0.5) * 2; r += e * 0.02 * (vnoise(d * 22, b + 9) - 0.5); } }
+    for (const [b, a] of [[0, 0.035], [1, 0.03], [2, 0.03], [3, 0.07], [8, 0.05], [30, 0.07], [31, 0.03], [32, 0.03], [32.5, 0.03], [43, 0.05], [57.5, 0.045], [59, 0.012]]) { const d = t - bt(b); if (d >= 0) s += a * Math.exp(-d / 0.13); }
+    for (const [b, a] of [[3, 16], [8, 12], [30, 24], [43, 14], [57.5, 16]]) { const d = t - bt(b); if (d >= 0 && d < 0.6) { const e = a * Math.exp(-d / 0.14); x += e * (vnoise(d * 30, b) - 0.5) * 2; y += e * (vnoise(d * 30, b + 50) - 0.5) * 2; r += e * 0.02 * (vnoise(d * 22, b + 9) - 0.5); } }
     // gentle follow of the active form field (keeps typing legible on a phone)
     if (fs.live && fs.focus) { const target = H * 0.5 - fs.fyStage; const f = clamp(tb(t) - 45, 0, 1) * clamp(54 - tb(t), 0, 1); y += clamp(target, -600, 200) * 1.12 * f; s *= 1 + 0.12 * f; }
     cam.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;
@@ -662,7 +679,7 @@
     const keyCues = (s, [b0, per]) => [...s].forEach((ch, i) => { if (ch !== " ") cue(b0 + i * per, "key", 0.5, 0.15, { var: i }); });
     keyCues(NAME, TYPE.name); keyCues(MAIL, TYPE.mail); keyCues(MSG, TYPE.msg);
     cue(53, "click", 0.9, 0.2); cue(53.6, "send", 0.7); cue(53.6, "ding", 0.9);
-    cue(54.25, "whoosh-s", 0.5); cue(55, "clap", 1.0); cue(55, "impact", 0.6); cue(58, "tick", 0.3);
+    cue(56.8, "whoosh-s", 0.45); cue(57, "pop", 0.4); cue(57.5, "clap", 1.0); cue(57.5, "impact", 0.6); cue(59, "click", 1.0, 0.1);
   }
 
   /* ---------- frame ---------- */
