@@ -197,29 +197,31 @@ const LEADS = /*LEADS*/[]/*END*/;
 
 // ---------- Potential score (pre-contact prediction from public Google Maps data) ----------
 // Temperature stays Cold until a real conversation; Potential ranks who to contact first.
-const POT_A = 56, POT_B = 42;
+const POT_S = 64, POT_A = 56, POT_B = 42;
 function potential(l) {
   const sig = l.sig || null, r = Number(l.rating) || 0, n = Number(l.reviews) || 0, why = [];
+  let need = 0; // signals that they clearly lack what we sell
   let p = ({ 1: 30, 2: 18, 3: 6 })[l.tier] ?? 6;
   if (sig && sig.n) {
     const rate = sig.replied / sig.n;
     if (rate >= 0.5) { p += 15; why.push([15, 'répond à ses avis Google']); }
     else if (rate > 0) { p += 7; why.push([7, 'répond parfois à ses avis']); }
-    if (n <= 20 && sig.oldest != null && sig.oldest <= 540) { p += 15; why.push([15, `${l.category === 'Real Estate' ? 'profil Google récent' : 'ouvert récemment'} (~${Math.max(1, Math.round(sig.oldest / 30))} mois)`]); }
+    if (n <= 20 && sig.oldest != null && sig.oldest <= 540) { p += 15; need++; why.push([15, `${l.category === 'Real Estate' ? 'profil Google récent' : 'ouvert récemment'} (~${Math.max(1, Math.round(sig.oldest / 30))} mois)`]); }
     if (sig.recent90 >= 2) { p += 6; why.push([6, 'avis récents (actif)']); }
   }
   const kind = l.siteKind || (String(l.website || '').trim() ? 'own' : (l.facebook ? 'facebook' : 'none')), web = kind === 'own' || kind === 'franchise';
   if (l.igKnown && !l.instagram && r >= 4.5 && n >= 25) {
-    const w = web ? 10 : 15; p += w; why.push([w, `${r.toFixed(1)}★ mais ${web ? 'pas d’Instagram' : 'ni Instagram ni site'}`]);
-  } else if (kind === 'none') { p += 8; why.push([8, 'pas de site web']); }
-  else if (kind === 'facebook') { p += 6; why.push([6, 'site = page Facebook']); }
+    const w = web ? 10 : 15; p += w; need++; why.push([w, `${r.toFixed(1)}★ mais ${web ? 'pas d’Instagram' : 'ni Instagram ni site'}`]);
+  } else if (kind === 'none') { p += 8; need++; why.push([8, 'pas de site web']); }
+  else if (kind === 'facebook') { p += 6; need++; why.push([6, 'site = page Facebook']); }
   if (l.email) { p += 8; why.push([8, 'courriel trouvé']); }
   if (l.igKnown && l.instagram) { p += 3; why.push([3, 'Instagram trouvé']); }
   if (n >= 100) { p += 6; why.push([6, `achalandé (${n} avis)`]); } else if (n >= 30) p += 3;
   if (n >= 10 && r && r < 3.8) { p -= 8; why.push([-8, `note faible (${r.toFixed(1)}★)`]); }
   if (!n) { p -= 6; why.push([-6, 'aucun avis Google']); }
   p = Math.max(0, Math.min(100, Math.round(p)));
-  return { pscore: p, potential: p >= POT_A ? 'A' : p >= POT_B ? 'B' : 'C', why: why.filter(w => w[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map(w => w[1]).join(' · ') || (why[0] || [0, ''])[1] };
+  const nws = kind === 'none' || kind === 'facebook';
+  return { pscore: p, nws, potential: l.tier <= 2 && (need >= 2 || (need && p >= POT_S) || (need && sig && sig.n && sig.replied / sig.n >= 0.5 && p >= POT_A)) ? 'S' : p >= POT_A ? 'A' : p >= POT_B ? 'B' : 'C', why: why.filter(w => w[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map(w => w[1]).join(' · ') || (why[0] || [0, ''])[1] };
 }
 const withPotential = l => Object.assign(l, potential(l));
 
@@ -262,7 +264,8 @@ const STATUS_CLS = {
 };
 const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-accent/10 text-accent-soft border-accent/40' };
 const TEMP_ICON = { Hot:'●', Warm:'●', Cold:'○' };
-const POT_CLS = { A:'border-emerald-500/60 bg-emerald-500/15 text-emerald-300', B:'border-accent/50 bg-accent/15 text-accent-soft', C:'border-line bg-surface-2 text-muted' };
+const POT_RANK = { S:0, A:1, B:2, C:3 };
+const POT_CLS = { S:'border-amber-400/70 bg-amber-400/20 text-amber-300 shadow-[0_0_14px_-4px_#fbbf24]', A:'border-emerald-500/60 bg-emerald-500/15 text-emerald-300', B:'border-accent/50 bg-accent/15 text-accent-soft', C:'border-line bg-surface-2 text-muted' };
 const TIER_CLS = { 1:'text-white', 2:'text-neutral-300', 3:'text-muted' };
 const askConfirm = (msg, onYes) => {
   const d = $('confirm'); $('confirmMsg').textContent = msg; d.classList.replace('hidden','flex');
@@ -277,9 +280,9 @@ const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove
 function filtered() {
   const q = ui.q.toLowerCase().trim();
   let out = leads.filter(l =>
-    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.pot || l.potential === ui.pot) &&
+    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.pot || (ui.pot === 'NWS' ? l.nws : ui.pot === 'SA' ? (l.potential === 'S' || l.potential === 'A') : l.potential === ui.pot)) &&
     (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email,l.why,l.gcategory].join(' ').toLowerCase().includes(q)));
-  if (ui.sort === 'virality') out.sort((a,b) => (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
+  if (ui.sort === 'virality') out.sort((a,b) => (POT_RANK[a.potential] ?? 3) - (POT_RANK[b.potential] ?? 3) || (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
   else out.sort((a,b) => a.name.localeCompare(b.name, 'fr'));
   return out;
 }
@@ -302,7 +305,7 @@ function renderStats(view) {
     stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, '', 'text-emerald-400') +
     stat("Appels aujourd'hui", today, `${contacted} contactés au total`, '', 'text-white') +
     stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-accent', 'text-accent-soft') +
-    stat('Potentiel A', leads.filter(l => l.potential === 'A').length, `${leads.filter(l => l.potential === 'A' && l.status === 'To be called').length} à contacter en priorité`, '', 'text-emerald-400');
+    stat('Tier S · A', `${leads.filter(l => l.potential === 'S').length} · ${leads.filter(l => l.potential === 'A').length}`, `${leads.filter(l => l.nws).length} NWS (besoin d’un site)`, '', 'text-amber-300');
 }
 const selectHtml = (field, id, opts, cur, cls) =>
   `<select data-inline="${field}" data-id="${id}" class="rounded-full border px-3 py-1 text-xs font-medium outline-none ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
@@ -317,7 +320,7 @@ function render() {
     <tr class="row-enter hover:bg-surface/70">
       <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
       <td class="px-3 py-2 max-w-[280px]"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div>${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}</td>
-      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span></div>
+      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span>${l.nws ? '<span title="Pas de vrai site web : opportunité site web" class="rounded-full border border-fuchsia-400/60 bg-fuchsia-400/15 px-2 py-0.5 text-[10px] font-bold text-fuchsia-300">NWS</span>' : ''}</div>
         <div class="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier} · viral ${l.score}</div></td>
       <td class="px-3 py-2">${l.contact ? `<div class="text-neutral-200">${esc(l.contact)}</div>` : ''}
         <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
@@ -415,7 +418,7 @@ const fill = (el, label, arr) => el.innerHTML = `<option value="">${label}</opti
 fill($('fCat'), 'Toutes catégories', Object.keys(CATS));
 fill($('fTemp'), 'Toutes températures', TEMPS);
 fill($('fStatus'), 'Tous statuts', STATUSES);
-$('fPot').innerHTML = '<option value="">Tout potentiel</option><option value="A">Potentiel A</option><option value="B">Potentiel B</option><option value="C">Potentiel C</option>';
+$('fPot').innerHTML = '<option value="">Tout potentiel</option><option value="S">★ S — besoin évident</option><option value="SA">S + A</option><option value="A">Potentiel A</option><option value="B">Potentiel B</option><option value="C">Potentiel C</option><option value="NWS">NWS — besoin d’un site web</option>';
 $('fPot').onchange = e => { ui.pot = e.target.value; render(); };
 let qt; $('q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { ui.q = e.target.value; render(); }, 80); });
 $('fCat').onchange = e => { ui.cat = e.target.value; render(); };
@@ -456,6 +459,7 @@ const ANGLES = {
 const because = (w, cap) => (cap ? 'P' : 'p') + (/^[aeéèêiouyh]/i.test(w) ? 'arce qu’' : 'arce que ') + w;
 function hooks(l, tu) {
   const v = (a, b) => tu ? a : b;
+  if (l.sig && l.reviews <= 20 && l.sig.oldest != null && l.sig.oldest <= 540 && l.category === 'Real Estate') return v(`J’ai vu que tu bâtis ta clientèle comme courtier (déjà ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google). C’est exactement le moment où la vidéo fait la différence pour te démarquer.`, `J’ai vu que vous bâtissez votre clientèle (déjà ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google). C’est exactement le moment où la vidéo aide un courtier à se démarquer.`);
   if (l.sig && l.reviews <= 20 && l.sig.oldest != null && l.sig.oldest <= 540) return v(`Félicitations pour l’ouverture de ${l.name} ! Les premiers mois, c’est là que la visibilité fait toute la différence.`, `Félicitations pour l’ouverture de ${l.name} ! Les premiers mois, c’est là que la visibilité fait toute la différence.`);
   if (l.sig && l.sig.n && l.sig.replied / l.sig.n >= 0.5 && l.reviews >= 20) return v(`J’ai remarqué que tu prends le temps de répondre à tes avis Google (${Number(l.rating).toFixed(1)}★, ${l.reviews} avis) : ça montre que ton image compte pour toi.`, `J’ai remarqué que vous prenez le temps de répondre à vos avis Google (${Number(l.rating).toFixed(1)}★, ${l.reviews} avis) : on voit que votre image compte pour vous.`);
   if (l.reviews >= 100 && l.rating >= 4.5) return v(`Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, c’est clair que tes clients t’adorent. Le défi, c’est que ça paraisse autant sur les réseaux.`, `Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, vos clients vous apprécient clairement. Le défi, c’est que ça paraisse autant sur les réseaux.`);
@@ -484,7 +488,7 @@ Chez Création Virale, on est une agence de Québec : on écrit le script, on se
 
 ${proof}
 
-${v('Aurais-tu 15 minutes cette semaine pour un appel rapide ? Je te montre 2-3 idées concrètes pour ta business, sans engagement.', 'Auriez-vous 15 minutes cette semaine pour un appel ? Je vous présente 2-3 idées concrètes pour votre entreprise, sans engagement.')}${cta}
+${v('Aurais-tu 15 minutes cette semaine pour un appel rapide ? Je te montre 2-3 idées concrètes pour ta business, sans engagement.', 'Auriez-vous 15 minutes cette semaine pour un appel ? Je vous présente 2-3 idées concrètes pour votre entreprise, sans engagement.')}${cta}${l.nws ? '\n\n' + v(`P.S. Je n’ai pas trouvé de site web pour ${l.name}. On peut aussi t’en bâtir un, simple et rapide, pour que tes vidéos mènent quelque part.`, `P.S. Je n’ai pas trouvé de site web pour ${l.name}. Nous pouvons aussi vous en bâtir un, simple et rapide, pour que vos vidéos mènent quelque part.`) : ''}
 
 ${footer(tu)}` },
     email2: { label:'Relance J+4', subject: v(`Re: Une idée vidéo pour ${l.name}`, `Re: Une idée vidéo pour ${l.name}`), body:
@@ -517,7 +521,7 @@ RAISON DE L'APPEL (20 sec)
 QUESTIONS
 • Qui s’occupe de votre contenu en ce moment ?
 • Combien de vidéos publiez-vous par mois ?
-• Avez-vous déjà fait des publicités sur Instagram ou Facebook ?
+• Avez-vous déjà fait des publicités sur Instagram ou Facebook ?${l.nws ? '\n• (NWS) Pas de vrai site web : proposer un site simple en plus des vidéos.' : ''}
 
 OBJECTIONS
 • « Pas le budget » → « On commence souvent par une seule journée de tournage pour tester. »
