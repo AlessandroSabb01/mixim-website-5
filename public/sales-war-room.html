@@ -46,10 +46,11 @@ tailwind.config = { theme: { extend: {
 <main class="relative z-10 mx-auto max-w-[1600px] px-4 py-4">
   <!-- Toolbar -->
   <section class="mb-4 grid gap-2 rounded-2xl border border-line bg-surface/80 p-3 lg:grid-cols-[1fr_auto]">
-    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
       <input id="q" type="search" placeholder="Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-full border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent" />
       <select id="fCat" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fTemp" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
+      <select id="fPot" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fStatus" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
     </div>
     <div class="flex flex-wrap gap-2">
@@ -74,7 +75,7 @@ tailwind.config = { theme: { extend: {
         <tr>
           <th class="px-3 py-3">#</th>
           <th class="px-3 py-3">Entreprise</th>
-          <th class="px-3 py-3">Virality</th>
+          <th class="px-3 py-3">Potentiel</th>
           <th class="px-3 py-3">Contact</th>
           <th class="px-3 py-3">Liens</th>
           <th class="px-3 py-3">Quartier</th>
@@ -193,8 +194,37 @@ const CATS = {
 // dashboard build injects them between the markers below.
 const LEADS = /*LEADS*/[]/*END*/;
 
+
+// ---------- Potential score (pre-contact prediction from public Google Maps data) ----------
+// Temperature stays Cold until a real conversation; Potential ranks who to contact first.
+const POT_A = 56, POT_B = 42;
+function potential(l) {
+  const sig = l.sig || null, r = Number(l.rating) || 0, n = Number(l.reviews) || 0, why = [];
+  let p = ({ 1: 30, 2: 18, 3: 6 })[l.tier] ?? 6;
+  if (sig && sig.n) {
+    const rate = sig.replied / sig.n;
+    if (rate >= 0.5) { p += 15; why.push([15, 'répond à ses avis Google']); }
+    else if (rate > 0) { p += 7; why.push([7, 'répond parfois à ses avis']); }
+    if (n <= 20 && sig.oldest != null && sig.oldest <= 540) { p += 15; why.push([15, `${l.category === 'Real Estate' ? 'profil Google récent' : 'ouvert récemment'} (~${Math.max(1, Math.round(sig.oldest / 30))} mois)`]); }
+    if (sig.recent90 >= 2) { p += 6; why.push([6, 'avis récents (actif)']); }
+  }
+  const kind = l.siteKind || (String(l.website || '').trim() ? 'own' : (l.facebook ? 'facebook' : 'none')), web = kind === 'own' || kind === 'franchise';
+  if (l.igKnown && !l.instagram && r >= 4.5 && n >= 25) {
+    const w = web ? 10 : 15; p += w; why.push([w, `${r.toFixed(1)}★ mais ${web ? 'pas d’Instagram' : 'ni Instagram ni site'}`]);
+  } else if (kind === 'none') { p += 8; why.push([8, 'pas de site web']); }
+  else if (kind === 'facebook') { p += 6; why.push([6, 'site = page Facebook']); }
+  if (l.email) { p += 8; why.push([8, 'courriel trouvé']); }
+  if (l.igKnown && l.instagram) { p += 3; why.push([3, 'Instagram trouvé']); }
+  if (n >= 100) { p += 6; why.push([6, `achalandé (${n} avis)`]); } else if (n >= 30) p += 3;
+  if (n >= 10 && r && r < 3.8) { p -= 8; why.push([-8, `note faible (${r.toFixed(1)}★)`]); }
+  if (!n) { p -= 6; why.push([-6, 'aucun avis Google']); }
+  p = Math.max(0, Math.min(100, Math.round(p)));
+  return { pscore: p, potential: p >= POT_A ? 'A' : p >= POT_B ? 'B' : 'C', why: why.filter(w => w[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map(w => w[1]).join(' · ') || (why[0] || [0, ''])[1] };
+}
+const withPotential = l => Object.assign(l, potential(l));
+
 function seed() {
-  return LEADS.map((d, i) => ({
+  return LEADS.map((d, i) => withPotential({
     id: 'L' + String(i + 1).padStart(3, '0'),
     ...d, tier: CATS[d.category].tier, contact: '',
     status: 'To be called', temp: 'Cold', lastContact: null,
@@ -203,14 +233,17 @@ function seed() {
 
 // ---------- State ----------
 let leads = load();
-const ui = { q:'', cat:'', temp:'', status:'', sort:'virality' };
+const ui = { q:'', cat:'', temp:'', status:'', pot:'', sort:'virality' };
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(STORE)); } catch {}
   if (!Array.isArray(d) || !d.length) return seed();
   // Keep the viewer's edits, and append leads published since their last visit.
   const k = l => String(l.name).toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + String(l.phone || '').replace(/\D/g, '').slice(-7);
   const have = new Set(d.map(k)); let n = Math.max(0, ...d.map(l => parseInt(String(l.id).slice(1)) || 0));
-  for (const l of seed()) if (!have.has(k(l))) d.push({ ...l, id: 'L' + String(++n).padStart(3, '0') });
+  const pub = new Map(seed().map(l => [k(l), l]));
+  for (const l of d) { const p = pub.get(k(l)); if (p) for (const f of ['sig', 'igKnown', 'gmaps', 'rating', 'reviews', 'gcategory']) if (l[f] == null && p[f] != null) l[f] = p[f]; }
+  for (const l of pub.values()) if (!have.has(k(l))) d.push({ ...l, id: 'L' + String(++n).padStart(3, '0') });
+  d.forEach(withPotential);
   return d;
 }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(leads)); } catch {} }
@@ -229,6 +262,7 @@ const STATUS_CLS = {
 };
 const TEMP_CLS = { Hot:'bg-emerald-500/15 text-emerald-300 border-emerald-500/50', Warm:'bg-amber-500/10 text-amber-300 border-amber-500/40', Cold:'bg-accent/10 text-accent-soft border-accent/40' };
 const TEMP_ICON = { Hot:'●', Warm:'●', Cold:'○' };
+const POT_CLS = { A:'border-emerald-500/60 bg-emerald-500/15 text-emerald-300', B:'border-accent/50 bg-accent/15 text-accent-soft', C:'border-line bg-surface-2 text-muted' };
 const TIER_CLS = { 1:'text-white', 2:'text-neutral-300', 3:'text-muted' };
 const askConfirm = (msg, onYes) => {
   const d = $('confirm'); $('confirmMsg').textContent = msg; d.classList.replace('hidden','flex');
@@ -243,9 +277,9 @@ const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove
 function filtered() {
   const q = ui.q.toLowerCase().trim();
   let out = leads.filter(l =>
-    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) &&
-    (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email].join(' ').toLowerCase().includes(q)));
-  if (ui.sort === 'virality') out.sort((a,b) => a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
+    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.pot || l.potential === ui.pot) &&
+    (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email,l.why,l.gcategory].join(' ').toLowerCase().includes(q)));
+  if (ui.sort === 'virality') out.sort((a,b) => (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
   else out.sort((a,b) => a.name.localeCompare(b.name, 'fr'));
   return out;
 }
@@ -268,7 +302,7 @@ function renderStats(view) {
     stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, '', 'text-emerald-400') +
     stat("Appels aujourd'hui", today, `${contacted} contactés au total`, '', 'text-white') +
     stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-accent', 'text-accent-soft') +
-    stat('Clients signés', leads.filter(l => l.status === 'Client').length, 'issus de la prospection', '', 'text-white');
+    stat('Potentiel A', leads.filter(l => l.potential === 'A').length, `${leads.filter(l => l.potential === 'A' && l.status === 'To be called').length} à contacter en priorité`, '', 'text-emerald-400');
 }
 const selectHtml = (field, id, opts, cur, cls) =>
   `<select data-inline="${field}" data-id="${id}" class="rounded-full border px-3 py-1 text-xs font-medium outline-none ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
@@ -276,16 +310,15 @@ const selectHtml = (field, id, opts, cur, cls) =>
 function render() {
   const view = filtered();
   renderStats(view);
-  $('countLbl').textContent = `${view.length} / ${leads.length} leads affichés · tri: ${ui.sort === 'virality' ? 'Virality Ratio' : 'A → Z'}`;
-  $('sortToggle').textContent = ui.sort === 'virality' ? '⚡ Ordre Virality: ON' : '⚡ Ordre Virality: OFF';
+  $('countLbl').textContent = `${view.length} / ${leads.length} leads affichés · tri: ${ui.sort === 'virality' ? 'Potentiel puis Virality' : 'A → Z'}`;
+  $('sortToggle').textContent = ui.sort === 'virality' ? '⚡ Tri : Potentiel' : '⚡ Tri : A → Z';
   $('empty').classList.toggle('hidden', view.length > 0);
   $('tbody').innerHTML = view.map((l, i) => `
     <tr class="row-enter hover:bg-surface/70">
       <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
-      <td class="px-3 py-2"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div></td>
-      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="mono font-bold ${TIER_CLS[l.tier]}">${l.score}</span>
-        <div class="h-1 w-14 rounded-full bg-line"><div class="h-1 rounded-full bg-gradient-to-r from-accent to-accent-soft" style="width:${l.score}%"></div></div></div>
-        <div class="text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier}</div></td>
+      <td class="px-3 py-2 max-w-[280px]"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div>${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}</td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span></div>
+        <div class="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier} · viral ${l.score}</div></td>
       <td class="px-3 py-2">${l.contact ? `<div class="text-neutral-200">${esc(l.contact)}</div>` : ''}
         <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
         <a href="mailto:${esc(l.email)}" class="text-xs text-muted hover:text-white">${esc(l.email)}</a></td>
@@ -310,7 +343,7 @@ function update(id, patch) {
   if (patch.status && patch.status !== l.status && patch.status !== 'To be called') patch.lastContact = new Date().toISOString();
   if (patch.status === 'Client' || patch.status === 'Meeting booked') patch.temp = 'Hot';
   if (patch.category) patch.tier = CATS[patch.category].tier;
-  Object.assign(l, patch); save(); render();
+  Object.assign(l, patch); withPotential(l); save(); render();
 }
 
 // ---------- Modal ----------
@@ -382,12 +415,14 @@ const fill = (el, label, arr) => el.innerHTML = `<option value="">${label}</opti
 fill($('fCat'), 'Toutes catégories', Object.keys(CATS));
 fill($('fTemp'), 'Toutes températures', TEMPS);
 fill($('fStatus'), 'Tous statuts', STATUSES);
+$('fPot').innerHTML = '<option value="">Tout potentiel</option><option value="A">Potentiel A</option><option value="B">Potentiel B</option><option value="C">Potentiel C</option>';
+$('fPot').onchange = e => { ui.pot = e.target.value; render(); };
 let qt; $('q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { ui.q = e.target.value; render(); }, 80); });
 $('fCat').onchange = e => { ui.cat = e.target.value; render(); };
 $('fTemp').onchange = e => { ui.temp = e.target.value; render(); };
 $('fStatus').onchange = e => { ui.status = e.target.value; render(); };
 $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
-$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'' }); ['q','fCat','fTemp','fStatus'].forEach(i => $(i).value = ''); render(); };
+$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'', pot:'' }); ['q','fCat','fTemp','fStatus','fPot'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
 $('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
 
@@ -421,6 +456,8 @@ const ANGLES = {
 const because = (w, cap) => (cap ? 'P' : 'p') + (/^[aeéèêiouyh]/i.test(w) ? 'arce qu’' : 'arce que ') + w;
 function hooks(l, tu) {
   const v = (a, b) => tu ? a : b;
+  if (l.sig && l.reviews <= 20 && l.sig.oldest != null && l.sig.oldest <= 540) return v(`Félicitations pour l’ouverture de ${l.name} ! Les premiers mois, c’est là que la visibilité fait toute la différence.`, `Félicitations pour l’ouverture de ${l.name} ! Les premiers mois, c’est là que la visibilité fait toute la différence.`);
+  if (l.sig && l.sig.n && l.sig.replied / l.sig.n >= 0.5 && l.reviews >= 20) return v(`J’ai remarqué que tu prends le temps de répondre à tes avis Google (${Number(l.rating).toFixed(1)}★, ${l.reviews} avis) : ça montre que ton image compte pour toi.`, `J’ai remarqué que vous prenez le temps de répondre à vos avis Google (${Number(l.rating).toFixed(1)}★, ${l.reviews} avis) : on voit que votre image compte pour vous.`);
   if (l.reviews >= 100 && l.rating >= 4.5) return v(`Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, c’est clair que tes clients t’adorent. Le défi, c’est que ça paraisse autant sur les réseaux.`, `Avec ${l.reviews} avis à ${Number(l.rating).toFixed(1)}★ sur Google, vos clients vous apprécient clairement. Le défi, c’est que ça paraisse autant sur les réseaux.`);
   if (!l.instagram) return v(`Je n’ai pas trouvé de compte Instagram actif pour ${l.name}, et c’est souvent là que les nouveaux clients te découvrent.`, `Je n’ai pas trouvé de compte Instagram actif pour ${l.name}, et c’est souvent là que les nouveaux clients vous découvrent.`);
   return v(`J’ai jeté un œil à ${l.name} en ligne et je pense qu’il y a une belle occasion avec la vidéo courte.`, `J’ai regardé la présence en ligne de ${l.name} et je pense qu’il y a une belle occasion avec la vidéo courte.`);
@@ -594,6 +631,14 @@ const FSA = {
 };
 const CHAINS = /mcdonald|tim hortons|subway|a&w|st-hubert|starbucks|burger king|harvey|benny|pizza hut|domino|kfc|mary brown|valentine|pacini|boston pizza|scores|normandin|chez cora|ben & florentine|eggsquis|mike's|sushi shop|thai express|second cup|van houtte|cage aux sports|chocolats favoris|dairy queen|wendy|five guys|chipotle|freshii|copper branch|tutti frutti|allô mon coco|couche-tard|jugo juice/i;
 const JUNK_EMAIL = /sentry|wixpress|mystore\.com|example\.|domain\.com|tactikmedia|@2x|\.png$|\.jpg$/i;
+function sigFromRow(r) {
+  let u; try { u = JSON.parse(r.user_reviews || '[]'); } catch { return null; }
+  if (!Array.isArray(u) || !u.length) return null;
+  const now = Date.now(), ds = [];
+  let replied = 0;
+  for (const x of u) { if (!x || typeof x !== 'object') continue; if (String(x.reply_text_original || '').trim()) replied++; const t = Date.parse(x.published_at || ''); if (!isNaN(t)) ds.push(Math.floor((now - t) / 864e5)); }
+  return { n: u.length, replied, oldest: ds.length ? Math.max(...ds) : null, newest: ds.length ? Math.min(...ds) : null, recent90: ds.filter(d => d <= 90).length };
+}
 function leadFromRow(r) {
   const name = r.title || r.name; if (!name) return null;
   const m = (r.address || '').match(/\b(G\d[A-Z])\s?\d[A-Z]\d\b/i);
@@ -605,14 +650,15 @@ function leadFromRow(r) {
   const category = (CAT_RULES.find(([re]) => re.test(gcat)) || CAT_RULES.find(([re]) => re.test(name)) || [null, 'Other'])[1];
   const rating = parseFloat(r.review_rating) || 0, reviews = parseInt(r.review_count) || 0;
   let website = r.website || '';
-  const fbSite = /facebook\.com/i.test(website);
-  if (fbSite || /411habitation|yellowpages|pagesjaunes|fresha\.com|booksy|planity/i.test(website)) website = '';
+  const fbSite = /facebook\.com/i.test(website), franchiseSite = /411habitation|yellowpages|pagesjaunes|fresha\.com|booksy|planity|remax|royallepage|sutton|via-capitale|kw\.com|centris/i.test(website);
+  const siteKind = !website ? 'none' : fbSite ? 'facebook' : franchiseSite ? 'franchise' : 'own';
+  if (fbSite || franchiseSite) website = '';
   const notes = [reviews ? `Google ${rating.toFixed(1)}★ (${reviews} avis)` : 'Aucun avis Google', r.instagram ? 'IG trouvé' : 'IG non trouvé'];
   if (!r.website) notes.push('pas de site web'); else if (fbSite) notes.push('site = page Facebook');
   return {
     name, category, tier: CATS[category].tier, score: CATS[category].base - 6 + Math.min(6, Math.floor(reviews / 100)),
     contact: '', phone: r.phone || '', email: (r.emails || r.email || '').split(/[,;\s]+/).filter(e => e.includes('@') && !JUNK_EMAIL.test(e)).join(', '),
-    instagram: r.instagram || '', website, facebook: r.facebook || (fbSite ? r.website : ''), gmaps: r.link || '', address: r.address || '', hood: FSA[fsa],
+    instagram: r.instagram || '', website, facebook: r.facebook || (fbSite ? r.website : ''), gmaps: r.link || '', sig: sigFromRow(r), siteKind, igKnown: 'instagram' in r, address: r.address || '', hood: FSA[fsa],
     rating, reviews, gcategory: gcat, notes: notes.join(' · '), status: 'To be called', temp: 'Cold', lastContact: null,
   };
 }
@@ -624,7 +670,7 @@ function importCsv(text) {
     const l = leadFromRow(r); if (!l) continue;
     if (l.skip) { skipped.push(l.skip); continue; }
     const k = leadKey(l); if (have.has(k)) { dup++; continue; }
-    have.add(k); leads.push({ id: 'L' + String(++n).padStart(3, '0'), ...l }); added++;
+    have.add(k); leads.push(withPotential({ id: 'L' + String(++n).padStart(3, '0'), ...l })); added++;
   }
   save(); render();
   askConfirm(`${added} leads ajoutés · ${dup} doublons ignorés · ${skipped.length} hors zone ignorés.` + (skipped.length ? `\n\nHors zone : ${skipped.slice(0, 8).join(' ; ')}${skipped.length > 8 ? '…' : ''}` : ''), () => {});
