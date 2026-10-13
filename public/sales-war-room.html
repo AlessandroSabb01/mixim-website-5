@@ -204,7 +204,15 @@ function seed() {
 // ---------- State ----------
 let leads = load();
 const ui = { q:'', cat:'', temp:'', status:'', sort:'virality' };
-function load() { try { const d = JSON.parse(localStorage.getItem(STORE)); if (Array.isArray(d) && d.length) return d; } catch {} return seed(); }
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(STORE)); } catch {}
+  if (!Array.isArray(d) || !d.length) return seed();
+  // Keep the viewer's edits, and append leads published since their last visit.
+  const k = l => String(l.name).toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + String(l.phone || '').replace(/\D/g, '').slice(-7);
+  const have = new Set(d.map(k)); let n = Math.max(0, ...d.map(l => parseInt(String(l.id).slice(1)) || 0));
+  for (const l of seed()) if (!have.has(k(l))) d.push({ ...l, id: 'L' + String(++n).padStart(3, '0') });
+  return d;
+}
 function save() { try { localStorage.setItem(STORE, JSON.stringify(leads)); } catch {} }
 save();
 
@@ -227,7 +235,7 @@ const askConfirm = (msg, onYes) => {
   const close = () => d.classList.replace('flex','hidden');
   $('confirmNo').onclick = close; $('confirmYes').onclick = () => { close(); onYes(); };
 };
-const mapsUrl = l => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${l.name} ${l.address || l.hood || ''} Québec`);
+const mapsUrl = l => /^https:\/\/www\.google\.[a-z.]+\/maps\//.test(l.gmaps || '') ? l.gmaps : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${l.name} ${l.address || l.hood || ''} Québec`);
 const igUrl = l => { const h = String(l.instagram || '').trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/.*$/, ''); return /^[A-Za-z0-9._]{1,30}$/.test(h) ? `https://www.instagram.com/${h}/` : ''; };
 const webUrl = l => { const w = String(l.website || '').trim(); if (!w || w === 'https://') return ''; return /^https?:\/\//.test(w) ? w : 'https://' + w; };
 const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); };
@@ -551,14 +559,16 @@ function parseCsv(text) {
 }
 // Google category text -> macro category (first match wins)
 const CAT_RULES = [
+  [/restaurant|painting studio/i, 'Food'],
+  [/insurance/i, 'Professional'],
   [/immobili|real estate|realtor|mortgage|hypoth/i, 'Real Estate'],
-  [/barb/i, 'Barbers'],
+  [/barbi|barber/i, 'Barbers'],
   [/m[ée]d(ical)? ?(spa|esth)|laser|botox|injection|cosmetic surg|dermat/i, 'Med Aesthetics'],
   [/hair|coiff|beaut|esth|nail|ongle|spa|lash|cils|makeup|maquill|wax|épil|epil/i, 'Aesthetics'],
   [/gym|fitness|crossfit|yoga|pilates|martial|boxing|boxe|sport club|climb|escalade|dance|danse|training/i, 'Fitness'],
   [/tattoo|tatou|jewel|bijou/i, 'Tattoo/Jewelry'],
   [/cloth|vêtement|vetement|boutique|fashion|shoe|chaussure|apparel|lingerie/i, 'Clothing'],
-  [/restaurant|caf[eé]|coffee|bar\b|pub|brew|brasserie|bakery|boulang|pâtiss|patiss|bistro|pizza|sushi|food|traiteur|caterer|ice cream|glacier|sugar shack|cabane/i, 'Food'],
+  [/restaurant|caf[eé]|coffee|bar\b|pub|brew|brasserie|bakery|boulang|pâtiss|patiss|bistro|pizza|sushi|food|traiteur|caterer|ice cream|glacier|sugar shack|cabane|bistrot|diner|sandwich|bagel|cr[eê]perie|poutine|burger|tea|deli\b|dessert|donut|beigne|juice|jus\b/i, 'Food'],
   [/dent|orthodont|clinic|clinique|médic|medic|optom|veterin|vétérin|doctor|pharma/i, 'Health/Clinic'],
   [/physio|chiro|massage|ostéo|osteo|naturo|acupunct|kin[ée]si/i, 'Wellness/Physio'],
   [/hotel|hôtel|inn|auberge|gîte|gite|b&b|bed and breakfast|tour|cruise|croisi|attraction|museum|musée/i, 'Hotels/Tourism'],
@@ -582,6 +592,7 @@ const FSA = {
   G6V:'Lévis', G6W:'Lévis', G6X:'Saint-Romuald', G6Y:'Saint-Jean-Chrysostome', G6Z:'Saint-Rédempteur', G6J:'Lévis (Saint-Étienne)',
   G7A:'Saint-Nicolas', G6K:'Lévis (Pintendre)', G0A:'Île d’Orléans / Côte-de-Beaupré / Rive-Nord', G0S:'Rive-Sud (périphérie)',
 };
+const CHAINS = /mcdonald|tim hortons|subway|a&w|st-hubert|starbucks|burger king|harvey|benny|pizza hut|domino|kfc|mary brown|valentine|pacini|boston pizza|scores|normandin|chez cora|ben & florentine|eggsquis|mike's|sushi shop|thai express|second cup|van houtte|cage aux sports|chocolats favoris|dairy queen|wendy|five guys|chipotle|freshii|copper branch|tutti frutti|allô mon coco|couche-tard|jugo juice/i;
 const JUNK_EMAIL = /sentry|wixpress|mystore\.com|example\.|domain\.com|tactikmedia|@2x|\.png$|\.jpg$/i;
 function leadFromRow(r) {
   const name = r.title || r.name; if (!name) return null;
@@ -589,7 +600,9 @@ function leadFromRow(r) {
   const fsa = m ? m[1].toUpperCase() : '';
   if (!FSA[fsa]) return { skip: `${name} (hors zone: ${r.address || 'adresse inconnue'})` };
   const gcat = r.category || '';
-  const category = (CAT_RULES.find(([re]) => re.test(gcat + ' ' + name)) || [null, 'Other'])[1];
+  if (/^(bank|park|beach|condominium|shopping mall|convenience store|elevator|district office|property management|apartment|economic development)/i.test(gcat)) return { skip: `${name} (hors cible: ${gcat})` };
+  if (CHAINS.test(name)) return { skip: `${name} (chaîne)` };
+  const category = (CAT_RULES.find(([re]) => re.test(gcat)) || CAT_RULES.find(([re]) => re.test(name)) || [null, 'Other'])[1];
   const rating = parseFloat(r.review_rating) || 0, reviews = parseInt(r.review_count) || 0;
   let website = r.website || '';
   const fbSite = /facebook\.com/i.test(website);
@@ -599,7 +612,7 @@ function leadFromRow(r) {
   return {
     name, category, tier: CATS[category].tier, score: CATS[category].base - 6 + Math.min(6, Math.floor(reviews / 100)),
     contact: '', phone: r.phone || '', email: (r.emails || r.email || '').split(/[,;\s]+/).filter(e => e.includes('@') && !JUNK_EMAIL.test(e)).join(', '),
-    instagram: r.instagram || '', website, facebook: r.facebook || '', address: r.address || '', hood: FSA[fsa],
+    instagram: r.instagram || '', website, facebook: r.facebook || (fbSite ? r.website : ''), gmaps: r.link || '', address: r.address || '', hood: FSA[fsa],
     rating, reviews, gcategory: gcat, notes: notes.join(' · '), status: 'To be called', temp: 'Cold', lastContact: null,
   };
 }
