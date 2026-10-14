@@ -65,11 +65,13 @@ tailwind.config = { theme: { extend: {
 <main class="relative z-10 mx-auto max-w-[1600px] px-4 py-4">
   <!-- Toolbar -->
   <section class="mb-4 grid gap-2 rounded-2xl border border-line bg-surface/80 p-3 lg:grid-cols-[1fr_auto]">
-    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-7">
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
       <input id="q" type="search" placeholder="Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-full border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent" />
       <select id="fCat" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fTemp" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fZone" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Tout le territoire</option><option value="5">◉ Rayon 5 km</option><option value="15">◉ Rayon 15 km</option><option value="25">◉ Rayon 25 km</option><option value="out">Hors rayon 25 km</option></select>
+      <select id="fTicket" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Tout budget</option><option value="3">$$$ High ticket (≈ 2 600 $/mois)</option><option value="2">$$ Medium ticket</option><option value="1">$ Cheap ticket</option></select>
+      <select id="fPres" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Toute présence</option><option value="noig">Instagram non trouvé (à vérifier)</option><option value="none">Ni Instagram ni site web</option><option value="active">Déjà actifs (IG + site) · proposer mieux</option></select>
       <select id="fPot" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fStatus" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
     </div>
@@ -272,7 +274,57 @@ function potential(l) {
   const nws = kind === 'none' || kind === 'facebook';
   return { dist, pscore: p, nws, potential: l.tier <= 2 && (need >= 2 || (need && p >= POT_S) || (need && sig && sig.n && sig.replied / sig.n >= 0.5 && p >= POT_A)) ? 'S' : p >= POT_A ? 'A' : p >= POT_B ? 'B' : 'C', why: why.filter(w => w[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map(w => w[1]).join(' · ') || (why[0] || [0, ''])[1] };
 }
-const withPotential = l => Object.assign(l, potential(l));
+// ---------- Spend ticket (can they afford a $2,600/month social media retainer?) ----------
+// $2,600/mo = $31,200/yr. Small businesses typically spend ~5–8% of revenue on marketing (restaurants 3–6%,
+// med spas 5–7%, gyms 2–12%), so a $31k social budget fits businesses doing roughly $0.5–1M+ a year.
+// Base level per industry = ISED Canadian Industry Statistics 2024 average revenue (SMEs): dental offices ~$0.8M,
+// restaurants ~$0.85M, fitness centres ~$0.38M, real estate agents ~$0.22M, hair/esthetic salons ~$0.17M;
+// med spas ~$1.4M (AmSpa 2024). Google review volume vs. the industry's own leads then moves a lead up or down.
+// 3 = High (can pay ~$2,600/mo) · 2 = Medium (~$1,000–2,000/mo) · 1 = Low (< ~$1,000/mo)
+const SPEND_BASE = { 'Med Aesthetics': 3, 'Health/Clinic': 2, 'Hotels/Tourism': 3, 'Automotive': 3, 'Events': 2, 'Food': 2, 'Fitness': 2,
+  'Real Estate': 2, 'Clothing': 2, 'Tattoo/Jewelry': 2, 'Wellness/Physio': 2, 'Education': 2, 'Professional': 2,
+  'Construction': 2, 'Plumbing': 1, 'HVAC': 2, 'Aesthetics': 1, 'Barbers': 1, 'Other': 1 };
+// Review counts at the 50th / 90th percentile of each industry in our own lead list.
+const SPEND_REV = { 'Food': [700, 2700], 'Aesthetics': [37, 180], 'Real Estate': [18, 95], 'Health/Clinic': [47, 330], 'Tattoo/Jewelry': [30, 200],
+  'Fitness': [53, 375], 'Clothing': [73, 340], 'Barbers': [123, 390], 'Med Aesthetics': [100, 400], 'Hotels/Tourism': [230, 1200] };
+const TICKET = { 3: { k: 'High', label: 'High ticket', short: '$$$', cls: 'border-emerald-400/60 bg-emerald-400/15 text-emerald-300' },
+  2: { k: 'Medium', label: 'Medium ticket', short: '$$', cls: 'border-sky-400/50 bg-sky-400/10 text-sky-300' },
+  1: { k: 'Low', label: 'Cheap ticket', short: '$', cls: 'border-line bg-surface-2 text-muted' } };
+let chainCount = new Map();
+// Same brand = same name before " - ", "|", "(" or "," (e.g. "Archibald Microbrasserie" ×3). Generic names are ignored.
+const GENERIC_NAME = /^(clinique ?(dentaire|médicale|medicale)?|restaurant|salon( de coiffure)?|coiffure|barbier|gym|bijouterie|boutique|courtier immobilier|centre dentaire|dentiste)$/;
+const chainKey = n => { const k = String(n).toLowerCase().split(/ [-–|] |[|(,]/)[0].trim(); return GENERIC_NAME.test(k) ? '' : k.normalize('NFD').replace(/[^a-z0-9]/g, ''); };
+function refreshChains() { chainCount = new Map(); for (const l of leads) { const k = chainKey(l.name); if (k.length > 4) chainCount.set(k, (chainCount.get(k) || 0) + 1); } }
+function spendTicket(l) {
+  const g = String(l.gcategory || ''), n = Number(l.reviews) || 0, why = [];
+  let lv = SPEND_BASE[l.category] ?? 1;
+  // Sub-types that differ from their industry's average.
+  if (/fast food|sandwich|pizza|coffee|caf[eé]|bakery|boulang|donut|ice cream|juice|bubble tea/i.test(g)) { lv = 1; why.push('comptoir / petit ticket'); }
+  else if (/fine dining|steak house|steakhouse|seafood restaurant|modern french|wine bar/i.test(g)) { lv = Math.max(lv, 3); why.push('restauration haut de gamme'); }
+  if (l.category === 'Tattoo/Jewelry') lv = /jewel|bijou/i.test(g + ' ' + l.name) ? 3 : 1;
+  if (/agency|agence|team|équipe|groupe/i.test(g + ' ' + l.name) && l.category === 'Real Estate') { lv = Math.max(lv, 3); why.push('agence / équipe de courtiers'); }
+  if (/mortgage|hypoth/i.test(g + ' ' + l.name)) { lv = Math.max(lv, 2); }
+  if (/medical clinic|clinique médicale|walk-in|family practice|hospital|CLSC/i.test(g + ' ' + l.name)) { lv = 1; why.push('médecine publique (RAMQ) : peu de marketing'); }
+  if (/dentist|dental|dentaire|orthodont|cosmetic surg|plastic surg/i.test(g + ' ' + l.name)) { lv = 3; why.push('clinique dentaire (~0,8 M$/an en moyenne)'); }
+  if (/gym|fitness|crossfit/i.test(g) && n >= 300) why.push('gym achalandé');
+  const [p50, p90] = SPEND_REV[l.category] || [50, 300];
+  if (n >= p90) { lv++; why.push(`très achalandé (${n} avis, top 10 % du secteur)`); }
+  else if (n < Math.max(8, p50 / 3)) { lv--; why.push(`petit volume (${n} avis)`); }
+  const ch = chainCount.get(chainKey(l.name)) || 1;
+  if (ch >= 2) { lv++; why.push(`${ch} emplacements`); }
+  lv = Math.max(1, Math.min(3, lv));
+  return { ticket: lv, ticketWhy: why.slice(0, 2).join(' · ') };
+}
+// Who to pitch with what: no IG = start from zero; IG + own site = already invests, pitch an upgrade.
+function presence(l) {
+  if (!l.igKnown) return 'unknown';
+  const site = l.siteKind === 'own' || l.siteKind === 'franchise';
+  if (!l.instagram && !site) return 'none';
+  if (!l.instagram) return 'noig';
+  return site ? 'active' : 'igonly';
+}
+
+const withPotential = l => Object.assign(l, potential(l), spendTicket(l), { presence: presence(l) });
 
 function seed() {
   return LEADS.map((d, i) => withPotential({
@@ -284,7 +336,8 @@ function seed() {
 
 // ---------- State ----------
 let leads = load();
-const ui = { q:'', cat:'', temp:'', status:'', pot:'', zone:'', sort:'virality', view:'table' };
+refreshChains(); leads.forEach(withPotential);
+const ui = { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'', sort:'virality', view:'table' };
 try { if (localStorage.getItem('warroom_view') === 'map') ui.view = 'map'; } catch {}
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(STORE)); } catch {}
@@ -330,9 +383,9 @@ const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove
 function filtered() {
   const q = ui.q.toLowerCase().trim();
   let out = leads.filter(l =>
-    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.zone || (ui.zone === 'out' ? l.dist != null && l.dist > RADIUS_KM : l.dist != null && l.dist <= +ui.zone)) && (!ui.pot || (ui.pot === 'NWS' ? l.nws : ui.pot === 'SA' ? (l.potential === 'S' || l.potential === 'A') : l.potential === ui.pot)) &&
+    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.zone || (ui.zone === 'out' ? l.dist != null && l.dist > RADIUS_KM : l.dist != null && l.dist <= +ui.zone)) && (!ui.ticket || l.ticket === +ui.ticket) && (!ui.pres || (ui.pres === 'noig' ? (l.presence === 'noig' || l.presence === 'none') : l.presence === ui.pres)) && (!ui.pot || (ui.pot === 'NWS' ? l.nws : ui.pot === 'SA' ? (l.potential === 'S' || l.potential === 'A') : l.potential === ui.pot)) &&
     (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email,l.why,l.gcategory].join(' ').toLowerCase().includes(q)));
-  if (ui.sort === 'virality') out.sort((a,b) => (POT_RANK[a.potential] ?? 3) - (POT_RANK[b.potential] ?? 3) || (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
+  if (ui.sort === 'virality') out.sort((a,b) => (POT_RANK[a.potential] ?? 3) - (POT_RANK[b.potential] ?? 3) || (b.ticket || 0) - (a.ticket || 0) || (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
   else out.sort((a,b) => a.name.localeCompare(b.name, 'fr'));
   return out;
 }
@@ -352,7 +405,7 @@ function renderStats(view) {
   const rate = contacted ? (conv / contacted * 100).toFixed(1) : '0.0';
   $('stats').innerHTML =
     stat('Total leads', total, `${leads.filter(l => l.dist != null && l.dist <= RADIUS_KM).length} dans le rayon 25 km · ${view.length} affichés`, '', 'text-white') +
-    stat('Hot leads', hot, `${(hot/total*100||0).toFixed(0)}% du pipeline`, '', 'text-emerald-400') +
+    stat('High ticket', leads.filter(l => l.ticket === 3).length, `${leads.filter(l => l.ticket === 3 && (l.presence === 'noig' || l.presence === 'none')).length} IG non trouvé · ${leads.filter(l => l.ticket === 3 && l.presence === 'active').length} déjà actifs`, '', 'text-emerald-400') +
     stat("Appels aujourd'hui", today, `${contacted} contactés au total`, '', 'text-white') +
     stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-accent', 'text-accent-soft') +
     stat('Tier S · A', `${leads.filter(l => l.potential === 'S').length} · ${leads.filter(l => l.potential === 'A').length}`, `${leads.filter(l => l.nws).length} NWS (besoin d’un site)`, '', 'text-amber-300');
@@ -374,8 +427,8 @@ function render() {
     <tr class="row-enter hover:bg-surface/70">
       <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
       <td class="px-3 py-2 max-w-[280px]"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div>${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}</td>
-      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span>${l.nws ? '<span title="Pas de vrai site web : opportunité site web" class="rounded-full border border-fuchsia-400/60 bg-fuchsia-400/15 px-2 py-0.5 text-[10px] font-bold text-fuchsia-300">NWS</span>' : ''}</div>
-        <div class="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier} · viral ${l.score}</div></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span>${l.ticket ? `<span title="${esc(TICKET[l.ticket].label + (l.ticketWhy ? ' · ' + l.ticketWhy : ''))}" class="rounded-full border px-2 py-0.5 text-[10px] font-bold ${TICKET[l.ticket].cls}">${TICKET[l.ticket].short}</span>` : ''}${l.nws ? '<span title="Pas de vrai site web : opportunité site web" class="rounded-full border border-fuchsia-400/60 bg-fuchsia-400/15 px-2 py-0.5 text-[10px] font-bold text-fuchsia-300">NWS</span>' : ''}</div>
+        <div class="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier} · viral ${l.score}</div>${l.ticket ? `<div class="mt-0.5 text-[10px] text-neutral-400">${TICKET[l.ticket].label}${l.presence === 'active' && l.ticket >= 2 ? ' · déjà actif → proposer mieux' : ''}</div>` : ''}</td>
       <td class="px-3 py-2">${l.contact ? `<div class="text-neutral-200">${esc(l.contact)}</div>` : ''}
         <a href="tel:${esc(l.phone)}" class="mono text-xs text-neutral-300 hover:text-white">${esc(l.phone)}</a><br>
         <a href="mailto:${esc(l.email)}" class="text-xs text-muted hover:text-white">${esc(l.email)}</a></td>
@@ -596,6 +649,7 @@ function popupHtml(l) {
       <div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div></div>
       <div class="flex shrink-0 items-center gap-1"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono text-xs text-white">${l.pscore ?? ''}</span></div></div>
     ${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}
+    ${l.ticket ? `<div class="mt-1"><span class="rounded-full border px-2 py-0.5 text-[10px] font-bold ${TICKET[l.ticket].cls}">${TICKET[l.ticket].short} ${TICKET[l.ticket].label}</span>${l.ticketWhy ? `<span class="ml-1 text-[11px] text-muted">${esc(l.ticketWhy)}</span>` : ''}${l.presence === 'active' && l.ticket >= 2 ? '<div class="mt-1 text-[11px] text-amber-300">Déjà actif (IG + site) : proposer une offre supérieure</div>' : ''}</div>` : ''}
     ${l.nws ? '<span class="mt-1 inline-block rounded-full border border-fuchsia-400/60 bg-fuchsia-400/15 px-2 py-0.5 text-[10px] font-bold text-fuchsia-300">NWS · besoin d’un site web</span>' : ''}
     <div class="mt-2 text-xs text-neutral-300">${esc(l.address || '')}</div>
     ${l.dist != null ? `<div class="text-xs" style="color:${(ringOf(l.dist) || { color: '#a3a3a3' }).color}">${l.dist} km du bureau · ${ringOf(l.dist) ? 'dans le rayon ' + ringOf(l.dist).km + ' km' : 'hors rayon 25 km'}${l.geoExact === false ? ' · position approx.' : ''}</div>` : ''}
@@ -648,12 +702,14 @@ fill($('fStatus'), 'Tous statuts', STATUSES);
 $('fPot').innerHTML = '<option value="">Tout potentiel</option><option value="S">★ S — besoin évident</option><option value="SA">S + A</option><option value="A">Potentiel A</option><option value="B">Potentiel B</option><option value="C">Potentiel C</option><option value="NWS">NWS — besoin d’un site web</option>';
 $('fPot').onchange = e => { ui.pot = e.target.value; render(); };
 $('fZone').onchange = e => { ui.zone = e.target.value; render(); };
+$('fTicket').onchange = e => { ui.ticket = e.target.value; render(); };
+$('fPres').onchange = e => { ui.pres = e.target.value; render(); };
 let qt; $('q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { ui.q = e.target.value; render(); }, 80); });
 $('fCat').onchange = e => { ui.cat = e.target.value; render(); };
 $('fTemp').onchange = e => { ui.temp = e.target.value; render(); };
 $('fStatus').onchange = e => { ui.status = e.target.value; render(); };
 $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
-$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'', pot:'', zone:'' }); ['q','fCat','fTemp','fStatus','fPot','fZone'].forEach(i => $(i).value = ''); render(); };
+$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'' }); ['q','fCat','fTemp','fStatus','fPot','fZone','fTicket','fPres'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
 $('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
 
@@ -837,6 +893,7 @@ const CAT_RULES = [
   [/gym|fitness|crossfit|yoga|pilates|martial|boxing|boxe|sport club|climb|escalade|dance|danse|training/i, 'Fitness'],
   [/tattoo|tatou|jewel|bijou|piercing/i, 'Tattoo/Jewelry'],
   [/personal trainer|sports complex/i, 'Fitness'],
+  [/supermarket|grocery|natural goods/i, 'Other'],
   [/sportswear|thrift|gift shop|running store|bicycle|sporting goods/i, 'Clothing'],
   [/cloth|vêtement|vetement|boutique|fashion|shoe|chaussure|apparel|lingerie/i, 'Clothing'],
   [/restaurant|caf[eé]|coffee|bar\b|pub|brew|brasserie|bakery|boulang|pâtiss|patiss|bistro|pizza|sushi|food|traiteur|caterer|ice cream|glacier|sugar shack|cabane|bistrot|diner|sandwich|bagel|cr[eê]perie|poutine|burger|tea|deli\b|dessert|donut|beigne|juice|jus\b/i, 'Food'],
@@ -913,6 +970,7 @@ function importCsv(text) {
     const k = leadKey(l); if (have.has(k)) { dup++; continue; }
     have.add(k); leads.push(withPotential({ id: 'L' + String(++n).padStart(3, '0'), ...l })); added++;
   }
+  refreshChains(); leads.forEach(withPotential);
   save(); render();
   askConfirm(`${added} leads ajoutés · ${dup} doublons ignorés · ${skipped.length} hors zone ignorés.` + (skipped.length ? `\n\nHors zone : ${skipped.slice(0, 8).join(' ; ')}${skipped.length > 8 ? '…' : ''}` : ''), () => {});
 }
@@ -924,7 +982,7 @@ $('fileImport').onchange = e => {
 };
 
 $('btnCsv').onclick = () => {
-  const cols = ['id','name','category','gcategory','tier','score','contact','phone','email','instagram','website','facebook','rating','reviews','hood','address','status','temp','notes','lastContact'];
+  const cols = ['id','name','category','gcategory','tier','score','pscore','potential','ticket','ticketWhy','presence','dist','contact','phone','email','instagram','website','facebook','rating','reviews','hood','address','status','temp','notes','lastContact'];
   const cell = v => { const t = String(v ?? ''); return /[",\n;]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t; };
   const rows = filtered(), csv = [cols.join(','), ...rows.map(l => cols.map(c => cell(l[c])).join(','))].join('\r\n');
   $('exportText').value = csv;
