@@ -67,3 +67,30 @@ def reverse_swell(length=1.0, level=0.3):
     return x[::-1] * level
 
 
+
+
+def keys(m_notes, length, level=0.12, bright=0.35):
+    """Glassy electric-piano chord: sine fundamentals + a soft 2nd/3rd partial, fast attack, gentle decay."""
+    t = np.arange(n(length)) / SR
+    out = np.zeros(n(length))
+    for m in m_notes:
+        f = midi(m)
+        out += sine(f, length) + bright * sine(f * 2, length) * np.exp(-t / 0.08) + 0.12 * sine(f * 3, length) * np.exp(-t / 0.03)
+    out /= len(m_notes)
+    return out * np.exp(-t / max(0.12, length * 0.6)) * adsr(length, 0.003, 0.04) * level
+
+
+def snap(level=0.4):
+    """Tight finger snap: one short band-limited transient, no tail."""
+    L = 0.12
+    t = np.arange(n(L)) / SR
+    x = filt(noise(L), "bandpass", [1600, 6500]) * np.exp(-t / 0.012)
+    x += sine(1900, L) * np.exp(-t / 0.01) * 0.2
+    return x * level
+
+
+def bell_lead(m, length, level=0.07):
+    t = np.arange(n(length)) / SR
+    f = midi(m)
+    x = sine(f, length) + 0.3 * sine(f * 2, length) * np.exp(-t / 0.15) + 0.08 * sine(f * 3.01, length) * np.exp(-t / 0.05)
+    return x * np.exp(-t / 0.35) * adsr(length, 0.004, 0.06) * level

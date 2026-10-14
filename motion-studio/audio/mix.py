@@ -150,19 +150,78 @@ def glass():
     return filt(s, "highpass", 900) * 0.7, a
 
 
+
+
+# ---- Apple-like palette: sine-based, short, soft transients, no noise cracks ----
+def tap():
+    """Soft UI touch: a muted wooden tick, rounded off."""
+    L = 0.07
+    x = sine(1650 * (1 + 0.15 * np.exp(-t_(L) / 0.004)), L) * np.exp(-t_(L) / 0.009) * 0.45
+    x += filt(noise(L), "bandpass", [2000, 6000]) * np.exp(-t_(L) / 0.0012) * 0.18
+    return filt(x, "lowpass", 7000) * adsr(L, 0.0004, 0.01), 0.0
+
+
+def glint(step=0):
+    """Tiny glassy tone, pitched up a minor-pentatonic ladder in F."""
+    L = 0.32
+    f = midi(84 + [0, 3, 5, 7, 10, 12, 15][step % 7])
+    x = sine(f, L) * np.exp(-t_(L) / 0.07) * 0.28 + sine(f * 2.01, L) * np.exp(-t_(L) / 0.03) * 0.08
+    return x * adsr(L, 0.002, 0.05), 0.0
+
+
+def bloom():
+    """Light swelling into a hit: an Fm(add9) sine chord that breathes in, peaks on the beat, glows out."""
+    pre, L = 0.18, 1.9
+    tt = t_(L)
+    env = np.where(tt < pre, (tt / pre) ** 2, np.exp(-(tt - pre) / 0.55))
+    x = sum(sine(midi(m) * (1 + 0.0015 * k), L, phase=k) * g for k, (m, g) in enumerate([(65, 0.16), (72, 0.12), (79, 0.08), (84, 0.05)]))
+    air = filt(noise(L), "bandpass", [3000, 9000]) * 0.03
+    s = np.stack([x * 1.0 + air, x * 0.95 + air[::-1]], axis=1) * env[:, None]
+    return s, pre
+
+
+def air(dir=1):
+    """A light line passing: filtered breath that sweeps up and travels across the stereo field."""
+    L = 0.55
+    p = np.linspace(0, 1, n(L))
+    env = np.sin(np.pi * p) ** 2
+    x = sweep(noise(L), "bandpass", 500, 3800, order=2) * env * 0.5
+    x += sine(midi(91) * (0.97 + 0.06 * p), L) * env * 0.035
+    g = p if dir > 0 else 1 - p
+    return np.stack([x * np.cos(g * np.pi / 2), x * np.sin(g * np.pi / 2)], axis=1), L * 0.5
+
+
+def thump():
+    """Soft sub hit: felt, not heard. No click, no crack."""
+    L = 0.9
+    f = 44 + 38 * np.exp(-t_(L) / 0.05)
+    x = sine(f, L) * np.exp(-t_(L) / 0.32) + sine(f * 2, L) * np.exp(-t_(L) / 0.08) * 0.25
+    return np.tanh(1.2 * x) * 0.75 * adsr(L, 0.003, 0.1), 0.0
+
+
+def shimmer():
+    """Hairline ring: a high glassy partial cluster with slow beating."""
+    L = 1.4
+    x = sum(sine(midi(m) * d, L) for m, d in ((96, 1.0), (96, 1.004), (103, 1.0))) * np.exp(-t_(L) / 0.4) * 0.06
+    return x * adsr(L, 0.01, 0.2), 0.0
+
+
 GEN = {"key": key, "select": select, "send": send, "ding": ding, "glass": glass,"click": click, "press": press, "release": release, "tick": tick, "wheel": wheel, "blip": blip, "pop": pop,
        "whoosh": whoosh, "whoosh-s": whoosh_s, "whoosh-long": lambda: whoosh(1.1), "swipe": swipe, "open": open_,
-       "impact": impact, "clap": clap}
+       "impact": impact, "clap": clap,
+       "tap": tap, "glint": glint, "bloom": bloom, "air": air, "thump": thump, "shimmer": shimmer}
 
 sfx = np.zeros_like(music)
 log = []
 for c in cues:
     g = GEN[c["type"]]
     kw = {}
-    if c["type"] == "blip":
+    if c["type"] in ("blip", "glint"):
         kw["step"] = c.get("step", 0)
     if c["type"] == "key":
         kw["var"] = c.get("var", 0)
+    if c["type"] == "air":
+        kw["dir"] = c.get("dir", 1)
     if c["type"] == "whoosh" and "len" in c:
         kw["len"] = c["len"]
     sig, anchor = g(**kw)
@@ -172,7 +231,7 @@ for c in cues:
     place(sfx, sig * c.get("gain", 1), at - anchor)
     log.append((c["beat"], c["type"], round(at, 4)))
 
-sfx = reverb(sfx, 1.2, 0.3, 0.14, hp=400)
+sfx = reverb(sfx, 1.6, 0.45, 0.2, hp=500)  # one shared, airy room: everything sits in the same space
 mix = music * 0.85 + sfx * 0.8
 
 # ---- master: loudness to -14 LUFS, true peak <= -1 dBTP ----

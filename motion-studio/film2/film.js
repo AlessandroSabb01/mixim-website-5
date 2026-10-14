@@ -660,26 +660,72 @@
     S.grain = g;
   }
 
+
+  /* ---------- light FX: minimal glows / sweeps / rings that the sound design answers ---------- */
+  // bloom: soft accent light that swells into a hit; sweep: a thin light line passing through the frame;
+  // ring: one hairline circle expanding. Never on UI chrome: light lives in the space between scenes.
+  const FX = {
+    bloom: [[3, 0.5, 0.5, 0.7], [8, 0.5, 0.5, 0.8], [30, 0.5, 0.5, 1], [43, 0.5, 0.48, 0.85], [53.6, 0.5, 0.6, 0.6], [57.5, 0.5, 0.5, 0.75]],
+    sweep: [[11.85, -1], [17.85, 1], [20.85, -1], [23.85, 1], [26.85, -1], [32.85, 1], [42.6, -1], [54.3, 1]],
+    ring: [[30, 0.5, 0.5], [54, 0.5, 0.5]],
+  };
+  function buildFX() {
+    const root = el(stage, { width: W + "px", height: H + "px", zIndex: 15, pointerEvents: "none", mixBlendMode: "screen", overflow: "hidden" });
+    const D = W * 1.5, L = Math.hypot(W, H) * 1.3;
+    S.blooms = FX.bloom.map(([, x, y]) => el(root, { left: x * W - D / 2 + "px", top: y * H - D / 2 + "px", width: D + "px", height: D + "px", borderRadius: "50%",
+      background: "radial-gradient(circle, rgba(150,175,255,.55) 0%, rgba(44,91,255,.28) 28%, rgba(44,91,255,.08) 48%, rgba(44,91,255,0) 66%)" }));
+    S.sweeps = FX.sweep.map(() => {
+      const g = el(root, { left: W / 2 - L / 2 + "px", top: H / 2 - 110 + "px", width: L + "px", height: "220px",
+        background: "linear-gradient(180deg, rgba(44,91,255,0), rgba(44,91,255,.16) 50%, rgba(44,91,255,0))" });
+      el(g, { left: 0, top: "108px", width: L + "px", height: "4px", borderRadius: "2px",
+        background: "linear-gradient(90deg, rgba(255,255,255,0) 8%, rgba(190,205,255,.9) 42%, #fff 50%, rgba(190,205,255,.9) 58%, rgba(255,255,255,0) 92%)" });
+      return g;
+    });
+    S.rings = FX.ring.map(([, x, y]) => el(root, { left: x * W - 100 + "px", top: y * H - 100 + "px", width: "200px", height: "200px", borderRadius: "50%",
+      border: "2px solid rgba(200,212,255,.7)", boxSizing: "border-box" }));
+  }
+  function fx(t) {
+    FX.bloom.forEach(([b, , , pk], i) => {
+      const d = t - bt(b), e = S.blooms[i];
+      if (d < -0.18 || d > 1.8) return vis(e, false);
+      const op = d < 0 ? pk * 0.35 * (1 + d / 0.18) : pk * Math.exp(-d / 0.5);
+      T(e, { s: 0.55 + 0.65 * ez.outExpo(clamp((d + 0.18) / 1.4)), op });
+    });
+    FX.sweep.forEach(([b, dir], i) => {
+      const d = (t - bt(b)) / 0.55, e = S.sweeps[i];          // crosses frame centre on the beat
+      if (d < -0.5 || d > 0.5) return vis(e, false);
+      const k = ez.inOutCubic(d + 0.5) - 0.5, r = -22 * dir, n = H * 1.25 * k;
+      const a = (r * Math.PI) / 180;
+      T(e, { x: -Math.sin(a) * n * dir, y: Math.cos(a) * n * dir, r, op: Math.sin(Math.PI * (d + 0.5)) });
+    });
+    FX.ring.forEach(([b], i) => {
+      const d = t - bt(b), e = S.rings[i];
+      if (d < 0 || d > 1.1) return vis(e, false);
+      T(e, { s: 0.4 + 8 * ez.outExpo(d / 1.1), op: 0.8 * (1 - d / 1.1) });
+    });
+  }
+
   /* ---------- sound design cues ---------- */
   function buildCues() {
-    cue(3, "impact", 0.6);
-    cue(5.6, "glass", 0.4); cue(6, "tick", 0.35); cue(7, "tick", 0.35);
-    cue(8, "impact", 0.75); for (let i = 1; i < 8; i++) cue(8 + i * 0.5, "swipe", 0.32, i % 2 ? 0.4 : -0.4);
-    cue(11.7, "whoosh-s", 0.5); cue(12, "pop", 0.4, -0.4); cue(12.5, "swipe", 0.3, -0.5);
-    for (let i = 0; i < 3; i++) cue(13 + i * 0.5, "tick", 0.45, -0.2 + i * 0.2);
-    cue(14.5, "pop", 0.6); for (let i = 0; i < 3; i++) cue(15 + i * 0.5, "pop", 0.5, [-0.5, 0.5, -0.4][i]);
-    cue(18, "whoosh", 0.7, 0, { len: 0.7 }); cue(18.5, "pop", 0.45);
-    for (const b of [21, 24, 27]) cue(b, "whoosh-s", 0.55, 0.4);
-    cue(30, "impact", 0.9); cue(30, "whoosh", 0.8, 0, { len: 0.6 }); cue(31, "glass", 0.5); cue(32, "glass", 0.5); cue(32.5, "glass", 0.5); cue(33, "whoosh-s", 0.6);
-    for (let i = 0; i < 3; i++) { const b0 = 33 + i * 3; cue(b0, "whoosh-s", 0.5, 0); cue(b0 + 0.25, "pop", 0.55); for (let j = 0; j < 6; j++) cue(b0 + (j < 3 ? 0.5 : 1.25) + (j % 3) * 0.125, "blip", 0.32, -0.5 + j * 0.2, { step: j + (j < 3 ? 0 : 1) }); }
-    cue(42, "whoosh-s", 0.5); cue(43, "impact", 0.85);
-    cue(44, "whoosh", 0.6, 0, { len: 0.6 });
-    for (const b of [45, 47, 49.5, 50.5]) cue(b, "click", 0.7, 0.2);
-    cue(50.25, "select", 0.8);
-    const keyCues = (s, [b0, per]) => [...s].forEach((ch, i) => { if (ch !== " ") cue(b0 + i * per, "key", 0.5, 0.15, { var: i }); });
+    // Apple-like palette: thump (soft sub hit), bloom (tonal light swell), air (light passing), glint (tiny tonal tap),
+    // tap (UI touch), shimmer (glassy ring), key/select/send/ding for the form.
+    for (const [b] of FX.bloom) cue(b, "bloom", 0.55);
+    for (const [b, dir] of FX.sweep) cue(b, "air", 0.5, 0, { dir });
+    for (const [b] of FX.ring) cue(b, "shimmer", 0.5);
+    for (const b of [3, 8, 30, 43]) cue(b, "thump", b === 30 ? 1 : 0.8);
+    cue(6, "glint", 0.35, -0.2, { step: 0 }); cue(7, "glint", 0.35, 0.2, { step: 2 });
+    for (let i = 1; i < 8; i++) cue(8 + i * 0.5, "tap", 0.3, i % 2 ? 0.35 : -0.35);
+    for (let i = 0; i < 3; i++) cue(13 + i * 0.5, "glint", 0.4, -0.3 + i * 0.3, { step: i });
+    cue(14.5, "tap", 0.5); for (let i = 0; i < 3; i++) cue(15 + i * 0.5, "glint", 0.4, [-0.5, 0.5, -0.4][i], { step: 3 + i });
+    cue(18.5, "tap", 0.4);
+    for (const b of [31, 32, 32.5]) cue(b, "glint", 0.45, 0, { step: b === 31 ? 0 : b === 32 ? 2 : 4 });
+    for (let i = 0; i < 3; i++) { const b0 = 33 + i * 3; cue(b0 + 0.25, "tap", 0.5); for (let j = 0; j < 6; j++) cue(b0 + (j < 3 ? 0.5 : 1.25) + (j % 3) * 0.125, "glint", 0.26, -0.5 + j * 0.2, { step: j + (j < 3 ? 0 : 1) }); }
+    for (const b of [45, 47, 49.5, 50.5]) cue(b, "tap", 0.65, 0.2);
+    cue(50.25, "select", 0.7);
+    const keyCues = (s, [b0, per]) => [...s].forEach((ch, i) => { if (ch !== " ") cue(b0 + i * per, "key", 0.45, 0.15, { var: i }); });
     keyCues(NAME, TYPE.name); keyCues(MAIL, TYPE.mail); keyCues(MSG, TYPE.msg);
-    cue(53, "click", 0.9, 0.2); cue(53.6, "send", 0.7); cue(53.6, "ding", 0.9);
-    cue(56.8, "whoosh-s", 0.45); cue(57, "pop", 0.4); cue(57.5, "clap", 1.0); cue(57.5, "impact", 0.6); cue(59, "click", 1.0, 0.1);
+    cue(53, "tap", 0.85, 0.2); cue(53.6, "send", 0.55); cue(53.6, "ding", 0.85);
+    cue(57, "glint", 0.35, 0, { step: 4 }); cue(57.5, "clap", 0.6); cue(57.5, "thump", 0.75); cue(59, "tap", 1.0, 0.1);
   }
 
   /* ---------- frame ---------- */
@@ -687,7 +733,7 @@
     pending.length = 0;
     hook(t); burst(t); hero(t); process(t); boom(t); results(t);
     const fs = contact(t);
-    cursor(t, fs); lockup(t, fs); camera(t, fs);
+    cursor(t, fs); lockup(t, fs); camera(t, fs); fx(t);
     const f = Math.floor(t * 30 + 1e-6);
     T(S.grain, { x: -Math.floor(hash(f, 3) * 256), y: -Math.floor(hash(f, 4) * 256), op: 0.14 });
     await Promise.all(pending);
@@ -704,7 +750,7 @@
     for (const w of ["400", "500", "600", "700", "800"]) await document.fonts.load(`${w} 100px Geist`);
     await document.fonts.load('500 100px "Geist Mono"');
     await document.fonts.ready;
-    buildHook(); buildBurst(); buildHero(); buildProcess(); buildBoom(); buildResults(); buildForm(); buildCursor(); buildLogo(svg); buildGrain(); buildCues();
+    buildHook(); buildBurst(); buildHero(); buildProcess(); buildBoom(); buildResults(); buildForm(); buildCursor(); buildLogo(svg); buildGrain(); buildFX(); buildCues();
     window.CUES = CUES.map((c) => ({ ...c, t: bt(c.beat) }));
     window.seek = seek;
     await seek(0);
