@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "higgsfield": {
+      "source": "OSideMedia/higgsfield-ai-prompt-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "72737e0bb4a4fbb24087fa6b673979f3d571a65c4a6e68f881aa9a8b324506a7"
+    }
+  }
+}
