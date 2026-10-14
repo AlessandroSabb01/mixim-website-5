@@ -94,3 +94,47 @@ def bell_lead(m, length, level=0.07):
     f = midi(m)
     x = sine(f, length) + 0.3 * sine(f * 2, length) * np.exp(-t / 0.15) + 0.08 * sine(f * 3.01, length) * np.exp(-t / 0.05)
     return x * np.exp(-t / 0.35) * adsr(length, 0.004, 0.06) * level
+
+
+# ---------- electro-funk kit (music3) ----------
+def kick_punch(level=1.0, length=0.4):
+    """Tight club kick: fast pitch dive, short body, a hard click on top, gently saturated."""
+    t = np.arange(n(length)) / SR
+    f = 48 + 170 * np.exp(-t / 0.025)
+    body = sine(f, length) * np.exp(-t / 0.13)
+    click = filt(noise(length), "bandpass", [2500, 9000]) * np.exp(-t / 0.0025) * 0.6
+    return np.tanh(2.2 * (body + click)) * level
+
+
+def slap_bass(m, length, level=0.34, bright=2600):
+    """Funky synth bass: saw + square through a plucky resonant lowpass, octave-up 'pop' on top."""
+    t = np.arange(n(length)) / SR
+    f = midi(m)
+    x = saw(f, length) * 0.6 + np.sign(sine(f, length)) * 0.35 + sine(f / 2, length) * 0.5
+    x = sweep(x, "lowpass", lambda p: 180 + bright * np.exp(-p * length / 0.045), None)
+    x += sine(f * 2, length) * np.exp(-t / 0.03) * 0.25
+    return np.tanh(1.6 * x) * adsr(length, 0.002, 0.02) * level
+
+
+def chord_stab(m_notes, length, level=0.16, open_=3800):
+    """Filtered house stab: detuned saws with a fast filter pluck."""
+    out = np.zeros(n(length))
+    for m in m_notes:
+        for d in (-0.08, 0.0, 0.08):
+            out += saw(midi(m) * 2 ** (d / 12), length, phase=abs(d) * 3)
+    out /= 3 * len(m_notes)
+    out = sweep(out, "lowpass", lambda p: 350 + open_ * np.exp(-p * length / 0.07), None)
+    return out * adsr(length, 0.002, 0.03) * level
+
+
+def vox(m, length, vowel="a", level=0.1):
+    """Vocal-chop stab: a saw through two formant band-passes."""
+    F = {"a": (800, 1150), "o": (450, 800), "e": (400, 2000)}[vowel]
+    x = saw(midi(m), length)
+    y = filt(x, "bandpass", [F[0] * 0.85, F[0] * 1.15]) + 0.7 * filt(x, "bandpass", [F[1] * 0.88, F[1] * 1.12])
+    return y * adsr(length, 0.005, 0.05) * level * 3
+
+
+def crash(level=0.25, length=1.6):
+    t = np.arange(n(length)) / SR
+    return filt(noise(length), "highpass", 5000) * np.exp(-t / 0.5) * level

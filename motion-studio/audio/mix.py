@@ -206,10 +206,42 @@ def shimmer():
     return x * adsr(L, 0.01, 0.2), 0.0
 
 
+
+# ---- motion-design accents (film3): punchy but clean ----
+def slam():
+    """Word slam: a short tonal punch + a tight air transient. Lands exactly on the anchor."""
+    L = 0.35
+    f = 90 + 260 * np.exp(-t_(L) / 0.012)
+    x = sine(f, L) * np.exp(-t_(L) / 0.07) * 0.6
+    x += filt(noise(L), "bandpass", [1500, 8000]) * np.exp(-t_(L) / 0.006) * 0.35
+    return np.tanh(1.4 * x), 0.0
+
+
+def zip_(dir=1):
+    """Shape flying: a fast pitched sweep (up or down) with a breathy edge, peaks on the anchor."""
+    L = 0.22
+    p = np.linspace(0, 1, n(L))
+    f = (700 + 2400 * p) if dir > 0 else (3100 - 2400 * p)
+    x = sine(f, L) * 0.12 + sweep(noise(L), "bandpass", 1200, 7000) * 0.25
+    env = (p / 0.8) ** 2 * (p < 0.8) + np.exp(-(p - 0.8) / 0.05) * (p >= 0.8)
+    return x * env, L * 0.8
+
+
+def sparkle():
+    """A scatter of glints after a big hit: 7 tiny tones up the F minor pentatonic, panned wide."""
+    L = 0.9
+    out = np.zeros((n(L), 2))
+    for j in range(7):
+        g, _ = glint(j)
+        place(out, pan(g * 0.7, -0.8 + j * 0.27), 0.045 * j)
+    return out, 0.0
+
+
 GEN = {"key": key, "select": select, "send": send, "ding": ding, "glass": glass,"click": click, "press": press, "release": release, "tick": tick, "wheel": wheel, "blip": blip, "pop": pop,
        "whoosh": whoosh, "whoosh-s": whoosh_s, "whoosh-long": lambda: whoosh(1.1), "swipe": swipe, "open": open_,
        "impact": impact, "clap": clap,
-       "tap": tap, "glint": glint, "bloom": bloom, "air": air, "thump": thump, "shimmer": shimmer}
+       "tap": tap, "glint": glint, "bloom": bloom, "air": air, "thump": thump, "shimmer": shimmer,
+       "slam": slam, "zip": zip_, "sparkle": sparkle}
 
 sfx = np.zeros_like(music)
 log = []
@@ -220,7 +252,7 @@ for c in cues:
         kw["step"] = c.get("step", 0)
     if c["type"] == "key":
         kw["var"] = c.get("var", 0)
-    if c["type"] == "air":
+    if c["type"] in ("air", "zip"):
         kw["dir"] = c.get("dir", 1)
     if c["type"] == "whoosh" and "len" in c:
         kw["len"] = c["len"]

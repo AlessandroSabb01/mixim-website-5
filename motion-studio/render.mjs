@@ -16,11 +16,14 @@ const fmtArg = opt("format", "9x16");
 const formats = fmtArg === "all" ? Object.keys(FORMATS) : String(fmtArg).split(",");
 const FPS = +opt("fps", 30), SUB = +opt("sub", 4), SHUTTER = 0.5;
 const CONTACT = !!opt("contact", false);
-const FILM = String(opt("film", "film"));          // film | film2
-const V2 = FILM === "film2";
-const SCORE = V2 ? "audio/music2.py" : "audio/music.py", LEN = V2 ? 30 : 20;
-const TAG = V2 ? "-v2" : "";
-const MUSIC = `build/music${V2 ? 2 : ""}.wav`, BEATS = V2 ? "beats2.json" : "beats.json", MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
+const FILM = String(opt("film", "film"));          // film | film2 | film3
+const CFG = {
+  film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
+  film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
+  film3: { score: "audio/music3.py", len: 8.5, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
+}[FILM];
+const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
+const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
 process.env.FILM_LEN = String(LEN);
 const BUILD = path.join(ROOT, "build"), OUT = path.join(ROOT, "out");
 fs.mkdirSync(BUILD, { recursive: true }); fs.mkdirSync(OUT, { recursive: true });
@@ -82,7 +85,7 @@ for (const f of formats) {
     // one frame per beat, sampled 0.4 beat after the hit (once the move has landed)
     const dir = path.join(BUILD, `contact${TAG}-${f}`); fs.mkdirSync(dir, { recursive: true });
     const per = beats[1] - beats[0];
-    const scenes = V2 ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Burst" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Logo") : (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
+    const scenes = FILM === "film3" ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Shapes" : "Mosaic") : V2 ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Burst" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Logo") : (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
     const cells = [];
     const strip = opt("strip", null);   // --strip from,to,step : dense filmstrip to judge motion
     const times = strip ? (() => { const [a, z, st] = String(strip).split(",").map(Number); const r = []; for (let x = a; x < z - 1e-9; x += st) r.push(x); return r; })() : beats.map((b) => b + 0.4 * per);
