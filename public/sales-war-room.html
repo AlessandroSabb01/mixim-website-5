@@ -41,6 +41,7 @@ tailwind.config = { theme: { extend: {
   .area-label:before { display:none; }
   .hide-labels .area-label { display:none; }
   .hq-icon { display:grid; place-items:center; width:30px; height:30px; border-radius:9999px; background:#2c5bff; color:#fff; font-weight:700; font-size:11px; box-shadow:0 0 0 4px rgba(44,91,255,.25), 0 0 24px #2c5bff; }
+  tr.li-hl { background:rgba(14,165,233,.07); box-shadow:inset 3px 0 0 #38bdf8; }
 </style>
 </head>
 <body class="grain min-h-screen font-sans text-white antialiased">
@@ -65,13 +66,14 @@ tailwind.config = { theme: { extend: {
 <main class="relative z-10 mx-auto max-w-[1600px] px-4 py-4">
   <!-- Toolbar -->
   <section class="mb-4 grid gap-2 rounded-2xl border border-line bg-surface/80 p-3 lg:grid-cols-[1fr_auto]">
-    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
+    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 2xl:grid-cols-10">
       <input id="q" type="search" placeholder="Rechercher nom, contact, quartier, note…" class="sm:col-span-2 rounded-full border border-line bg-ink-2 px-4 py-2 text-sm outline-none focus:border-accent" />
       <select id="fCat" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fTemp" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fZone" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Tout le territoire</option><option value="5">◉ Rayon 5 km</option><option value="15">◉ Rayon 15 km</option><option value="25">◉ Rayon 25 km</option><option value="out">Hors rayon 25 km</option></select>
       <select id="fTicket" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Tout budget</option><option value="3">$$$ High ticket (≈ 2 600 $/mois)</option><option value="2">$$ Medium ticket</option><option value="1">$ Cheap ticket</option></select>
-      <select id="fPres" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Toute présence</option><option value="noig">Instagram non trouvé (à vérifier)</option><option value="none">Ni Instagram ni site web</option><option value="active">Déjà actifs (IG + site) · proposer mieux</option><option value="li">LinkedIn du décideur trouvé</option></select>
+      <select id="fPres" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Toute présence</option><option value="noig">Instagram non trouvé (à vérifier)</option><option value="none">Ni Instagram ni site web</option><option value="active">Déjà actifs (IG + site) · proposer mieux</option></select>
+      <select id="fLi" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"><option value="">Tout LinkedIn</option><option value="any">in · Avec LinkedIn (tous)</option><option value="person">in · Décideur trouvé</option><option value="co">in · Page entreprise seulement</option><option value="none">Sans LinkedIn</option></select>
       <select id="fPot" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
       <select id="fStatus" class="rounded-full border border-line bg-ink-2 px-4 py-2 text-sm"></select>
     </div>
@@ -337,7 +339,7 @@ function seed() {
 // ---------- State ----------
 let leads = load();
 refreshChains(); leads.forEach(withPotential);
-const ui = { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'', sort:'virality', view:'table' };
+const ui = { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'', li:'', sort:'virality', view:'table' };
 try { if (localStorage.getItem('warroom_view') === 'map') ui.view = 'map'; } catch {}
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(STORE)); } catch {}
@@ -376,6 +378,8 @@ const askConfirm = (msg, onYes) => {
   $('confirmNo').onclick = close; $('confirmYes').onclick = () => { close(); onYes(); };
 };
 // LinkedIn: verified decision-maker profile, company page, or a pre-filled people search (needs a LinkedIn login).
+const liKind = l => /^https:\/\/([a-z]+\.)?linkedin\.com\/in\//.test(l.linkedin || '') ? 'person' : /^https:\/\/([a-z]+\.)?linkedin\.com\/(company|showcase|school)\//.test(l.linkedinCo || '') ? 'co' : 'none';
+const LI_BADGE = l => liKind(l) === 'none' ? '' : `<span title="${liKind(l) === 'person' ? 'LinkedIn du décideur trouvé' : 'Page LinkedIn entreprise trouvée'}" class="ml-1.5 inline-grid h-4 place-items-center rounded px-1 align-middle text-[10px] font-bold ${liKind(l) === 'person' ? 'bg-sky-500 text-white' : 'border border-sky-500/60 text-sky-300'}">in</span>`;
 const liSearchUrl = l => 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(String(l.name).split(/ [-–|] |[|(,:]/)[0].replace(/courtiers? immobiliers?|courtier hypoth[ée]caire|RE\/?MAX.*$/gi, '').trim() + ' Québec');
 const liLinks = (l, cls = 'text-sky-300') => (/^https:\/\/([a-z]+\.)?linkedin\.com\/in\//.test(l.linkedin || '') ? `<a target="_blank" rel="noopener" href="${esc(l.linkedin)}" class="${cls} hover:underline" title="${esc(l.liWho || 'Profil LinkedIn trouvé sur leur site')}">in · Décideur ↗</a><br>` : '')
   + (/^https:\/\/([a-z]+\.)?linkedin\.com\/(company|showcase|school)\//.test(l.linkedinCo || '') ? `<a target="_blank" rel="noopener" href="${esc(l.linkedinCo)}" class="text-muted hover:text-white">in · Entreprise ↗</a><br>` : '')
@@ -388,7 +392,7 @@ const toast = m => { const t = $('toast'); t.textContent = m; t.classList.remove
 function filtered() {
   const q = ui.q.toLowerCase().trim();
   let out = leads.filter(l =>
-    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.zone || (ui.zone === 'out' ? l.dist != null && l.dist > RADIUS_KM : l.dist != null && l.dist <= +ui.zone)) && (!ui.ticket || l.ticket === +ui.ticket) && (!ui.pres || (ui.pres === 'li' ? !!l.linkedin : ui.pres === 'noig' ? (l.presence === 'noig' || l.presence === 'none') : l.presence === ui.pres)) && (!ui.pot || (ui.pot === 'NWS' ? l.nws : ui.pot === 'SA' ? (l.potential === 'S' || l.potential === 'A') : l.potential === ui.pot)) &&
+    (!ui.cat || l.category === ui.cat) && (!ui.temp || l.temp === ui.temp) && (!ui.status || l.status === ui.status) && (!ui.zone || (ui.zone === 'out' ? l.dist != null && l.dist > RADIUS_KM : l.dist != null && l.dist <= +ui.zone)) && (!ui.ticket || l.ticket === +ui.ticket) && (!ui.li || liKind(l) === ui.li || (ui.li === 'any' && liKind(l) !== 'none')) && (!ui.pres || (ui.pres === 'noig' ? (l.presence === 'noig' || l.presence === 'none') : l.presence === ui.pres)) && (!ui.pot || (ui.pot === 'NWS' ? l.nws : ui.pot === 'SA' ? (l.potential === 'S' || l.potential === 'A') : l.potential === ui.pot)) &&
     (!q || [l.name,l.contact,l.hood,l.address,l.notes,l.category,l.instagram,l.email,l.why,l.gcategory].join(' ').toLowerCase().includes(q)));
   if (ui.sort === 'virality') out.sort((a,b) => (POT_RANK[a.potential] ?? 3) - (POT_RANK[b.potential] ?? 3) || (b.ticket || 0) - (a.ticket || 0) || (b.pscore ?? 0) - (a.pscore ?? 0) || a.tier - b.tier || b.score - a.score || a.name.localeCompare(b.name));
   else out.sort((a,b) => a.name.localeCompare(b.name, 'fr'));
@@ -429,9 +433,9 @@ function render() {
   for (const [id, v] of [['vTable', 'table'], ['vMap', 'map']]) $(id).className = 'rounded-full px-3 py-1 text-xs font-medium ' + (ui.view === v ? 'bg-white text-ink' : 'text-muted hover:text-white');
   if (ui.view === 'map') { renderMap(view); return; }
   $('tbody').innerHTML = view.map((l, i) => `
-    <tr class="row-enter hover:bg-surface/70">
+    <tr class="row-enter hover:bg-surface/70${ui.li && ui.li !== 'none' && liKind(l) !== 'none' ? ' li-hl' : ''}">
       <td class="px-3 py-2 mono text-xs text-neutral-500">${i + 1}</td>
-      <td class="px-3 py-2 max-w-[280px]"><div class="font-semibold text-white">${esc(l.name)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div>${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}</td>
+      <td class="px-3 py-2 max-w-[280px]"><div class="font-semibold text-white">${esc(l.name)}${LI_BADGE(l)}</div><div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div>${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}</td>
       <td class="px-3 py-2"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono font-bold text-white">${l.pscore ?? '–'}</span>${l.ticket ? `<span title="${esc(TICKET[l.ticket].label + (l.ticketWhy ? ' · ' + l.ticketWhy : ''))}" class="rounded-full border px-2 py-0.5 text-[10px] font-bold ${TICKET[l.ticket].cls}">${TICKET[l.ticket].short}</span>` : ''}${l.nws ? '<span title="Pas de vrai site web : opportunité site web" class="rounded-full border border-fuchsia-400/60 bg-fuchsia-400/15 px-2 py-0.5 text-[10px] font-bold text-fuchsia-300">NWS</span>' : ''}</div>
         <div class="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">Tier ${l.tier} · viral ${l.score}</div>${l.ticket ? `<div class="mt-0.5 text-[10px] text-neutral-400">${TICKET[l.ticket].label}${l.presence === 'active' && l.ticket >= 2 ? ' · déjà actif → proposer mieux' : ''}</div>` : ''}</td>
       <td class="px-3 py-2">${l.contact ? `<div class="text-neutral-200">${esc(l.contact)}</div>` : ''}
@@ -651,7 +655,7 @@ function initMap() {
 function popupHtml(l) {
   const link = (u, t, c) => u ? `<a target="_blank" rel="noopener" href="${esc(u)}" class="${c}">${t}</a>` : '';
   return `<div class="text-[13px] leading-5">
-    <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="font-semibold text-white">${esc(l.name)}</div>
+    <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="font-semibold text-white">${esc(l.name)}${LI_BADGE(l)}</div>
       <div class="text-xs text-muted">${esc(l.category)}${l.reviews ? ` · ★ ${Number(l.rating).toFixed(1)} (${l.reviews})` : ''}</div></div>
       <div class="flex shrink-0 items-center gap-1"><span class="grid size-7 place-items-center rounded-full border text-xs font-bold ${POT_CLS[l.potential] || POT_CLS.C}">${l.potential || 'C'}</span><span class="mono text-xs text-white">${l.pscore ?? ''}</span></div></div>
     ${l.why ? `<div class="mt-1 text-[11px] leading-4 text-accent-soft">${esc(l.why)}</div>` : ''}
@@ -669,6 +673,7 @@ function popupHtml(l) {
     <div class="mt-3 flex gap-2"><button data-msg="${l.id}" class="rounded-full bg-white px-3 py-1 text-xs font-medium text-ink">✉ Message</button><button data-edit="${l.id}" class="rounded-full border border-line px-3 py-1 text-xs text-white">Éditer</button></div>
   </div>`;
 }
+const liHl = l => !!ui.li && ui.li !== 'none' && liKind(l) !== 'none';
 function renderMap(view) {
   if (!window.L) { $('mapLegend').innerHTML = '<span class="text-rose-300">La carte n’a pas pu se charger (Leaflet). Vérifiez la connexion puis rechargez.</span>'; return; }
   initMap(); map.invalidateSize();
@@ -679,7 +684,7 @@ function renderMap(view) {
   let reopen = null;
   for (const l of pins) {
     const m = L.circleMarker([l.lat, l.lng], {
-      pane: 'pins', renderer: pinRenderer, radius: PIN_R[l.potential] || 4.5, color: l.potential === 'S' ? '#fbbf24' : '#050505', weight: l.potential === 'S' ? 2.5 : 1,
+      pane: 'pins', renderer: pinRenderer, radius: PIN_R[l.potential] || 4.5, color: liHl(l) ? '#38bdf8' : l.potential === 'S' ? '#fbbf24' : '#050505', weight: liHl(l) ? 3 : l.potential === 'S' ? 2.5 : 1,
       fillColor: PIN[l.status] || PIN['To be called'], fillOpacity: l.geoExact === false ? 0.55 : 0.95, dashArray: l.geoExact === false ? '2 2' : null,
     }).bindTooltip(`${esc(l.name)} · ${l.potential || 'C'}`, { direction: 'top' })
       .bindPopup(() => popupHtml(l), { leadId: l.id, maxWidth: 320, autoPanPadding: [20, 20] });
@@ -694,7 +699,7 @@ function renderMap(view) {
   const cnt = st => view.filter(l => l.status === st).length;
   $('mapLegend').innerHTML = `<div class="eyebrow mb-2">Carte · ${pins.length} leads</div>
     ${STATUSES.map(st => `<div class="flex items-center gap-2"><span class="inline-block size-2.5 rounded-full" style="background:${PIN[st]}"></span><span class="text-neutral-300">${st === 'To be called' ? 'Pas encore contacté' : st}</span><span class="ml-auto mono text-muted">${cnt(st)}</span></div>`).join('')}
-    <div class="mt-2 flex items-center gap-2"><span class="inline-block size-3 rounded-full border-2 border-amber-400"></span><span class="text-neutral-300">Tier S (plus gros = meilleur potentiel)</span></div>
+    <div class="mt-2 flex items-center gap-2"><span class="inline-block size-3 rounded-full border-2 border-amber-400"></span><span class="text-neutral-300">Tier S (plus gros = meilleur potentiel)</span></div>${ui.li && ui.li !== 'none' ? `<div class="mt-1 flex items-center gap-2"><span class="inline-block size-3 rounded-full border-2 border-sky-400"></span><span class="text-neutral-300">LinkedIn trouvé</span><span class="ml-auto mono text-muted">${pins.filter(liHl).length}</span></div>` : ''}
     <div class="mt-2 space-y-0.5">${RINGS.map(r => `<div class="flex items-center gap-2"><span class="inline-block h-0 w-4 border-t-2 border-dashed" style="border-color:${r.color}"></span><span class="${!sel || r.km === sel ? 'text-neutral-200' : 'text-neutral-500'}">${r.label}</span><span class="ml-auto mono text-muted">${leads.filter(l => l.dist != null && l.dist <= r.km).length}</span></div>`).join('')}</div>
     <div class="mt-1 text-muted">${sel ? `Filtre actif : seuls les leads à ${sel} km ou moins sont affichés` : `${inR} dans le rayon 25 km · ${view.length - inR} hors rayon`}</div>
     <div class="mt-1 text-[10px] text-neutral-500">Pointillé = position approximative (code postal)</div>`;
@@ -712,12 +717,13 @@ $('fPot').onchange = e => { ui.pot = e.target.value; render(); };
 $('fZone').onchange = e => { ui.zone = e.target.value; render(); };
 $('fTicket').onchange = e => { ui.ticket = e.target.value; render(); };
 $('fPres').onchange = e => { ui.pres = e.target.value; render(); };
+$('fLi').onchange = e => { ui.li = e.target.value; render(); };
 let qt; $('q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => { ui.q = e.target.value; render(); }, 80); });
 $('fCat').onchange = e => { ui.cat = e.target.value; render(); };
 $('fTemp').onchange = e => { ui.temp = e.target.value; render(); };
 $('fStatus').onchange = e => { ui.status = e.target.value; render(); };
 $('sortToggle').onclick = () => { ui.sort = ui.sort === 'virality' ? 'alpha' : 'virality'; render(); };
-$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'' }); ['q','fCat','fTemp','fStatus','fPot','fZone','fTicket','fPres'].forEach(i => $(i).value = ''); render(); };
+$('btnReset').onclick = () => { Object.assign(ui, { q:'', cat:'', temp:'', status:'', pot:'', zone:'', ticket:'', pres:'', li:'' }); ['q','fCat','fTemp','fStatus','fPot','fZone','fTicket','fPres','fLi'].forEach(i => $(i).value = ''); render(); };
 $('btnAdd').onclick = () => openModal(null);
 $('btnSeed').onclick = () => askConfirm('Effacer toutes les modifications et restaurer les leads de départ ?', () => { leads = seed(); save(); render(); toast('Données restaurées'); });
 
