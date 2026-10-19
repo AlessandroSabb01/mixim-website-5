@@ -25,3 +25,7 @@
    motion quality, variety, brand accuracy, sound sync.
 3. Fix the 3 worst problems. Repeat until every score is 8+.
 4. Only then do the full render.
+
+## Motion Studio (review artifact)
+- Corrections, approvals and new briefs arrive from https://claude.ai/artifact/NLJtGQeCneh9ejxNtywKqs.
+  Follow the protocol in review/README.md: preview frames first, full render only after approval.
