@@ -3,3 +3,5 @@ build/
 out/*.mp4
 assets/broll/
 assets/vo/
+assets/importrama/frames/
+assets/importrama/video/

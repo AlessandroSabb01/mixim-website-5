@@ -21,6 +21,7 @@ const CFG = {
   film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
+  film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json" },
 }[FILM];
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
 const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
@@ -85,7 +86,7 @@ for (const f of formats) {
     // one frame per beat, sampled 0.4 beat after the hit (once the move has landed)
     const dir = path.join(BUILD, `contact${TAG}-${f}`); fs.mkdirSync(dir, { recursive: true });
     const per = beats[1] - beats[0];
-    const scenes = FILM === "film3" ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Shapes" : b < 14.5 ? "Mosaïque" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Fin") : V2 ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Burst" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Logo") : (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
+    const scenes = FILM === "film4" ? (b) => (b < 10 ? "Hook" : b < 26 ? "Where it started" : b < 42 ? "What we believe" : b < 54 ? "Proof" : "Logo sting") : FILM === "film3" ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Shapes" : b < 14.5 ? "Mosaïque" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Fin") : V2 ? (b) => (b < 6 ? "Hook" : b < 8 ? "Voici comment" : b < 12 ? "Burst" : b < 18 ? "Agence" : b < 30 ? "Process" : b < 33 ? "Explosion" : b < 42 ? "Résultats" : b < 44 ? "7,5 M+" : b < 54 ? "Formulaire" : "Logo") : (b) => (b < 6 ? "Hook" : b < 12 ? "Produit" : b < 18 ? "01 Scroll" : b < 24 ? "02 Plateformes" : b < 30 ? "03 Engagement" : b < 34 ? "Chiffre" : "Logo");
     const cells = [];
     const strip = opt("strip", null);   // --strip from,to,step : dense filmstrip to judge motion
     const times = strip ? (() => { const [a, z, st] = String(strip).split(",").map(Number); const r = []; for (let x = a; x < z - 1e-9; x += st) r.push(x); return r; })() : beats.map((b) => b + 0.4 * per);
