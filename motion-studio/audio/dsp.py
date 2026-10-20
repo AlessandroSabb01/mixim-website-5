@@ -3,7 +3,8 @@ import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 48000
-BPM = 120
+import os as _os
+BPM = float(_os.environ.get("FILM_BPM", "120"))
 BEAT = 60 / BPM
 import os
 LENGTH = float(os.environ.get("FILM_LEN", "20"))

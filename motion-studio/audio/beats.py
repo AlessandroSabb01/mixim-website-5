@@ -8,23 +8,30 @@ import json
 import sys
 import numpy as np
 import librosa
+import os
 
 src, dst = sys.argv[1], sys.argv[2]
 y, sr = librosa.load(src, sr=44100, mono=True)
 hop = 128
 onset = librosa.onset.onset_strength(y=y, sr=sr, hop_length=hop)
-tempo, frames = librosa.beat.beat_track(onset_envelope=onset, sr=sr, hop_length=hop, start_bpm=120, tightness=400)
+tempo, frames = librosa.beat.beat_track(onset_envelope=onset, sr=sr, hop_length=hop, start_bpm=float(os.environ.get("FILM_BPM", "120")), tightness=400)
 raw = librosa.frames_to_time(frames, sr=sr, hop_length=hop)
 tempo = float(np.atleast_1d(tempo)[0])
 period0 = 60 / tempo
 k = np.round((raw - raw[0]) / period0)
 period, t0 = np.polyfit(k, raw, 1)
+# robust refit: syncopated hits can pull a tracked beat off the grid; drop those and fit again
+res0 = raw - (t0 + k * period)
+keep = np.abs(res0) < 0.04
+if keep.sum() >= max(8, len(raw) // 2):
+    period, t0 = np.polyfit(k[keep], raw[keep], 1)
 # shift so index 0 is the first beat at or after t=0 within half a period
 t0 = t0 - np.floor(t0 / period + 0.25) * period
 duration = len(y) / sr
 count = int(np.floor((duration - t0) / period)) + 1
 grid = [round(t0 + i * period, 5) for i in range(count)]
 resid = raw - (t0 + np.round((raw - t0) / period) * period)
+resid = resid[np.abs(resid) < 0.04] if (np.abs(resid) < 0.04).sum() >= 8 else resid   # report the fit on the beats it used
 json.dump({"source": src, "tracker_bpm": round(tempo, 3), "bpm": round(60 / period, 3), "t0": round(t0, 5),
            "period": round(period, 6), "raw": [round(x, 4) for x in raw], "beats": grid,
            "max_residual_ms": round(float(np.abs(resid).max() * 1000), 2)}, open(dst, "w"), indent=1)

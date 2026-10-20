@@ -21,11 +21,12 @@ const CFG = {
   film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
-  film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json" },
+  film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
 }[FILM];
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
 const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
 process.env.FILM_LEN = String(LEN);
+process.env.FILM_BPM = String(CFG.bpm || 120);
 const BUILD = path.join(ROOT, "build"), OUT = path.join(ROOT, "out");
 fs.mkdirSync(BUILD, { recursive: true }); fs.mkdirSync(OUT, { recursive: true });
 const run = (cmd, a) => { const r = execFileSync(cmd, a, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); if (r.trim()) console.log(r.trim()); };
