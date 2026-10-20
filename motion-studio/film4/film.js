@@ -236,8 +236,6 @@
       return { pin, num, tl, sb, y };
     });
     S.r.RX = RX;
-    S.r.photo = imgCell(root, "img/entrepot.webp", colX(3) + 20, 930, W - M - colX(3) - 20, 640);
-    S.r.photoCap = el(root, { left: colX(3) + 20 + "px", top: "1590px", ...fBC(26, 600, 1, 0.12), color: "rgba(255,255,255,.75)", whiteSpace: "nowrap" }); S.r.photoCap.textContent = "Container unloading, Montréal";
     // paper columns that rise to carry us into S3
     S.r.paper = [0, 1, 2, 3, 4, 5].map((i) => el(root, { left: i * (W / 6) + "px", top: 0, width: W / 6 + 1 + "px", height: H + "px", background: C.paper }));
   }
@@ -277,12 +275,6 @@
       T(R.dot, { x: R.RX - 16, y: lerp(from, to, e) - 16, s: 1 + 0.25 * Math.exp(-Math.max(0, since(t, 14 + 2 * k)) / 0.12), op: 1 - pb(t, 24, 24.4) });
       R.dot.style.transformOrigin = "50% 50%";
     } else vis(R.dot, false);
-    // node 04: the warehouse photo
-    const ph = R.photo, pin = ez.outExpo(pr(t, 20, 0.45)), pout = ez.inExpo(pb(t, 21.7, 22.1));
-    vis(ph.box, b >= 20 && b < 22.15); vis(R.photoCap, b >= 20.2 && b < 22.1);
-    ph.box.style.clipPath = `inset(${(1 - pin) * 100}% 0 0 0)`;
-    T(ph.box, { x: ph.x + pout * (W - ph.x), y: ph.y });
-    ph.img.style.transform = `scale(${1.15 - 0.15 * pin})`;
     // paper columns rise from the bottom
     R.paper.forEach((c, i) => T(c, { x: 0, y: (1 - ez.inOutExpo(pb(t, 24.9 + i * 0.07, 25.6 + i * 0.07))) * H, op: b >= 24.85 ? 1 : 0 }));
   }
@@ -397,11 +389,10 @@
     const z3 = fit("NO STRINGS ATTACHED.", W - 2 * M, 800, 140);
     S.p.s1 = line(red, "SEND US WHAT YOU BUY.", z3, C.white, M - 4, 1180);
     S.p.s2 = line(red, `NO STRINGS ATTACHED${dot(C.black)}`, z3, C.black, M - 4, 1180 + z3 * 0.95);
-    S.p.sq = el(red, { width: "260px", height: "260px", background: C.red, left: (W - 260) / 2 + "px", top: (H - 260) / 2 + "px", transformOrigin: "50% 50%" });
   }
   function proof(t) {
     const b = tb(t), Pf = S.p;
-    disp(Pf.root, b >= 41.9 && b < 46.2); disp(Pf.dark, b >= 45.5 && b < 49.9); disp(Pf.red, b >= 49.3 && b < 54.2);
+    disp(Pf.root, b >= 41.9 && b < 46.2); disp(Pf.dark, b >= 45.5 && b < 49.9); disp(Pf.red, b >= 49.3 && b < 53.8);
     if (b >= 41.9 && b < 46.2) {
       Pf.lab.style.clipPath = `inset(0 ${(1 - ez.outExpo(pr(t, 42, 0.4))) * 100}% 0 0)`;
       rise(Pf.h, pr(t, 42.05, 0.3), pb(t, 45.6, 45.9));
@@ -437,46 +428,53 @@
       T(Pf.big, { x: 0, y: (1 - ez.outExpo(pr(t, 49.6, 0.4))) * 120 - out * 200, s: 1 + 0.04 * (b >= 51 ? Math.exp(-since(t, 51) / 0.12) : 0), op: (b >= 49.6 ? 1 : 0) * (1 - out) });
       Pf.big.style.left = M - 10 + "px"; Pf.big.style.top = "420px";
       rise(Pf.s1, pr(t, 51.5, 0.3), pb(t, 53.2, 53.5)); rise(Pf.s2, pr(t, 52.5, 0.3), pb(t, 53.2, 53.5));
-      // the red collapses into a square: the 新 mark's seat in the logo
-      const sq = ez.inOutExpo(pb(t, 53.45, 54));
-      Pf.red.style.background = sq > 0 ? "transparent" : C.red;
-      T(Pf.sq, { s: lerp(Math.hypot(W, H) / 260, 1, sq), op: b >= 53.45 ? 1 : 0 });
-      Pf.lab3.style.opacity = 1 - sq;
     }
   }
 
-  /* ===== S5 logo sting (b54-64) ===== */
+  /* ===== S5 ending (b53.75-64): PAY LESS FOR ANYTHING. centred, then the logo builds, centred; the film ends on it ===== */
   function buildLogo() {
     const root = layer(8); root.style.background = C.paper;
     S.l = { root };
-    const LW = W - 2 * M;
+    const LW = W - 2 * M - 40;
     S.l.parts = ["glyph", "importW", "rama", "tag"].map((p) => logoSVG(root, p, LW));
     S.l.LW = LW; S.l.LH = S.l.parts[0].h;
-    const z = fit("FOR ANYTHING.", W - 2 * M, 800, 200);
-    S.l.l1 = line(root, "PAY LESS", z, C.ink, M - 4, 1060);
-    S.l.l2 = line(root, `FOR ANYTHING${dot(C.red)}`, z, C.ink, M - 4, 1060 + z * 0.88);
-    S.l.cta = el(root, { left: M + "px", top: "1560px", height: "104px", padding: "0 40px", background: C.red, display: "flex", alignItems: "center", gap: "18px", ...fBC(46, 700, 1, 0.08), color: C.white, whiteSpace: "nowrap" });
-    S.l.cta.innerHTML = `GET A PRICE <span style="font-family:${BR};font-weight:600">→</span>`;
-    S.l.url = el(root, { left: M + "px", top: "1700px", ...fBR(36, 500), color: "#57514C" }); S.l.url.textContent = "importrama.com";
+    const z = fit("FOR ANYTHING.", W - 2 * M, 800, 280);
+    const w1 = measure("PAY LESS", z), w2 = measure("FOR ANYTHING.", z), y1 = (H - z * 0.88 * 2) / 2 - 20;
+    S.l.l1 = line(root, "PAY LESS", z, C.ink, (W - w1) / 2, y1);
+    S.l.l2 = line(root, `FOR ANYTHING${dot(C.red)}`, z, C.ink, (W - w2) / 2, y1 + z * 0.88);
+    // the red square from the 48 H scene shrinks into this period
+    const sz = z * 0.15;
+    // measure the period where it actually renders (the layer is still untransformed at build time)
+    const pr_ = S.l.l2.ink.querySelector("span").getBoundingClientRect(), st_ = stage.getBoundingClientRect();
+    S.l.dot = { x: pr_.left - st_.left + pr_.width / 2, y: y1 + z * 0.88 + z * 0.79, s: sz };
+    S.l.sq = el(root, { width: sz + "px", height: sz + "px", background: C.red, transformOrigin: "50% 50%" });
   }
   function logo(t) {
     const b = tb(t), L = S.l;
-    disp(L.root, b >= 53.95);
-    if (b < 53.95) return;
-    const [gl, im, ra, tg] = L.parts, y0 = 520;
-    // glyph: lands where the red square was (centre), then slides into its seat in the lockup
-    const gw = (LOGO.glyphBox[2] / LOGO.vb[2]) * L.LW, gx0 = M + ((LOGO.glyphBox[0] - LOGO.vb[0]) / LOGO.vb[2]) * L.LW;
+    disp(L.root, b >= 53.75);
+    if (b < 53.75) return;
+    // the red square: full frame → the period of ANYTHING.
+    const e = ez.inOutExpo(pb(t, 53.75, 54.45)), D = L.dot;
+    const big = (Math.hypot(W, H) * 1.05) / D.s;
+    const cx = lerp(W / 2, D.x, e), cy = lerp(H / 2, D.y, e);
+    T(L.sq, { x: cx - D.s / 2, y: cy - D.s / 2, s: lerp(big, 1, e), op: b < 54.85 ? 1 : 0 });
+    L.sq.style.borderRadius = `${50 * ez.inCubic(e)}%`;            // the square becomes the round period as it lands
+    // 1) the line, centred
+    const tout = pb(t, 56.85, 57.2);
+    rise(L.l1, pr(t, 54.25, 0.32), tout); rise(L.l2, pr(t, 54.6, 0.32), tout);
+    // 2) the logo, centred both ways: 新 pops in the centre, slides to its seat, IMPORT / RAMA / tagline reveal
+    const [gl, im, ra, tg] = L.parts, x0 = (W - L.LW) / 2, y0 = (H - L.LH) / 2;
+    const gw = (LOGO.glyphBox[2] / LOGO.vb[2]) * L.LW, gx0 = x0 + ((LOGO.glyphBox[0] - LOGO.vb[0]) / LOGO.vb[2]) * L.LW;
     const gyc = y0 + ((LOGO.glyphBox[1] - LOGO.vb[1] + LOGO.glyphBox[3] / 2) / LOGO.vb[3]) * L.LH;
-    const seat = ez.inOutExpo(pb(t, 55, 55.75)), pop = spring(since(t, 54) + 0.02, 2, 6.5);
-    const cx = lerp(W / 2, gx0 + gw / 2, seat), cy = lerp(H / 2, gyc, seat), s = lerp(1.6, 1, seat) * (0.6 + 0.4 * clamp(pop, 0, 1.2));
-    gl.d.style.transformOrigin = `${gx0 + gw / 2 - M}px ${gyc - y0}px`;
-    T(gl.d, { x: M + (cx - (gx0 + gw / 2)), y: y0 + (cy - gyc), s, op: 1 });
-    const reveal = (d, b0) => { const e = ez.outExpo(pr(t, b0, 0.5)); d.d.style.clipPath = `inset(0 ${(1 - e) * 100}% 0 0)`; T(d.d, { x: M + (1 - e) * 40, y: y0, op: b >= b0 ? 1 : 0 }); };
-    reveal(im, 55.5); reveal(ra, 56); reveal(tg, 56.5);
-    rise(L.l1, pr(t, 57, 0.3)); rise(L.l2, pr(t, 57.5, 0.3));
-    const ce = spring(since(t, 58.5) + 0.02, 2.4, 7);
-    T(L.cta, { s: Math.max(0.001, clamp(ce, 0, 1.2)), op: b >= 58.5 ? 1 : 0 }); L.cta.style.transformOrigin = "0 50%";
-    L.url.style.clipPath = `inset(0 ${(1 - ez.outExpo(pr(t, 59.25, 0.5))) * 100}% 0 0)`;
+    const seat = ez.inOutExpo(pb(t, 58, 58.8)), pop = spring(since(t, 57.25) + 0.02, 2, 6.5);
+    const gcx = lerp(W / 2, gx0 + gw / 2, seat), gcy = lerp(H / 2, gyc, seat), gs = lerp(1.8, 1, seat) * clamp(pop, 0, 1.2);
+    gl.d.style.transformOrigin = `${gx0 + gw / 2 - x0}px ${gyc - y0}px`;
+    T(gl.d, { x: x0 + (gcx - (gx0 + gw / 2)), y: y0 + (gcy - gyc), s: Math.max(0.001, gs), op: b >= 57.2 ? 1 : 0 });
+    const reveal = (d, b0) => { const k = ez.outExpo(pr(t, b0, 0.5)); d.d.style.clipPath = `inset(0 ${(1 - k) * 100}% 0 0)`; T(d.d, { x: x0 + (1 - k) * 40, y: y0, op: b >= b0 ? 1 : 0 }); };
+    reveal(im, 58.5); reveal(ra, 59); reveal(tg, 59.5);
+    // the whole lockup settles very slowly to the last frame
+    const settle = 1 + 0.03 * pb(t, 59.5, 64);
+    [gl, im, ra, tg].forEach((d) => { d.d.style.scale = settle; });
   }
 
   /* ===== camera, flash, grain ===== */
@@ -492,10 +490,10 @@
   }
   function fx(t) {
     let f = 0;
-    for (const [b, a] of [[6, 0.35], [10, 0.25], [40, 0.3], [49.5, 0.2], [54, 0.3]]) { const d = since(t, b); if (d >= 0) f = Math.max(f, a * Math.exp(-d / 0.1)); }
+    for (const [b, a] of [[6, 0.35], [10, 0.25], [40, 0.3], [49.5, 0.2], [53.75, 0.2]]) { const d = since(t, b); if (d >= 0) f = Math.max(f, a * Math.exp(-d / 0.1)); }
     T(S.flash, { op: f });
     let s = 1, x = 0, y = 0, r = 0;
-    for (const b of [0, 1, 3, 5, 6, 6.75, 7.25, 10, 11, 12, 14, 16, 18, 20, 22, 26, 28, 30, 32, 34, 36, 37, 38, 40, 42, 46, 47, 48, 49.5, 51, 54, 55.5, 57.5, 58.5]) {
+    for (const b of [0, 1, 3, 5, 6, 6.75, 7.25, 10, 11, 12, 14, 16, 18, 20, 22, 26, 28, 30, 32, 34, 36, 37, 38, 40, 42, 46, 47, 48, 49.5, 51, 54.25, 54.6, 57.25, 58.5, 59]) {
       const d = since(t, b); if (d >= 0) s += ([6, 40, 54, 10].includes(b) ? 0.05 : 0.02) * Math.exp(-d / 0.12);
     }
     for (const [b, a] of [[6, 18], [10, 12], [40, 16], [54, 10]]) { const d = since(t, b); if (d >= 0 && d < 0.5) { const e = a * Math.exp(-d / 0.12); x += e * sn(d * 30, b); y += e * sn(d * 30, b + 9); r += e * 0.02 * sn(d * 20, b + 3); } }
@@ -520,8 +518,8 @@
     cue(45.6, "air", 0.5, 0, { dir: 1 }); cue(46, "slam", 0.6); cue(46.5, "slam", 0.6); [47, 47.5, 48].forEach((b) => cue(b, "zip", 0.35, 0.5, { dir: -1 }));
     cue(49.4, "air", 0.5, 0, { dir: 1 }); for (let k = 0; k < 12; k++) cue(49.6 + k * 0.12, "tap", 0.12 + 0.02 * k, 0);
     cue(51, "thump", 0.7); cue(51.5, "slam", 0.5); cue(52.5, "slam", 0.55);
-    cue(53.5, "air", 0.6, 0, { dir: -1 }); cue(54, "thump", 0.9); cue(54, "bloom", 0.55); cue(55.5, "glint", 0.4, 0, { step: 2 }); cue(56, "glint", 0.4, 0, { step: 4 });
-    cue(57, "slam", 0.5); cue(57.5, "slam", 0.6); cue(58.5, "tap", 0.8); cue(58.55, "shimmer", 0.4); cue(59.25, "glint", 0.3, 0, { step: 6 });
+    cue(53.75, "air", 0.6, 0, { dir: -1 }); cue(54.25, "slam", 0.7); cue(54.6, "slam", 0.8); cue(54.6, "thump", 0.7);
+    cue(57, "air", 0.4, 0, { dir: 1 }); cue(57.25, "thump", 0.85); cue(57.25, "bloom", 0.55); cue(58.5, "glint", 0.4, 0, { step: 2 }); cue(59, "glint", 0.4, 0, { step: 4 }); cue(59.5, "shimmer", 0.45);
   }
 
   /* ---------- frame ---------- */
