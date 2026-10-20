@@ -119,9 +119,12 @@ for (const f of formats) {
   const n0 = Math.round(from * FPS), n1 = Math.round(to * FPS);
   const name = opt("out", `creation-virale${TAG}-${f}`);
   const outFile = path.join(OUT, `${name}.mp4`);
-  const vf = SUB > 1 ? [`tmix=frames=${SUB}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`, `setpts=N/(${FPS}*TB)`] : [`setpts=N/(${FPS}*TB)`];
-  const ff = spawn("ffmpeg", ["-y", "-loglevel", "error",
-    "-f", "image2pipe", "-c:v", "png", "-framerate", String(FPS * SUB), "-i", "-",
+  // Chrome writes a frame as RGBA whenever any pixel is not fully opaque, so the PNG stream can switch between
+  // rgb24 and rgba mid-film. ffmpeg would then rebuild the filter graph and reset tmix/select/setpts, dropping frames.
+  // Keep one graph (-reinit_filter 0) and let scale convert every frame to rgb24 before the blend.
+  const vf = ["scale", "format=rgb24", ...(SUB > 1 ? [`tmix=frames=${SUB}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`, `setpts=N/(${FPS}*TB)`] : [`setpts=N/(${FPS}*TB)`])];
+  const ff = spawn("ffmpeg", ["-y", "-loglevel", process.env.FF_LOG || "error",
+    "-reinit_filter", "0", "-f", "image2pipe", "-c:v", "png", "-framerate", String(FPS * SUB), "-i", "-",
     ...(fs.existsSync(path.join(ROOT, MIX)) ? ["-ss", String(from), "-t", String(to - from), "-i", path.join(ROOT, MIX)] : []),
     "-vf", [...vf, "format=yuv420p"].join(","), "-r", String(FPS),
     "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", "-profile:v", "high", "-movflags", "+faststart",
