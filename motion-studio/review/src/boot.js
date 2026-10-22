@@ -3,6 +3,7 @@
   try { const th = localStorage.getItem("cv-theme"); document.documentElement.dataset.theme = th === "dark" ? "dark" : "light"; }
   catch { document.documentElement.dataset.theme = "light"; }
   go(routeFromHash(), false);
+  addEventListener("hashchange", () => go(routeFromHash(), false));
   const [db, assets, comments, downloads, user] = await Promise.all(["db", "assets", "comments", "downloads", "user"].map(use));
   Object.assign(CAP, { db, assets, comments, downloads, user });
   try { const w = await user?.can?.("data.write"); ST.canWrite = w !== false; } catch {}

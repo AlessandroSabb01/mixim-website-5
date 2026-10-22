@@ -1,5 +1,5 @@
 /* ===================== Home: two doors, projects, requests in flight ===================== */
-const REQ_LABEL = { corrections: "Corrections", render: "Final render", brief: "New video brief", changes: "Preview changes" };
+const REQ_LABEL = { corrections: "Corrections", render: "Final render", brief: "New video brief", changes: "Preview changes", hooks: "Hook lab", footage: "AI footage" };
 const REQ_STEPS = ["Sent", "Working", "Preview", "Approved", "Rendered"];
 const reqStep = (s) => ({ sent: 0, working: 1, preview_ready: 2, approved: 3, rendering: 3, done: 4, failed: 1 }[s] ?? 0);
 const reqStatusPill = (s) => ({
@@ -42,15 +42,15 @@ VIEWS.home = {
           <p>Start a new motion video from a brief, or open a past cut and mark it up frame by frame. Your comments, drawings and approvals go straight to Claude, and every version stays here.</p>
         </div>
         <div class="flow" aria-label="How a video moves through the studio">
-          <div><span class="n">01</span><b>Brief</b><span>Pick style, music and sound</span></div>
-          <div><span class="n">02</span><b>30 key frames</b><span>Mark them up before any render</span></div>
+          <div><span class="n">01</span><b>Brief</b><span>Style, hooks, trend audio, AI shots</span></div>
+          <div><span class="n">02</span><b>5 hooks + 30 key frames</b><span>Pick the opening, mark up the frames</span></div>
           <div><span class="n">03</span><b>Final render</b><span>Review it, correct, version up</span></div>
         </div>
       </section>
       <section class="doors">
         <button class="door blue" id="doorCreate">
           <div class="door-art" aria-hidden="true"><i></i><i></i><i></i></div>
-          <div><div class="eyebrow">New</div><h2>Create a new video</h2><p>Build the brief from tiles: visual style, energy, music, sound design, story beats and brand. Claude answers with 30 key frames.</p></div>
+          <div><div class="eyebrow">New</div><h2>Create a new video</h2><p>Build the brief from tiles: style, hooks, trend-matched music, captions, AI footage and brand. Claude answers with 5 hooks and 30 key frames.</p></div>
           <span class="go">${ICON.go}</span>
         </button>
         <button class="door" id="doorReview">
@@ -64,13 +64,17 @@ VIEWS.home = {
         ${projects.length ? `<div class="projects">${projectCards}</div>` :
           `<div class="card empty"><b>${CAP.db ? (ST.booted ? "No projects yet" : "Loading the studio…") : "Open on claude.ai to load your projects"}</b><span>${CAP.db ? "Create a new video, or ask Claude to add a past one." : "Projects, versions and comments live in this artifact's database."}</span></div>`}
       </section>
+      <section id="library"><div class="sec-h"><h2>Style library</h2><span class="eyebrow">${plural(ST.styles.length, "recipe")}</span></div>
+        ${ST.styles.length ? `<div class="styles">${ST.styles.map(styleCard).join("")}</div>` : `<div class="card empty"><b>No saved styles yet</b><span>Press “Save style” on any video or brief. The full recipe (look, motion, music, sound, captions and hooks) becomes a tile in the Brief Builder.</span></div>`}
+      </section>
       ${flying.length ? `<section><div class="sec-h"><h2>With Claude</h2><span class="eyebrow">${plural(flying.length, "request")} in flight</span></div>
         <div class="inflight">${flying.map((r) => `<button class="req-row" data-pid="${esc(r.p.id)}" data-tab="requests">
-          <span class="ic">${r.type === "brief" ? ICON.wand : r.type === "render" ? ICON.film : ICON.send}</span>
+          <span class="ic">${r.type === "hooks" ? ICON.hook : r.type === "brief" ? ICON.wand : r.type === "render" ? ICON.film : ICON.send}</span>
           <span><b>${esc(REQ_LABEL[r.type] || "Request")} · ${esc(r.p.name)}</b><small>${esc(r.versionLabel || "")}${r.commentIds?.length ? ` · ${plural(r.commentIds.length, "comment")}` : ""} · ${ago(r.createdAt)}</small></span>
           ${reqStatusPill(r.status)}</button>`).join("")}</div></section>` : ""}
     </main>`;
     $("#doorCreate").onclick = () => go({ view: "create" });
+    bindStyleCards($("#library"));
     $("#doorReview").onclick = () => { if (projects.length === 1) go({ view: "project", pid: projects[0].id }); else $("#projects").scrollIntoView({ behavior: "smooth" }); };
     $$("[data-pid]", root).forEach((b) => (b.onclick = () => { VIEWS.project.pendingTab = b.dataset.tab || null; go({ view: "project", pid: b.dataset.pid }); }));
   },

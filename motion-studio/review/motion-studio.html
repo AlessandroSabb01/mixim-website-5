@@ -1,4 +1,4 @@
-<title>Création Virale Motion Studio</title>
+<title>Création Virale - Motion Studio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -529,6 +529,121 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @keyframes eqc { from { transform: scaleY(.3); } to { transform: scaleY(1); } }
 .tile:has(.ply) .lab { padding-right: 50px; }
 
+/* ===================== Viral kit ===================== */
+.hint { display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); color: var(--ink-2); font-size: 13.5px; line-height: 1.45; }
+.hint svg { width: 18px; height: 18px; flex: none; color: var(--accent); margin-top: 1px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line-2); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.chips .cdot i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); }
+.btn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, transparent); }
+.btn.icon-only { width: 32px; padding: 0; justify-content: center; }
+.btn.icon-only.danger { width: auto; padding: 0 10px; }
+
+/* hook formulas */
+.hookf { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); gap: 8px; }
+.hookf button { display: grid; gap: 3px; text-align: left; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
+.hookf button b { font: 700 14px/1.2 var(--f-display); }
+.hookf button small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.hookf button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.hookf button[aria-pressed="true"] b::before { content: "✓ "; color: var(--accent); }
+
+/* trend switch */
+.trend { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.trend.on { border-color: var(--accent); background: linear-gradient(135deg, var(--accent-soft), transparent 60%), var(--surface); }
+.trend > div { display: grid; gap: 6px; min-width: 0; }
+.trend b { display: inline-flex; align-items: center; gap: 8px; font: 700 15px/1.2 var(--f-display); }
+.trend b svg { width: 18px; height: 18px; color: var(--accent); }
+.trend span { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.trend .field { margin-top: 6px; }
+.toggle { width: 44px; height: 26px; border-radius: 99px; border: 0; padding: 3px; background: var(--line); position: relative; flex: none; transition: background .15s ease; }
+.toggle i { display: block; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .2s cubic-bezier(.16, 1, .3, 1); }
+.toggle[aria-checked="true"] { background: var(--accent); }
+.toggle[aria-checked="true"] i { transform: translateX(18px); }
+
+/* caption previews */
+.cp-pop { background: #0B0C10; }
+.cp-pop span { left: 0; right: 0; top: 50%; margin-top: -19px; text-align: center; font: 900 32px/38px var(--f-display); letter-spacing: -.04em; color: #fff; opacity: 0; animation: cpop 2.1s cubic-bezier(.34, 1.56, .64, 1) infinite; }
+.cp-pop span:nth-child(2) { animation-delay: -1.4s; }
+.cp-pop span.k { animation-delay: -.7s; color: #0B0C10; }
+.cp-pop span.k::before { content: ""; position: absolute; inset: 2px 22% 2px 22%; background: #FFC400; z-index: -1; border-radius: 6px; transform: rotate(-2deg); }
+@keyframes cpop { 0% { opacity: 0; transform: scale(1.8); } 8% { opacity: 1; transform: scale(.94); } 14%, 30% { opacity: 1; transform: scale(1); } 33.3%, 100% { opacity: 0; transform: scale(1); } }
+.cp-meme { background: linear-gradient(160deg, #3A2B6E, #10121A); }
+.cp-meme .z { inset: 14px 30px; border-radius: 10px; background: linear-gradient(135deg, #FF7A45, #FF3D8B); animation: zpunch 2.4s cubic-bezier(.16, 1, .3, 1) infinite; }
+.cp-meme .t { left: 0; right: 0; bottom: 12px; text-align: center; font: 800 15px/1 var(--f-display); color: #fff; text-shadow: 0 2px 0 #000, 0 0 6px #000; }
+.cp-meme .e { right: 22px; top: 10px; font-size: 30px; line-height: 1; animation: emoji 2.4s cubic-bezier(.34, 1.56, .64, 1) infinite; }
+@keyframes zpunch { 0%, 45% { transform: scale(1); } 50% { transform: scale(1.22) rotate(-2deg); } 70%, 100% { transform: scale(1.12) rotate(-1deg); } }
+@keyframes emoji { 0%, 48% { transform: scale(0) rotate(-30deg); } 58% { transform: scale(1.3) rotate(8deg); } 70%, 92% { transform: scale(1) rotate(0); } 100% { transform: scale(0); } }
+.cp-sub { background: #1B1E27; }
+.cp-sub .v { inset: 0; background: radial-gradient(circle at 30% 35%, #4E78FF, transparent 55%), radial-gradient(circle at 75% 60%, #22D3A6, transparent 50%); opacity: .55; }
+.cp-sub .b { left: 12px; right: 12px; bottom: 12px; padding: 6px 8px; border-radius: 7px; background: rgba(0, 0, 0, .72); text-align: center; font: 600 12px/1.25 var(--f-body); color: #fff; animation: subin 3s ease-in-out infinite; }
+.cp-sub .b u { text-decoration: none; color: #FFC400; }
+@keyframes subin { 0%, 8% { opacity: 0; transform: translateY(4px); } 14%, 86% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; } }
+.cp-none { background: var(--surface-2); }
+.cp-none span { inset: 0; display: grid; place-items: center; font: 800 34px/1 var(--f-display); color: var(--line); }
+
+/* AI footage rows in the builder */
+.shot-row select { height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 12.5px; padding: 0 6px; }
+
+/* style library: builder strip */
+.bsec.lib[hidden] { display: none; }
+.bsec.lib header h2 { display: inline-flex; align-items: center; gap: 8px; }
+.bsec.lib header h2 svg { width: 18px; height: 18px; color: var(--accent); }
+.slib { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
+.lchip { flex: none; display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; align-items: center; padding: 6px 12px 6px 6px; max-width: 260px; text-align: left; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.lchip img, .lchip > i { width: 38px; height: 52px; border-radius: 8px; object-fit: cover; display: block; }
+.lchip b { display: block; font: 700 13.5px/1.2 var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lchip small { display: block; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lchip.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* style library: home cards */
+.styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.scard { display: grid; grid-template-columns: 112px minmax(0, 1fr); border-radius: var(--r-lg); border: 1px solid var(--line-2); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.sart { position: relative; background: var(--stage); min-height: 190px; }
+.sart img, .sart .ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sart .swatch { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 3px; }
+.sart .swatch i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transform: none; }
+.smeta { padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.smeta h3 { font: 700 17px/1.2 var(--f-display); letter-spacing: -.02em; }
+.smeta .row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+
+/* hook lab in a request */
+.hooklab, .shots { display: grid; gap: 10px; }
+.hl-h { display: flex; align-items: center; gap: 8px; }
+.hl-h svg { width: 17px; height: 17px; color: var(--accent); }
+.hl-h b { font: 700 14px/1 var(--f-display); }
+.hl-h small { margin-left: auto; color: var(--muted); font-size: 12px; text-align: right; }
+.hooklab.wait .hl-h small { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .4; } }
+.hooks { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.hk { display: grid; gap: 7px; align-content: start; padding: 6px 6px 8px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--surface-2); transition: opacity .2s ease; }
+.hk.on { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+.hk.off { opacity: .45; }
+.hk .btn, .hk .pill { justify-self: start; }
+.flip { position: relative; display: block; width: 100%; height: 0; padding: 177.78% 0 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--stage); }
+.flip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.flip img.on { opacity: 1; }
+.flip .n { position: absolute; left: 6px; top: 6px; font: 700 10px/1 var(--f-mono); color: #fff; background: rgba(0, 0, 0, .6); padding: 3px 5px; border-radius: 5px; }
+.flip .rec { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; font: 700 10px/1 var(--f-body); color: #fff; background: var(--accent); padding: 5px 4px; border-radius: 6px; }
+.flip .rec svg { width: 11px; height: 11px; }
+.hk-m { display: grid; gap: 2px; padding: 0 2px; min-width: 0; }
+.hk-m b { font: 700 13px/1.2 var(--f-display); }
+.hk-m small { font-size: 11px; color: var(--muted); }
+.hk-m q { font-size: 12px; color: var(--ink-2); line-height: 1.35; quotes: "“" "”"; }
+.hk-frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.hk-frames figure { margin: 0; display: grid; gap: 6px; justify-items: center; }
+.hk-frames img { width: 100%; max-height: 52vh; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 12px; }
+
+/* AI footage in a request */
+.shot { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.shot .th { width: 48px; aspect-ratio: 9 / 16; border-radius: 8px; overflow: hidden; background: var(--stage); display: grid; place-items: center; color: var(--stage-muted); font: 600 11px/1 var(--f-mono); grid-row: span 2; }
+.shot .th img, .shot .th video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot .sm { display: grid; gap: 3px; min-width: 0; }
+.shot .sm b { font-weight: 600; font-size: 13.5px; line-height: 1.35; }
+.shot .sm small { font-size: 12px; color: var(--muted); }
+.shot .sm .cn { color: var(--ink-2); }
+.shot .sa { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.req .row-note { color: var(--muted); font-size: 12px; }
+
 </style>
 <header class="bar" id="bar"></header>
 <div id="view"></div>
@@ -581,6 +696,11 @@ const ICON = {
   down: I('<path d="M6 10l6 6 6-6"/>'),
   sparkle: I('<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9-1.9 5.6-1.9-5.6-5.6-1.9 5.6-1.9z"/>'),
   film: I('<rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 3.5v17M16 3.5v17M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4"/>'),
+  hook: I('<path d="M13 3v10.5a4.5 4.5 0 1 1-9 0V12"/><path d="M13 3l3 3M13 3l-3 3"/><path d="M18 14l2 2-2 2"/>'),
+  bookmark: I('<path d="M7 4h10v16l-5-3.5L7 20z"/>'),
+  camera: I('<rect x="3.5" y="6.5" width="13" height="11" rx="2.5"/><path d="M16.5 10.5l4-2.5v8l-4-2.5"/>'),
+  trend: I('<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>'),
+  caption: I('<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M7 14.5h4M13 14.5h4M7 11h10"/>'),
   wand: I('<path d="M5 19L15.5 8.5"/><path d="M14 4v3M18.5 5.5l-2 2M20 10h-3"/><path d="M13.5 10.5l-2-2"/>'),
   sun: I('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),
   moon: I('<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>'),
@@ -605,6 +725,7 @@ const ST = {
   booted: false,
   projects: [],
   versions: {}, comments: {}, requests: {},       // pid -> [ {id, ...data} ]
+  styles: [],                                       // the style library: saved recipes
   subs: {},                                         // pid -> [unsubscribe]
   route: { view: "home", pid: null, vid: null },
   claude: "unknown",                                // canSendToClaude snapshot
@@ -635,6 +756,8 @@ function startData() {
     ST.booted = true;
     changed("projects");
   }, (e) => { console.warn("db projects", e?.code); ST.booted = true; changed("projects"); });
+  CAP.db.collection("styles").orderBy("createdAt", "desc").limit(40).onSnapshot((s) => { ST.styles = rows(s); changed("styles"); },
+    (e) => console.warn("db styles", e?.code));
 }
 
 /* writes: one at a time per document, only on a viewer action */
@@ -859,8 +982,199 @@ const SYNTH = (() => {
   };
 })();
 
+/* ===================== Viral kit: Hook lab, trend audio, AI footage, captions, style library ===================== */
+const HOOKS = [
+  { id: "shock", name: "Shock stat", ex: "59× more views." },
+  { id: "pov", name: "POV", ex: "POV: you stopped overpaying." },
+  { id: "question", name: "Question", ex: "Why pay retail?" },
+  { id: "beforeafter", name: "Before / after", ex: "$4.20 → $1.10" },
+  { id: "countdown", name: "Countdown", ex: "3 things nobody tells you" },
+  { id: "interrupt", name: "Pattern interrupt", ex: "STOP. Look at this box." },
+  { id: "claim", name: "Bold claim", ex: "The cheapest box in Québec." },
+  { id: "waitfor", name: "Wait for it", ex: "Watch the price drop…" },
+];
+const CAPTIONS = [
+  { id: "wordpop", name: "Bold word-pop", d: "Big words punch in on the beat, brand colour on the key word", html: `<div class="sp cp-pop"><span>PAY</span><span>LESS</span><span class="k">NOW.</span></div>` },
+  { id: "meme", name: "Meme grammar", d: "Emoji pops, zoom punches, freeze frames, “wait for it”", html: `<div class="sp cp-meme"><i class="z"></i><span class="t">wait for it…</span><span class="e">🤯</span></div>` },
+  { id: "subtitle", name: "Subtitle bar", d: "Clean sound-off captions under the action", html: `<div class="sp cp-sub"><i class="v"></i><span class="b">same box, <u>half</u> the price</span></div>` },
+  { id: "none", name: "No captions", d: "The type is already the story", html: `<div class="sp cp-none"><span>Aa</span></div>` },
+];
+const HOOK_DEFAULT = ["shock", "pov", "interrupt", "claim", "question"];
+const hookName = (id) => HOOKS.find((h) => h.id === id)?.name || id;
+const captionName = (id) => CAPTIONS.find((c) => c.id === id)?.name || "Bold word-pop";
+
+/* a style = the full recipe of a brief, minus what is specific to one video */
+const RECIPE_KEYS = ["format", "duration", "styles", "energy", "music", "sfx", "trend", "captions", "hooks", "story", "beats", "brand"];
+const recipeOf = (b) => JSON.parse(JSON.stringify(Object.fromEntries(RECIPE_KEYS.filter((k) => b?.[k] != null).map((k) => [k, b[k]]))));
+const recipeChips = (r) => [
+  ...(r.styles || []).map((id) => STYLES.find((s) => s.id === id)?.name).filter(Boolean),
+  MUSIC.find((m) => m.id === r.music)?.name, r.trend?.on && "Trend-matched", SOUND.find((s) => s.id === r.sfx)?.name,
+  r.captions && r.captions !== "none" && captionName(r.captions), r.hooks?.length && `${r.hooks.length} hook formulas`,
+].filter(Boolean);
+
+/* ---------- style library ---------- */
+function styleCard(s) {
+  const r = s.recipe || {}, cols = r.brand?.colors || [];
+  return `<article class="scard">
+    <div class="sart">${s.posterAssetId ? `<img src="${blobUrl(s.posterAssetId)}" alt="" loading="lazy">` : `<div class="ph" style="background:${esc(cols[0] || "var(--accent)")}"></div>`}
+      <div class="swatch">${cols.slice(0, 4).map((c) => `<i style="background:${esc(c)}"></i>`).join("")}</div></div>
+    <div class="smeta"><span class="eyebrow">${esc(s.fromName || "Saved style")}</span><h3>${esc(s.name)}</h3>
+      <div class="chips">${recipeChips(r).slice(0, 5).map((c) => `<span>${esc(c)}</span>`).join("")}</div>
+      <div class="row"><button class="btn sm primary" data-use-style="${esc(s.id)}">${ICON.wand}Use this style</button>
+        <button class="btn sm ghost icon-only" data-del-style="${esc(s.id)}" aria-label="Delete ${esc(s.name)}">${ICON.x}</button></div></div>
+  </article>`;
+}
+function bindStyleCards(root) {
+  $$("[data-use-style]", root).forEach((b) => (b.onclick = () => useStyle(b.dataset.useStyle)));
+  $$("[data-del-style]", root).forEach((b) => (b.onclick = async () => {
+    if (b.dataset.arm !== "1") { b.dataset.arm = "1"; b.classList.add("danger"); b.innerHTML = "Delete?"; setTimeout(() => { if (b.isConnected) { b.dataset.arm = ""; b.classList.remove("danger"); b.innerHTML = ICON.x; } }, 3000); return; }
+    try { await dbw.del(`styles/${b.dataset.delStyle}`); toast("Style deleted"); } catch { toast("Could not delete the style"); }
+  }));
+}
+function useStyle(sid) {
+  const s = ST.styles.find((x) => x.id === sid); if (!s) return;
+  let draft = null; try { draft = JSON.parse(localStorage.getItem("cv-brief") || "null"); } catch {}
+  const next = { ...freshBrief(), ...(draft || {}), ...JSON.parse(JSON.stringify(s.recipe || {})), styleId: s.id, styleName: s.name };
+  try { localStorage.setItem("cv-brief", JSON.stringify(next)); } catch {}
+  if (ST.route.view === "create") VIEWS.create.enter(); else go({ view: "create" });
+  toast(`“${s.name}” loaded into the brief`);
+}
+function saveStyleSheet({ recipe, posterAssetId = null, fromName = "", fromPid = null, fromVid = null, suggest = "" }) {
+  if (!CAP.db) return toast("Open this page on claude.ai to save styles");
+  sheet({
+    title: "Save to the style library", sub: "The full recipe: look, motion, music, sound design, captions and hook formulas. It becomes a tile in the Brief Builder.",
+    body: `<div class="field"><label for="stName">Style name</label><input id="stName" maxlength="60" value="${esc(suggest)}" placeholder="e.g. Red Swiss techno"></div>
+      <div class="field"><label>What gets saved</label><div class="chips">${recipeChips(recipe).map((c) => `<span>${esc(c)}</span>`).join("") || "<span>Defaults</span>"}${(recipe.brand?.colors || []).map((c) => `<span class="cdot"><i style="background:${esc(c)}"></i>${esc(c)}</span>`).join("")}</div></div>`,
+    foot: `<button class="btn" data-close>Cancel</button><button class="btn primary" id="stSave">${ICON.bookmark}Save style</button>`,
+    onMount: (s) => {
+      const inp = $("#stName", s); setTimeout(() => inp.focus(), 30);
+      $("#stSave", s).onclick = async (e) => {
+        const name = inp.value.trim(); if (!name) return inp.focus();
+        e.currentTarget.disabled = true;
+        try {
+          await dbw.set(`styles/${newId("s")}`, { name, recipe, posterAssetId, fromName, fromPid, fromVid, createdAt: now() });
+          closeSheet(); toast(`“${name}” saved to the style library`);
+        } catch { e.currentTarget.disabled = false; toast("Could not save the style"); }
+      };
+    },
+  });
+}
+
+/* ---------- Hook lab: 5 openings, you pick one ---------- */
+function hookLabHTML(r) {
+  const H = r.hookOptions || [];
+  if (!H.length) return r.type === "hooks" || r.hooks?.length ? `<div class="hooklab wait"><div class="hl-h">${ICON.hook}<b>Hook lab</b><small>${r.status === "sent" || r.status === "working" ? "Claude is building 5 openings…" : ""}</small></div></div>` : "";
+  const picked = r.hookPick;
+  return `<div class="hooklab"><div class="hl-h">${ICON.hook}<b>Hook lab</b><small>${picked ? `You picked “${esc(H.find((h) => h.id === picked)?.name || picked)}”` : "Pick the first 2 seconds"}</small></div>
+    <div class="hooks">${H.map((h, i) => `<article class="hk ${picked === h.id ? "on" : ""} ${picked && picked !== h.id ? "off" : ""}">
+      <button class="flip" data-hook-view="${esc(r.id)}" data-i="${i}" aria-label="Play hook ${i + 1}: ${esc(h.name)}">${(h.frames || []).map((f, k) => `<img src="${blobUrl(f.assetId || f)}" alt="" ${k ? "" : `class="on"`}>`).join("")}
+        <span class="n">${pad(i + 1)}</span>${h.rec ? `<span class="rec">${ICON.sparkle}Claude's pick</span>` : ""}</button>
+      <div class="hk-m"><b>${esc(h.name)}</b><small>${[h.formula && hookName(h.formula) !== h.name && hookName(h.formula), h.score && `${h.score}/10`].filter(Boolean).map(esc).join(" · ")}</small>${h.line ? `<q>${esc(h.line)}</q>` : ""}</div>
+      ${picked ? (picked === h.id ? `<span class="pill done"><i></i>Picked</span>` : "") : `<button class="btn sm ${h.rec ? "primary" : ""}" data-hook-pick="${esc(r.id)}" data-h="${esc(h.id)}">${ICON.check}Pick</button>`}
+    </article>`).join("")}</div></div>`;
+}
+let flipTimer = 0;
+function startFlips() {
+  clearInterval(flipTimer);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  flipTimer = setInterval(() => {
+    const els = $$(".flip"); if (!els.length) return clearInterval(flipTimer);
+    els.forEach((f) => { const im = $$("img", f); if (im.length < 2) return; const i = im.findIndex((x) => x.classList.contains("on")); im[i]?.classList.remove("on"); im[(i + 1) % im.length].classList.add("on"); });
+  }, 520);
+}
+function openHook(pid, rid, i) {
+  const r = requestsOf(pid).find((x) => x.id === rid); const h = r?.hookOptions?.[i]; if (!h) return;
+  sheet({
+    wide: true, title: `Hook ${pad(i + 1)} · ${esc(h.name)}`, sub: esc([hookName(h.formula), h.line && `“${h.line}”`, h.note].filter(Boolean).join(" · ")),
+    body: `<div class="hk-frames">${(h.frames || []).map((f, k) => `<figure><img src="${blobUrl(f.assetId || f)}" alt="Hook ${i + 1}, frame ${k + 1}"><figcaption class="eyebrow">${f.t != null ? fmtTC(f.t) : `frame ${k + 1}`}</figcaption></figure>`).join("")}</div>`,
+    foot: `${i > 0 ? `<button class="btn" id="hkPrev">${ICON.fprev}Previous</button>` : ""}${i < r.hookOptions.length - 1 ? `<button class="btn" id="hkNext">Next${ICON.fnext}</button>` : ""}${r.hookPick ? "" : `<button class="btn primary" id="hkPick">${ICON.check}Pick this hook</button>`}<button class="btn dark" data-close>Done</button>`,
+    onMount: (s) => {
+      $("#hkPrev", s) && ($("#hkPrev", s).onclick = () => openHook(pid, rid, i - 1));
+      $("#hkNext", s) && ($("#hkNext", s).onclick = () => openHook(pid, rid, i + 1));
+      $("#hkPick", s) && ($("#hkPick", s).onclick = () => { closeSheet(); pickHook(pid, rid, h.id); });
+    },
+  });
+}
+function pickHook(pid, rid, hid) {
+  const r = requestsOf(pid).find((x) => x.id === rid), h = r?.hookOptions?.find((x) => x.id === hid), p = P(pid); if (!h) return;
+  sheet({
+    title: `Pick “${esc(h.name)}”`, sub: "This opening goes into the film. Add a note if you want a twist on it.",
+    body: `<div class="field"><label for="hkNote">Note (optional)</label><textarea id="hkNote" maxlength="800" placeholder="e.g. Use this hook but with the 48 H number from hook 3."></textarea></div>`,
+    foot: `<button class="btn" data-close>Cancel</button><button class="btn primary" id="hkGo">${ICON.send}Send pick to Claude</button>`,
+    onMount: (s) => ($("#hkGo", s).onclick = async (e) => {
+      e.currentTarget.disabled = true;
+      const note = $("#hkNote", s).value.trim(), path = `projects/${pid}/requests/${rid}`;
+      const text = `Motion Studio · HOOK PICKED ${rid}\nProject: ${p?.name || pid}\nHook: ${h.id} · ${h.name}${h.formula && hookName(h.formula) !== h.name ? ` (${hookName(h.formula)})` : ""}${h.line ? ` · “${h.line}”` : ""}${note ? `\nNote: “${note}”` : ""}\nBuild this opening into the film${r.type === "hooks" ? " and post preview frames" : ""}.\nData: ${path}`;
+      const thread = await notifyClaude(text, $("#panel") || e.currentTarget);
+      try { await dbw.update(path, { hookPick: h.id, hookNote: note || null, hookPickedAt: now(), ...(r.type === "hooks" ? { status: "working" } : {}) }); touchProject(pid); }
+      catch { e.currentTarget.disabled = false; return toast("Could not save the pick"); }
+      closeSheet(); if (thread) toast("Hook sent to Claude"); else fallbackSheet(text, "Hook pick");
+    }),
+  });
+}
+function openHookLabSheet(pid, ver) {
+  if (!CAP.db) return toast("Open this page on claude.ai to use the Hook lab");
+  const p = P(pid), sel = new Set(p?.brief?.hooks?.length ? p.brief.hooks : HOOK_DEFAULT);
+  sheet({
+    title: "Hook lab", sub: `Claude builds 5 new openings for ${esc(ver?.label || "this video")} and posts them as key frames. You pick the winner; nothing renders before that.`,
+    body: `<div class="field"><label>Hook formulas to try</label><div class="hookf" id="hkF">${HOOKS.map((h) => `<button data-hf="${h.id}" aria-pressed="${sel.has(h.id)}"><b>${h.name}</b><small>${esc(h.ex)}</small></button>`).join("")}</div></div>
+      <div class="field"><label for="hkBrief">Angle (optional)</label><input id="hkBrief" maxlength="200" placeholder="e.g. Lead with the price, talk to restaurant owners"></div>`,
+    foot: `<button class="btn" data-close>Cancel</button><button class="btn primary" id="hkSend">${ICON.hook}Generate 5 hooks</button>`,
+    onMount: (s) => {
+      $$("[data-hf]", s).forEach((b) => (b.onclick = () => { const id = b.dataset.hf; sel.has(id) ? sel.delete(id) : sel.add(id); b.setAttribute("aria-pressed", sel.has(id)); $("#hkSend", s).disabled = !sel.size; }));
+      $("#hkSend", s).onclick = async (e) => {
+        e.currentTarget.disabled = true;
+        const rid = newId("r"), hooks = [...sel], angle = $("#hkBrief", s).value.trim(), path = `projects/${pid}/requests/${rid}`;
+        const text = `Motion Studio · HOOK LAB ${rid}\nProject: ${p?.name || pid} · ${ver?.label || ""}\nFormulas: ${hooks.map(hookName).join(", ")}${angle ? `\nAngle: “${angle}”` : ""}\nBuild 5 alternative openings (first 2 s) as key frames, 3–4 frames each, and post them as hookOptions. Mark your favourite. No render until a hook is picked.\nData: ${path}`;
+        const thread = await notifyClaude(text, e.currentTarget);
+        try { await dbw.set(path, { type: "hooks", status: "sent", versionId: ver?.id || null, versionLabel: ver?.label || null, hooks, angle: angle || null, createdAt: now(), notified: !!thread, threadId: thread && thread !== "sent" ? thread : null, text }); touchProject(pid); }
+        catch { e.currentTarget.disabled = false; return toast("Could not save the request"); }
+        closeSheet(); if (R) { R.tab = "requests"; renderRail(); }
+        if (thread) toast("Hook lab sent to Claude"); else fallbackSheet(text, "Hook lab");
+      };
+    },
+  });
+}
+
+/* ---------- AI footage: every shot is quoted, nothing generates without a click ---------- */
+const SHOT_STATUS = { requested: ["open", "Waiting for a quote"], quoted: ["check", "Quoted"], approved: ["prog", "Generating"], done: ["done", "Ready"], skipped: ["", "Skipped"] };
+function shotsHTML(r) {
+  const S = r.shots || []; if (!S.length) return "";
+  const quoted = S.filter((x) => x.status === "quoted"), sum = quoted.reduce((n, x) => n + (+x.credits || 0), 0);
+  return `<div class="shots"><div class="hl-h">${ICON.camera}<b>AI footage</b><small>${plural(S.length, "shot")}${quoted.length ? ` · ${sum} credits to approve` : ""}</small></div>
+    ${S.map((x, i) => { const [cls, lab] = SHOT_STATUS[x.status] || SHOT_STATUS.requested; return `<div class="shot">
+      <div class="th">${x.assetId ? (x.kind === "video" ? `<video src="${blobUrl(x.assetId)}" muted loop playsinline preload="metadata" aria-label="Shot ${i + 1}"></video>` : `<img src="${blobUrl(x.assetId)}" alt="Shot ${i + 1}">`) : `<span>${pad(i + 1)}</span>`}</div>
+      <div class="sm"><b>${esc(x.prompt)}</b><small>${x.kind === "image" ? "Still → animated" : "Video clip"}${x.model ? ` · ${esc(x.model)}` : ""}${x.credits != null ? ` · <span class="num">${esc(String(x.credits))}</span> credits` : ""}</small>${x.note ? `<small class="cn">${esc(x.note)}</small>` : ""}</div>
+      <div class="sa">${cls ? `<span class="pill ${cls}"><i></i>${lab}</span>` : `<span class="pill">${lab}</span>`}
+        ${x.status === "quoted" ? `<button class="btn sm primary" data-shot="${esc(r.id)}" data-i="${i}" data-a="approve">Approve</button><button class="btn sm ghost" data-shot="${esc(r.id)}" data-i="${i}" data-a="skip">Skip</button>` : ""}</div>
+    </div>`; }).join("")}
+    ${quoted.length > 1 ? `<button class="btn sm primary" data-shot="${esc(r.id)}" data-a="all">${ICON.check}Approve all ${quoted.length} · ${sum} credits</button>` : ""}</div>`;
+}
+async function shotAction(pid, rid, a, i, btn) {
+  const r = requestsOf(pid).find((x) => x.id === rid); if (!r) return;
+  const path = `projects/${pid}/requests/${rid}`, p = P(pid);
+  const shots = JSON.parse(JSON.stringify(r.shots || []));
+  const idx = a === "all" ? shots.map((x, k) => (x.status === "quoted" ? k : -1)).filter((k) => k >= 0) : [i];
+  const st = a === "skip" ? "skipped" : "approved";
+  idx.forEach((k) => (shots[k].status = st));
+  btn.disabled = true;
+  try { await dbw.update(path, { shots }); } catch { btn.disabled = false; return toast("Could not save"); }
+  if (st === "skipped") return toast("Shot skipped");
+  const credits = idx.reduce((n, k) => n + (+shots[k].credits || 0), 0);
+  const text = `Motion Studio · FOOTAGE APPROVED ${rid}\nProject: ${p?.name || pid}\nGenerate ${plural(idx.length, "shot")} (${credits} credits):\n${idx.map((k) => `  ${pad(k + 1)} ${shots[k].prompt}${shots[k].model ? ` · ${shots[k].model}` : ""}`).join("\n")}\nUpload each result as an asset, set shots[n].assetId and status "done".\nData: ${path}`;
+  const thread = await notifyClaude(text, $("#panel") || btn);
+  if (thread) toast(`${plural(idx.length, "shot")} approved`); else fallbackSheet(text, "Footage approval");
+}
+function bindViral(root, pid) {
+  $$("[data-hook-pick]", root).forEach((b) => (b.onclick = () => pickHook(pid, b.dataset.hookPick, b.dataset.h)));
+  $$("[data-hook-view]", root).forEach((b) => (b.onclick = () => openHook(pid, b.dataset.hookView, +b.dataset.i)));
+  $$("[data-shot]", root).forEach((b) => (b.onclick = () => shotAction(pid, b.dataset.shot, b.dataset.a, +b.dataset.i, b)));
+  $$(".shot video", root).forEach((v) => { v.onmouseenter = () => v.play().catch(() => {}); v.onmouseleave = () => v.pause(); });
+  startFlips();
+}
+
 /* ===================== Home: two doors, projects, requests in flight ===================== */
-const REQ_LABEL = { corrections: "Corrections", render: "Final render", brief: "New video brief", changes: "Preview changes" };
+const REQ_LABEL = { corrections: "Corrections", render: "Final render", brief: "New video brief", changes: "Preview changes", hooks: "Hook lab", footage: "AI footage" };
 const REQ_STEPS = ["Sent", "Working", "Preview", "Approved", "Rendered"];
 const reqStep = (s) => ({ sent: 0, working: 1, preview_ready: 2, approved: 3, rendering: 3, done: 4, failed: 1 }[s] ?? 0);
 const reqStatusPill = (s) => ({
@@ -903,15 +1217,15 @@ VIEWS.home = {
           <p>Start a new motion video from a brief, or open a past cut and mark it up frame by frame. Your comments, drawings and approvals go straight to Claude, and every version stays here.</p>
         </div>
         <div class="flow" aria-label="How a video moves through the studio">
-          <div><span class="n">01</span><b>Brief</b><span>Pick style, music and sound</span></div>
-          <div><span class="n">02</span><b>30 key frames</b><span>Mark them up before any render</span></div>
+          <div><span class="n">01</span><b>Brief</b><span>Style, hooks, trend audio, AI shots</span></div>
+          <div><span class="n">02</span><b>5 hooks + 30 key frames</b><span>Pick the opening, mark up the frames</span></div>
           <div><span class="n">03</span><b>Final render</b><span>Review it, correct, version up</span></div>
         </div>
       </section>
       <section class="doors">
         <button class="door blue" id="doorCreate">
           <div class="door-art" aria-hidden="true"><i></i><i></i><i></i></div>
-          <div><div class="eyebrow">New</div><h2>Create a new video</h2><p>Build the brief from tiles: visual style, energy, music, sound design, story beats and brand. Claude answers with 30 key frames.</p></div>
+          <div><div class="eyebrow">New</div><h2>Create a new video</h2><p>Build the brief from tiles: style, hooks, trend-matched music, captions, AI footage and brand. Claude answers with 5 hooks and 30 key frames.</p></div>
           <span class="go">${ICON.go}</span>
         </button>
         <button class="door" id="doorReview">
@@ -925,13 +1239,17 @@ VIEWS.home = {
         ${projects.length ? `<div class="projects">${projectCards}</div>` :
           `<div class="card empty"><b>${CAP.db ? (ST.booted ? "No projects yet" : "Loading the studio…") : "Open on claude.ai to load your projects"}</b><span>${CAP.db ? "Create a new video, or ask Claude to add a past one." : "Projects, versions and comments live in this artifact's database."}</span></div>`}
       </section>
+      <section id="library"><div class="sec-h"><h2>Style library</h2><span class="eyebrow">${plural(ST.styles.length, "recipe")}</span></div>
+        ${ST.styles.length ? `<div class="styles">${ST.styles.map(styleCard).join("")}</div>` : `<div class="card empty"><b>No saved styles yet</b><span>Press “Save style” on any video or brief. The full recipe (look, motion, music, sound, captions and hooks) becomes a tile in the Brief Builder.</span></div>`}
+      </section>
       ${flying.length ? `<section><div class="sec-h"><h2>With Claude</h2><span class="eyebrow">${plural(flying.length, "request")} in flight</span></div>
         <div class="inflight">${flying.map((r) => `<button class="req-row" data-pid="${esc(r.p.id)}" data-tab="requests">
-          <span class="ic">${r.type === "brief" ? ICON.wand : r.type === "render" ? ICON.film : ICON.send}</span>
+          <span class="ic">${r.type === "hooks" ? ICON.hook : r.type === "brief" ? ICON.wand : r.type === "render" ? ICON.film : ICON.send}</span>
           <span><b>${esc(REQ_LABEL[r.type] || "Request")} · ${esc(r.p.name)}</b><small>${esc(r.versionLabel || "")}${r.commentIds?.length ? ` · ${plural(r.commentIds.length, "comment")}` : ""} · ${ago(r.createdAt)}</small></span>
           ${reqStatusPill(r.status)}</button>`).join("")}</div></section>` : ""}
     </main>`;
     $("#doorCreate").onclick = () => go({ view: "create" });
+    bindStyleCards($("#library"));
     $("#doorReview").onclick = () => { if (projects.length === 1) go({ view: "project", pid: projects[0].id }); else $("#projects").scrollIntoView({ behavior: "smooth" }); };
     $$("[data-pid]", root).forEach((b) => (b.onclick = () => { VIEWS.project.pendingTab = b.dataset.tab || null; go({ view: "project", pid: b.dataset.pid }); }));
   },
@@ -1024,12 +1342,20 @@ function renderVbar() {
   el.innerHTML = `
     <div class="vsel" role="group" aria-label="Versions">${vs.map((v) => `<button data-v="${esc(v.id)}" aria-pressed="${!R.compare && v.id === R.vid}" title="${esc(v.title || "")}">${esc(v.label || "v" + v.n)}<small>${v.kind === "frames" ? "frames" : ago(v.createdAt)}</small></button>`).join("") || `<button disabled>No versions yet</button>`}</div>
     <button class="btn sm ${R.compare ? "dark" : ""}" id="cmpBtn" ${vs.filter((v) => v.kind !== "frames").length < 2 ? "disabled" : ""} aria-pressed="${!!R.compare}">${ICON.compare}Compare</button>
+    <button class="btn sm" id="hookBtn" ${!R.ver ? "disabled" : ""}>${ICON.hook}Hook lab</button>
     <span class="grow"></span>
+    <button class="btn sm ghost" id="styleBtn" ${!R.ver ? "disabled" : ""}>${ICON.bookmark}Save style</button>
     <button class="btn sm ghost" id="rulesBtn">${ICON.book}Brief &amp; rules</button>
     <button class="btn sm" id="dlBtn" ${!R.ver || R.ver.kind === "frames" ? "disabled" : ""}>${ICON.download}Download</button>`;
   $$("[data-v]", el).forEach((b) => (b.onclick = () => setVersion(b.dataset.v)));
   $("#cmpBtn").onclick = toggleCompare;
   $("#rulesBtn").onclick = openRules;
+  $("#hookBtn").onclick = () => openHookLabSheet(R.pid, R.ver);
+  $("#styleBtn").onclick = () => {
+    const p = P(R.pid), v = R.ver;
+    const recipe = recipeOf({ ...freshBrief(), ...(p.brief || { brand: { colors: [], font: "", rules: p.rules || "" } }), duration: Math.round(v?.duration || p.duration || 30) });
+    saveStyleSheet({ recipe, posterAssetId: v?.posterAssetId || null, fromName: `${p.name} · ${v?.label || ""}`, fromPid: R.pid, fromVid: v?.id || null, suggest: p.name });
+  };
   $("#dlBtn").onclick = download;
 }
 
@@ -1594,6 +1920,7 @@ function renderRequests(el) {
   el.innerHTML = `<div id="reqAnchor"></div>` + (reqs.length ? reqs.map(requestCard).join("") : `<div class="empty"><b>No requests yet</b><span>Send corrections from the Comments tab. Each pass shows up here with its preview frames.</span></div>`);
   $$("[data-rq]", el).forEach((b) => (b.onclick = () => requestAction(b.dataset.rq, b.dataset.a, b)));
   $$(".pv button", el).forEach((b) => (b.onclick = () => openPreview(b.dataset.rq, +b.dataset.i)));
+  bindViral(el, R.pid);
 }
 function requestCard(r) {
   const k = reqStep(r.status), n = r.commentIds?.length || 0;
@@ -1602,8 +1929,9 @@ function requestCard(r) {
     <div class="top"><div><h4>${esc(REQ_LABEL[r.type] || "Request")}${r.versionLabel ? ` · ${esc(r.versionLabel)}` : ""}${rv ? ` → ${esc(rv.label)}` : ""}</h4><small>${ago(r.createdAt)}${n ? ` · ${plural(n, "comment")}` : ""}${r.notified === false ? " · waiting for Claude" : ""}</small></div>${reqStatusPill(r.status)}</div>
     <div class="steps" aria-label="Progress">${REQ_STEPS.map((s, i) => `<div class="${i < k || (i === k && r.status === "done") ? "on" : i === k ? "on now" : ""}"><i></i><span>${s}</span></div>`).join("")}</div>
     ${r.claudeNote ? `<div class="claude-note">${ICON.sparkle}<span>${esc(r.claudeNote)}</span></div>` : ""}
+    ${hookLabHTML(r)}${shotsHTML(r)}
     ${r.previewFrames?.length ? `<div class="pv">${r.previewFrames.map((f, i) => `<button data-rq="${esc(r.id)}" data-i="${i}" style="background-image:url('${blobUrl(f.assetId)}')" aria-label="Preview frame at ${fmtTC(f.t)}"><span>${fmtTC(f.t)}</span></button>`).join("")}</div>` : ""}
-    ${r.status === "preview_ready" ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-rq="${esc(r.id)}" data-a="approve">${ICON.check}Approve &amp; render</button><button class="btn sm" data-rq="${esc(r.id)}" data-a="changes">Ask for changes</button></div>` : ""}
+    ${r.status === "preview_ready" ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary sm" data-rq="${esc(r.id)}" data-a="approve" ${r.hookOptions?.length && !r.hookPick ? `disabled title="Pick a hook first"` : ""}>${ICON.check}Approve &amp; render</button><button class="btn sm" data-rq="${esc(r.id)}" data-a="changes">Ask for changes</button>${r.hookOptions?.length && !r.hookPick ? `<small>Pick a hook first</small>` : ""}</div>` : ""}
     ${rv ? `<button class="btn sm" data-rq="${esc(r.id)}" data-a="open">${ICON.film}Open ${esc(rv.label)}</button>` : ""}
     ${r.notified === false && r.status === "sent" ? `<button class="btn sm ghost" data-rq="${esc(r.id)}" data-a="resend">${ICON.send}Send to Claude again</button>` : ""}
   </article>`;
@@ -1614,7 +1942,8 @@ async function requestAction(rid, a, btn) {
   if (a === "open") return setVersion(r.resultVersion);
   if (a === "approve") {
     btn.disabled = true;
-    const text = `Motion Studio · APPROVED ${rid}\nProject: ${p.name} · ${r.versionLabel || ""}\nThe preview frames look right: go ahead with the final render.\nData: ${path}`;
+    const hk = r.hookPick && r.hookOptions?.find((h) => h.id === r.hookPick);
+    const text = `Motion Studio · APPROVED ${rid}\nProject: ${p.name} · ${r.versionLabel || ""}\nThe preview frames look right: go ahead with the final render.${hk ? `\nOpening: hook ${hk.id} · ${hk.name}` : ""}\nData: ${path}`;
     const thread = await notifyClaude(text, btn);
     try { await dbw.update(path, { status: "approved", approvedAt: now() }); } catch { toast("Could not save the approval"); btn.disabled = false; return; }
     if (thread) toast("Approved: Claude is rendering"); else fallbackSheet(text, "Approval");
@@ -1768,17 +2097,18 @@ const PIPELINE = [
   "Key-frame preview first; the full render only after approval in Motion Studio",
 ];
 const freshBrief = () => ({ name: "", client: "", url: "", images: [], library: false, format: "9:16", duration: 30, styles: ["kinetic"], energy: "hype",
-  music: "electrofunk", sfx: "glassy", story: "Showreel", beats: STORY.Showreel.slice(), brand: { colors: ["#2C5BFF", "#0B0C10", "#FFFFFF"], font: "Geist", rules: "" }, notes: "" });
+  music: "electrofunk", sfx: "glassy", trend: { on: true, link: "" }, captions: "wordpop", hooks: HOOK_DEFAULT.slice(), shots: [], story: "Showreel", beats: STORY.Showreel.slice(), brand: { colors: ["#2C5BFF", "#0B0C10", "#FFFFFF"], font: "Geist", rules: "" }, notes: "" });
 let CB = null;
 const saveDraft = () => { try { localStorage.setItem("cv-brief", JSON.stringify(CB)); } catch {} };
 const loadDraft = () => { try { const j = JSON.parse(localStorage.getItem("cv-brief") || "null"); if (j && j.beats) return { ...freshBrief(), ...j }; } catch {} return freshBrief(); };
+const MAX_SHOTS = 6;
 
 const waveBars = (seed) => { let s = seed * 9301 + 49297; return Array.from({ length: 28 }, (_, i) => { s = (s * 9301 + 49297) % 233280; return 0.25 + (s / 233280) * 0.75 * (0.6 + 0.4 * Math.sin(i * 0.6 + seed)); }); };
 
 VIEWS.create = {
   enter() { CB = loadDraft(); this.render(); },
   leave() { SYNTH.stop(); },
-  update() {},
+  update(kind) { if (kind === "styles") this.paintLibrary(); },
   render() {
     const root = $("#view");
     const tileSel = (arr, id) => arr.includes(id);
@@ -1786,6 +2116,8 @@ VIEWS.create = {
       <div class="builder">
         <header class="create-h"><span class="eyebrow">New video · brief builder</span><h1 style="margin-top:14px">Build the brief.<br><em>Claude builds the film.</em></h1>
           <p>Pick the ingredients below. Claude turns them into a coded motion film and sends you 30 key frames to mark up. Nothing is rendered until you approve.</p></header>
+
+        <section class="bsec lib" id="lib"></section>
 
         <section class="bsec"><header><h2><span class="n">01</span>Project</h2><small>Who is it for</small></header>
           <div class="two"><div class="field"><label for="bName">Video name</label><input id="bName" maxlength="80" placeholder="e.g. Spring launch reel" value="${esc(CB.name)}"></div>
@@ -1797,28 +2129,44 @@ VIEWS.create = {
             <label class="drop" for="bFiles" title="Add images or clips">${ICON.upload}<input id="bFiles" type="file" accept="image/*,video/mp4,video/quicktime" multiple class="sr"></label></div></div>
           <label style="display:flex;gap:10px;align-items:center;font-size:14px"><input type="checkbox" id="bLib" ${CB.library ? "checked" : ""} style="width:18px;height:18px;accent-color:var(--accent)"> Use the Création Virale client footage library (24 cleared clips)</label></section>
 
-        <section class="bsec"><header><h2><span class="n">03</span>Format &amp; length</h2><small>${CB.duration} s = ${CB.duration * 2} beats at 120 BPM</small></header>
+        <section class="bsec"><header><h2><span class="n">03</span>AI footage</h2><small>Generated shots that live inside the motion</small></header>
+          <p class="hint">${ICON.camera}<span>Describe the shots you wish you had. Claude quotes each one in credits; nothing is generated until you approve it in the project.</span></p>
+          <div class="beats-list" id="shots">${CB.shots.map((x, i) => `<div class="beat-row shot-row"><span class="ix">${pad(i + 1)}</span><label class="sr" for="shot${i}">Shot ${i + 1}</label><input id="shot${i}" data-shot-p="${i}" maxlength="240" placeholder="e.g. Slow-motion top-down: kraft boxes stacking on a steel counter" value="${esc(x.prompt)}">
+            <span class="mv"><select data-shot-k="${i}" aria-label="Shot ${i + 1} type"><option value="video" ${x.kind !== "image" ? "selected" : ""}>Video</option><option value="image" ${x.kind === "image" ? "selected" : ""}>Still</option></select><button data-rms="${i}" aria-label="Remove shot">${ICON.x}</button></span></div>`).join("")}</div>
+          <button class="btn sm" id="addShot" style="justify-self:start" ${CB.shots.length >= MAX_SHOTS ? "disabled" : ""}>${ICON.plus}Add a shot</button></section>
+
+        <section class="bsec"><header><h2><span class="n">04</span>Format &amp; length</h2><small>${CB.duration} s = ${CB.duration * 2} beats at 120 BPM</small></header>
           <div class="fmt" role="group" aria-label="Aspect ratio">${FORMATS.map((f) => `<button data-fmt="${f.id}" aria-pressed="${CB.format === f.id}"><i style="aspect-ratio:${f.w}/${f.h};${f.w > f.h ? "width:72px;height:auto" : ""}"></i><b>${f.id}</b><small>${f.d}</small></button>`).join("")}</div>
           <div class="seg" role="group" aria-label="Duration">${[15, 30, 45, 60].map((d) => `<button data-dur="${d}" aria-pressed="${CB.duration === d}">${d} s</button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">04</span>Visual style</h2><small>Pick one, or two to blend (the first leads)</small></header>
+        <section class="bsec"><header><h2><span class="n">05</span>Visual style</h2><small>Pick one, or two to blend (the first leads)</small></header>
           <div class="tiles">${STYLES.map((s) => `<button class="tile" data-style="${s.id}" aria-pressed="${tileSel(CB.styles, s.id)}">${s.html}<span class="tag">${CB.styles.indexOf(s.id) + 1 || ""}</span><span class="lab"><b>${s.name}</b><span>${s.d}</span></span></button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">05</span>Energy</h2><small>Sets tempo, cut rate and easing</small></header>
+        <section class="bsec"><header><h2><span class="n">06</span>Energy</h2><small>Sets tempo, cut rate and easing</small></header>
           <div class="energy" role="group" aria-label="Energy">${ENERGY.map((e) => `<button data-energy="${e.id}" aria-pressed="${CB.energy === e.id}"><div class="bars">${e.bars.map((d, i) => `<i style="--d:${d}s;animation-delay:${-i * 0.13}s"></i>`).join("")}</div><b>${e.name}</b><small>${e.d}</small></button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">06</span>Music</h2><small>Press play to hear a two-bar sketch</small></header>
+        <section class="bsec"><header><h2><span class="n">07</span>Hook lab</h2><small>${CB.hooks.length ? `${plural(CB.hooks.length, "formula")} · Claude builds 5 openings` : "Pick at least one"}</small></header>
+          <p class="hint">${ICON.hook}<span>The first 2 seconds decide the scroll. Claude builds 5 alternative openings from these formulas as key frames; you vote for the winner before anything renders.</span></p>
+          <div class="hookf" role="group" aria-label="Hook formulas">${HOOKS.map((h) => `<button data-hf="${h.id}" aria-pressed="${CB.hooks.includes(h.id)}"><b>${h.name}</b><small>${esc(h.ex)}</small></button>`).join("")}</div></section>
+
+        <section class="bsec"><header><h2><span class="n">08</span>Music</h2><small>Press play to hear a two-bar sketch</small></header>
+          <div class="trend ${CB.trend.on ? "on" : ""}"><button class="toggle" id="trendOn" role="switch" aria-checked="${!!CB.trend.on}" aria-label="Match what is trending"><i></i></button>
+            <div><b>${ICON.trend}Match what's trending</b><span>Claude reads this week's trending TikTok sounds for tempo, drop timing and texture, then composes an <em>original</em> track in that style. No copyrighted audio in your ad.</span>
+            ${CB.trend.on ? `<div class="field"><label for="trendLink">A sound you love (optional)</label><input id="trendLink" inputmode="url" maxlength="300" placeholder="TikTok sound or video link" value="${esc(CB.trend.link || "")}"></div>` : ""}</div></div>
           <div class="tiles">${MUSIC.map((m, k) => `<div class="tile" role="button" tabindex="0" data-music="${m.id}" aria-pressed="${CB.music === m.id}"><div class="wave">${waveBars(k + 1).map((h, i) => `<i style="height:${Math.round(h * 100)}%;animation-delay:${-i * 0.05}s"></i>`).join("")}</div><span class="tag">✓</span><span class="lab"><b>${m.name}</b><span>${m.d}</span></span><button class="ply" data-play-m="${m.id}" aria-label="Play ${m.name} sketch">${ICON.play}</button></div>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">07</span>Sound design</h2><small>The UI sounds that back every move</small></header>
+        <section class="bsec"><header><h2><span class="n">09</span>Sound design</h2><small>The UI sounds that back every move</small></header>
           <div class="tiles">${SOUND.map((m, k) => `<div class="tile" role="button" tabindex="0" data-sfx="${m.id}" aria-pressed="${CB.sfx === m.id}"><div class="wave sfx">${waveBars(k + 11).map((h, i) => `<i style="height:${Math.round(h * (i % 7 === 0 ? 100 : 40))}%;animation-delay:${-i * 0.05}s"></i>`).join("")}</div><span class="tag">✓</span><span class="lab"><b>${m.name}</b><span>${m.d}</span></span><button class="ply" data-play-s="${m.id}" aria-label="Play ${m.name} palette">${ICON.play}</button></div>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">08</span>Story beats</h2><small>The order the film tells it</small></header>
+        <section class="bsec"><header><h2><span class="n">10</span>Captions</h2><small>Most people watch with the sound off</small></header>
+          <div class="tiles">${CAPTIONS.map((c) => `<button class="tile" data-cap="${c.id}" aria-pressed="${CB.captions === c.id}">${c.html}<span class="tag">✓</span><span class="lab"><b>${c.name}</b><span>${c.d}</span></span></button>`).join("")}</div></section>
+
+        <section class="bsec"><header><h2><span class="n">11</span>Story beats</h2><small>The order the film tells it</small></header>
           <div class="presets">${Object.keys(STORY).map((k) => `<button class="btn sm ${CB.story === k ? "dark" : ""}" data-story="${esc(k)}">${esc(k)}</button>`).join("")}</div>
           <div class="beats-list" id="beats">${CB.beats.map((b, i) => `<div class="beat-row"><span class="ix">${pad(i + 1)}</span><label class="sr" for="beat${i}">Beat ${i + 1}</label><input id="beat${i}" data-beat="${i}" maxlength="120" value="${esc(b)}"><span class="mv"><button data-mv="${i}:-1" aria-label="Move up" ${i ? "" : "disabled"}>${ICON.up}</button><button data-mv="${i}:1" aria-label="Move down" ${i < CB.beats.length - 1 ? "" : "disabled"}>${ICON.down}</button><button data-rmb="${i}" aria-label="Remove beat">${ICON.x}</button></span></div>`).join("")}</div>
           <button class="btn sm" id="addBeat" style="justify-self:start" ${CB.beats.length >= 8 ? "disabled" : ""}>${ICON.plus}Add a beat</button></section>
 
-        <section class="bsec"><header><h2><span class="n">09</span>Brand</h2><button class="btn sm ghost" id="cvBrand">Use Création Virale brand</button></header>
+        <section class="bsec"><header><h2><span class="n">12</span>Brand</h2><button class="btn sm ghost" id="cvBrand">Use Création Virale brand</button></header>
           <div class="field"><label>Colours (the first one leads)</label><div class="colors" id="cols">${CB.brand.colors.map((c, i) => `<div class="c" style="background:${esc(c)}"><input type="color" value="${esc(c)}" data-col="${i}" aria-label="Brand colour ${i + 1}"><button data-rmc="${i}" aria-label="Remove colour">×</button></div>`).join("")}${CB.brand.colors.length < 6 ? `<button class="add" id="addCol" aria-label="Add a colour">+</button>` : ""}</div></div>
           <div class="two"><div class="field"><label for="bFont">Display typeface</label><select id="bFont">${FONTS.map((f) => `<option ${CB.brand.font === f ? "selected" : ""}>${f}</option>`).join("")}</select></div>
           <div class="field"><label for="bNotes">Must include (optional)</label><input id="bNotes" maxlength="200" placeholder="e.g. the 59× Sushi X result" value="${esc(CB.notes)}"></div></div>
@@ -1828,9 +2176,9 @@ VIEWS.create = {
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><h3>The brief</h3><span class="eyebrow">Live</span></div>
         <div class="meter" id="meter"></div>
         <div class="brief-out" id="briefOut"></div>
-        <button class="btn primary" id="genBtn" style="height:48px">${ICON.wand}Generate 30 key frames</button>
-        <small style="color:var(--muted);font-size:12.5px;line-height:1.45">Claude reads this brief, builds the film in code and posts 30 key frames here as version “preview”. You comment on them like any video, then approve the final render.</small>
-        <button class="btn sm ghost" id="resetBrief" style="justify-self:start">Start over</button>
+        <button class="btn primary" id="genBtn" style="height:48px">${ICON.wand}Generate hooks + 30 key frames</button>
+        <small style="color:var(--muted);font-size:12.5px;line-height:1.45">Claude reads this brief, builds the film in code and posts 5 hook options plus 30 key frames here as version “preview”. You pick a hook, comment on the frames like any video, then approve the final render.</small>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="saveStyle">${ICON.bookmark}Save as style</button><button class="btn sm ghost" id="resetBrief">Start over</button></div>
       </div></aside></main>`;
     this.bind();
     this.paint();
@@ -1877,7 +2225,26 @@ VIEWS.create = {
     on("[data-rm]", "click", (e) => { CB.images.splice(+e.currentTarget.dataset.rm, 1); this.reRender(); });
     $("#bFiles").onchange = (e) => this.upload([...e.target.files]);
     $("#genBtn").onclick = (e) => this.generate(e.currentTarget);
+    on("[data-hf]", "click", (e) => { const id = e.currentTarget.dataset.hf, i = CB.hooks.indexOf(id); i >= 0 ? CB.hooks.splice(i, 1) : CB.hooks.push(id); this.reRender(); });
+    on("[data-cap]", "click", (e) => { CB.captions = e.currentTarget.dataset.cap; this.reRender(); });
+    $("#trendOn").onclick = () => { CB.trend = { ...CB.trend, on: !CB.trend.on }; this.reRender(); };
+    $("#trendLink") && txt("#trendLink", (v) => (CB.trend = { ...CB.trend, link: v.trim() }));
+    on("[data-shot-p]", "input", (e) => { CB.shots[+e.target.dataset.shotP].prompt = e.target.value; saveDraft(); this.paint(); });
+    on("[data-shot-k]", "change", (e) => { CB.shots[+e.target.dataset.shotK].kind = e.target.value; saveDraft(); this.paint(); });
+    on("[data-rms]", "click", (e) => { CB.shots.splice(+e.currentTarget.dataset.rms, 1); this.reRender(); });
+    $("#addShot").onclick = () => { CB.shots.push({ prompt: "", kind: "video" }); this.reRender(); setTimeout(() => $(`#shot${CB.shots.length - 1}`)?.focus(), 20); };
+    $("#saveStyle").onclick = () => saveStyleSheet({ recipe: recipeOf(CB), fromName: CB.client || CB.name || "Brief Builder", suggest: CB.styleName ? "" : [CB.client, STYLES.find((x) => x.id === CB.styles[0])?.name].filter(Boolean).join(" · ") });
+    this.paintLibrary();
     $("#resetBrief").onclick = () => { CB = freshBrief(); this.reRender(); toast("Brief cleared"); };
+  },
+  paintLibrary() {
+    const el = $("#lib"); if (!el) return;
+    const L = ST.styles;
+    el.hidden = !L.length && !CB.styleName;
+    el.innerHTML = `<header><h2>${ICON.bookmark}Style library</h2><small>${L.length ? "Start from a recipe you already love" : ""}</small></header>
+      ${CB.styleName ? `<p class="hint">${ICON.sparkle}<span>Built from “${esc(CB.styleName)}”. Change anything below; the library copy stays as it is.</span></p>` : ""}
+      <div class="slib">${L.map((x) => `<button class="lchip ${CB.styleId === x.id ? "on" : ""}" data-use-style="${esc(x.id)}">${x.posterAssetId ? `<img src="${blobUrl(x.posterAssetId)}" alt="">` : `<i style="background:${esc(x.recipe?.brand?.colors?.[0] || "var(--accent)")}"></i>`}<span><b>${esc(x.name)}</b><small>${esc(recipeChips(x.recipe || {}).slice(0, 2).join(" · "))}</small></span></button>`).join("")}</div>`;
+    bindStyleCards(el);
   },
   reRender() { saveDraft(); const y = scrollY; SYNTH.stop(); this.render(); scrollTo(0, y); },
   async upload(files) {
@@ -1899,23 +2266,27 @@ VIEWS.create = {
       ["FORMAT", `${CB.format} · ${CB.duration} s (${CB.duration * 2} beats at 120 BPM)`],
       ["STYLE", st],
       ["ENERGY", `${en.name} · ${en.d}`],
-      ["MUSIC", `${mu.name} · ${mu.d}`],
+      ["HOOKS", CB.hooks.length ? `5 options from ${CB.hooks.map(hookName).join(", ")}` : "—"],
+      ["MUSIC", `${mu.name} · ${mu.d}${CB.trend.on ? `\n  Trend-matched: original track styled on current trending sounds${CB.trend.link ? `\n  Reference: ${CB.trend.link}` : ""}` : ""}`],
       ["SOUND", `${sd.name} · ${sd.d}`],
+      ["CAPTIONS", captionName(CB.captions)],
+      ...(CB.shots.some((x) => x.prompt.trim()) ? [["AI SHOTS", CB.shots.filter((x) => x.prompt.trim()).map((x, i) => `\n  ${pad(i + 1)} [${x.kind === "image" ? "still" : "video"}] ${x.prompt.trim()}`).join("")]] : []),
+      ...(CB.styleName ? [["LIBRARY", `Built from the saved style “${CB.styleName}”`]] : []),
       ["STORY", CB.beats.filter((b) => b.trim()).map((b, i) => `\n  ${pad(i + 1)} ${b}`).join("")],
       ["BRAND", `${CB.brand.colors.join(" ")} · ${CB.brand.font}${CB.brand.rules ? `\n  ${CB.brand.rules.replace(/\n/g, "\n  ")}` : ""}`],
       ...(CB.notes ? [["INCLUDE", CB.notes]] : []),
-      ["DELIVERY", "30 key frames for review → corrections → final render"],
+      ["DELIVERY", "5 hooks + 30 key frames → pick a hook, corrections → final render"],
     ];
   },
   paint() {
     const out = $("#briefOut"); if (!out) return;
     const s = this.summary();
     out.innerHTML = s.map(([k, v]) => `<b>${k.padEnd(9, " ")}</b>${esc(v)}`).join("\n");
-    const checks = [!!CB.name.trim(), !!(CB.url || CB.images.length || CB.library), CB.styles.length > 0, !!CB.music, !!CB.sfx, CB.beats.filter((b) => b.trim()).length >= 2, CB.brand.colors.length > 0];
+    const checks = [!!CB.name.trim(), !!(CB.url || CB.images.length || CB.library || CB.shots.some((x) => x.prompt.trim())), CB.styles.length > 0, !!CB.music, !!CB.sfx, CB.beats.filter((b) => b.trim()).length >= 2, CB.brand.colors.length > 0, CB.hooks.length > 0];
     const pc = Math.round((checks.filter(Boolean).length / checks.length) * 100);
-    const missing = [!checks[0] && "a name", !checks[1] && "a source", !checks[5] && "two story beats"].filter(Boolean);
+    const missing = [!checks[0] && "a name", !checks[1] && "a source", !checks[5] && "two story beats", !checks[7] && "a hook formula"].filter(Boolean);
     $("#meter").innerHTML = `<div class="t"><i style="width:${pc}%"></i></div><small><span>${pc === 100 ? "Ready to send" : `Add ${missing.join(", ") || "the rest"}`}</span><span class="num">${pc}%</span></small>`;
-    $("#genBtn").disabled = !(checks[0] && checks[1] && checks[5]);
+    $("#genBtn").disabled = !(checks[0] && checks[1] && checks[5] && checks[7]);
   },
   async generate(btn) {
     if (!CAP.db) return toast("Open this page on claude.ai to send the brief");
@@ -1923,13 +2294,14 @@ VIEWS.create = {
     const slug = (CB.name || "video").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "video";
     const pid = `${slug}-${Math.random().toString(36).slice(2, 6)}`, rid = newId("r");
     const summary = this.summary().map(([k, v]) => `${k}: ${v}`).join("\n");
-    const text = `Motion Studio · NEW VIDEO BRIEF ${rid}\n${summary}\n\nBuild the film, then post 30 key frames as a “frames” version for review. Do not render the video until it is approved.\nData: projects/${pid}/requests/${rid}`;
+    const text = `Motion Studio · NEW VIDEO BRIEF ${rid}\n${summary}\n\nBuild the film, then post 30 key frames as a “frames” version for review, and 5 alternative openings (first 2 s, 3–4 frames each) as hookOptions on this request. Quote every AI shot (model + credits) in shots[] and generate nothing until it is approved. Do not render the video until a hook is picked and the frames are approved.\nData: projects/${pid}/requests/${rid}`;
     const thread = await notifyClaude(text, btn);
     try {
       await dbw.set(`projects/${pid}`, { name: CB.name.trim(), client: CB.client.trim() || null, format: CB.format, duration: CB.duration, status: "briefing",
         brief: { ...JSON.parse(JSON.stringify(CB)), summary }, rules: [CB.brand.rules, "Never render the full video before the key frames are approved."].filter(Boolean).join("\n"),
         pipeline: PIPELINE, createdAt: now(), updatedAt: now() });
-      await dbw.set(`projects/${pid}/requests/${rid}`, { type: "brief", status: "sent", versionLabel: "brief", createdAt: now(), notified: !!thread, threadId: thread && thread !== "sent" ? thread : null, text });
+      const shots = CB.shots.filter((x) => x.prompt.trim()).map((x) => ({ id: newId("sh"), prompt: x.prompt.trim(), kind: x.kind || "video", status: "requested" }));
+      await dbw.set(`projects/${pid}/requests/${rid}`, { type: "brief", status: "sent", versionLabel: "brief", createdAt: now(), hooks: CB.hooks.slice(), shots, notified: !!thread, threadId: thread && thread !== "sent" ? thread : null, text });
     } catch (e) { btn.disabled = false; return toast(e?.code === "invalid_argument" ? "You can view this studio but not create projects" : "Could not save the brief. Try again."); }
     try { localStorage.removeItem("cv-brief"); } catch {}
     VIEWS.project.pendingTab = "requests";
@@ -1943,6 +2315,7 @@ VIEWS.create = {
   try { const th = localStorage.getItem("cv-theme"); document.documentElement.dataset.theme = th === "dark" ? "dark" : "light"; }
   catch { document.documentElement.dataset.theme = "light"; }
   go(routeFromHash(), false);
+  addEventListener("hashchange", () => go(routeFromHash(), false));
   const [db, assets, comments, downloads, user] = await Promise.all(["db", "assets", "comments", "downloads", "user"].map(use));
   Object.assign(CAP, { db, assets, comments, downloads, user });
   try { const w = await user?.can?.("data.write"); ST.canWrite = w !== false; } catch {}

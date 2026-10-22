@@ -46,17 +46,18 @@ const PIPELINE = [
   "Key-frame preview first; the full render only after approval in Motion Studio",
 ];
 const freshBrief = () => ({ name: "", client: "", url: "", images: [], library: false, format: "9:16", duration: 30, styles: ["kinetic"], energy: "hype",
-  music: "electrofunk", sfx: "glassy", story: "Showreel", beats: STORY.Showreel.slice(), brand: { colors: ["#2C5BFF", "#0B0C10", "#FFFFFF"], font: "Geist", rules: "" }, notes: "" });
+  music: "electrofunk", sfx: "glassy", trend: { on: true, link: "" }, captions: "wordpop", hooks: HOOK_DEFAULT.slice(), shots: [], story: "Showreel", beats: STORY.Showreel.slice(), brand: { colors: ["#2C5BFF", "#0B0C10", "#FFFFFF"], font: "Geist", rules: "" }, notes: "" });
 let CB = null;
 const saveDraft = () => { try { localStorage.setItem("cv-brief", JSON.stringify(CB)); } catch {} };
 const loadDraft = () => { try { const j = JSON.parse(localStorage.getItem("cv-brief") || "null"); if (j && j.beats) return { ...freshBrief(), ...j }; } catch {} return freshBrief(); };
+const MAX_SHOTS = 6;
 
 const waveBars = (seed) => { let s = seed * 9301 + 49297; return Array.from({ length: 28 }, (_, i) => { s = (s * 9301 + 49297) % 233280; return 0.25 + (s / 233280) * 0.75 * (0.6 + 0.4 * Math.sin(i * 0.6 + seed)); }); };
 
 VIEWS.create = {
   enter() { CB = loadDraft(); this.render(); },
   leave() { SYNTH.stop(); },
-  update() {},
+  update(kind) { if (kind === "styles") this.paintLibrary(); },
   render() {
     const root = $("#view");
     const tileSel = (arr, id) => arr.includes(id);
@@ -64,6 +65,8 @@ VIEWS.create = {
       <div class="builder">
         <header class="create-h"><span class="eyebrow">New video · brief builder</span><h1 style="margin-top:14px">Build the brief.<br><em>Claude builds the film.</em></h1>
           <p>Pick the ingredients below. Claude turns them into a coded motion film and sends you 30 key frames to mark up. Nothing is rendered until you approve.</p></header>
+
+        <section class="bsec lib" id="lib"></section>
 
         <section class="bsec"><header><h2><span class="n">01</span>Project</h2><small>Who is it for</small></header>
           <div class="two"><div class="field"><label for="bName">Video name</label><input id="bName" maxlength="80" placeholder="e.g. Spring launch reel" value="${esc(CB.name)}"></div>
@@ -75,28 +78,44 @@ VIEWS.create = {
             <label class="drop" for="bFiles" title="Add images or clips">${ICON.upload}<input id="bFiles" type="file" accept="image/*,video/mp4,video/quicktime" multiple class="sr"></label></div></div>
           <label style="display:flex;gap:10px;align-items:center;font-size:14px"><input type="checkbox" id="bLib" ${CB.library ? "checked" : ""} style="width:18px;height:18px;accent-color:var(--accent)"> Use the Création Virale client footage library (24 cleared clips)</label></section>
 
-        <section class="bsec"><header><h2><span class="n">03</span>Format &amp; length</h2><small>${CB.duration} s = ${CB.duration * 2} beats at 120 BPM</small></header>
+        <section class="bsec"><header><h2><span class="n">03</span>AI footage</h2><small>Generated shots that live inside the motion</small></header>
+          <p class="hint">${ICON.camera}<span>Describe the shots you wish you had. Claude quotes each one in credits; nothing is generated until you approve it in the project.</span></p>
+          <div class="beats-list" id="shots">${CB.shots.map((x, i) => `<div class="beat-row shot-row"><span class="ix">${pad(i + 1)}</span><label class="sr" for="shot${i}">Shot ${i + 1}</label><input id="shot${i}" data-shot-p="${i}" maxlength="240" placeholder="e.g. Slow-motion top-down: kraft boxes stacking on a steel counter" value="${esc(x.prompt)}">
+            <span class="mv"><select data-shot-k="${i}" aria-label="Shot ${i + 1} type"><option value="video" ${x.kind !== "image" ? "selected" : ""}>Video</option><option value="image" ${x.kind === "image" ? "selected" : ""}>Still</option></select><button data-rms="${i}" aria-label="Remove shot">${ICON.x}</button></span></div>`).join("")}</div>
+          <button class="btn sm" id="addShot" style="justify-self:start" ${CB.shots.length >= MAX_SHOTS ? "disabled" : ""}>${ICON.plus}Add a shot</button></section>
+
+        <section class="bsec"><header><h2><span class="n">04</span>Format &amp; length</h2><small>${CB.duration} s = ${CB.duration * 2} beats at 120 BPM</small></header>
           <div class="fmt" role="group" aria-label="Aspect ratio">${FORMATS.map((f) => `<button data-fmt="${f.id}" aria-pressed="${CB.format === f.id}"><i style="aspect-ratio:${f.w}/${f.h};${f.w > f.h ? "width:72px;height:auto" : ""}"></i><b>${f.id}</b><small>${f.d}</small></button>`).join("")}</div>
           <div class="seg" role="group" aria-label="Duration">${[15, 30, 45, 60].map((d) => `<button data-dur="${d}" aria-pressed="${CB.duration === d}">${d} s</button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">04</span>Visual style</h2><small>Pick one, or two to blend (the first leads)</small></header>
+        <section class="bsec"><header><h2><span class="n">05</span>Visual style</h2><small>Pick one, or two to blend (the first leads)</small></header>
           <div class="tiles">${STYLES.map((s) => `<button class="tile" data-style="${s.id}" aria-pressed="${tileSel(CB.styles, s.id)}">${s.html}<span class="tag">${CB.styles.indexOf(s.id) + 1 || ""}</span><span class="lab"><b>${s.name}</b><span>${s.d}</span></span></button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">05</span>Energy</h2><small>Sets tempo, cut rate and easing</small></header>
+        <section class="bsec"><header><h2><span class="n">06</span>Energy</h2><small>Sets tempo, cut rate and easing</small></header>
           <div class="energy" role="group" aria-label="Energy">${ENERGY.map((e) => `<button data-energy="${e.id}" aria-pressed="${CB.energy === e.id}"><div class="bars">${e.bars.map((d, i) => `<i style="--d:${d}s;animation-delay:${-i * 0.13}s"></i>`).join("")}</div><b>${e.name}</b><small>${e.d}</small></button>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">06</span>Music</h2><small>Press play to hear a two-bar sketch</small></header>
+        <section class="bsec"><header><h2><span class="n">07</span>Hook lab</h2><small>${CB.hooks.length ? `${plural(CB.hooks.length, "formula")} · Claude builds 5 openings` : "Pick at least one"}</small></header>
+          <p class="hint">${ICON.hook}<span>The first 2 seconds decide the scroll. Claude builds 5 alternative openings from these formulas as key frames; you vote for the winner before anything renders.</span></p>
+          <div class="hookf" role="group" aria-label="Hook formulas">${HOOKS.map((h) => `<button data-hf="${h.id}" aria-pressed="${CB.hooks.includes(h.id)}"><b>${h.name}</b><small>${esc(h.ex)}</small></button>`).join("")}</div></section>
+
+        <section class="bsec"><header><h2><span class="n">08</span>Music</h2><small>Press play to hear a two-bar sketch</small></header>
+          <div class="trend ${CB.trend.on ? "on" : ""}"><button class="toggle" id="trendOn" role="switch" aria-checked="${!!CB.trend.on}" aria-label="Match what is trending"><i></i></button>
+            <div><b>${ICON.trend}Match what's trending</b><span>Claude reads this week's trending TikTok sounds for tempo, drop timing and texture, then composes an <em>original</em> track in that style. No copyrighted audio in your ad.</span>
+            ${CB.trend.on ? `<div class="field"><label for="trendLink">A sound you love (optional)</label><input id="trendLink" inputmode="url" maxlength="300" placeholder="TikTok sound or video link" value="${esc(CB.trend.link || "")}"></div>` : ""}</div></div>
           <div class="tiles">${MUSIC.map((m, k) => `<div class="tile" role="button" tabindex="0" data-music="${m.id}" aria-pressed="${CB.music === m.id}"><div class="wave">${waveBars(k + 1).map((h, i) => `<i style="height:${Math.round(h * 100)}%;animation-delay:${-i * 0.05}s"></i>`).join("")}</div><span class="tag">✓</span><span class="lab"><b>${m.name}</b><span>${m.d}</span></span><button class="ply" data-play-m="${m.id}" aria-label="Play ${m.name} sketch">${ICON.play}</button></div>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">07</span>Sound design</h2><small>The UI sounds that back every move</small></header>
+        <section class="bsec"><header><h2><span class="n">09</span>Sound design</h2><small>The UI sounds that back every move</small></header>
           <div class="tiles">${SOUND.map((m, k) => `<div class="tile" role="button" tabindex="0" data-sfx="${m.id}" aria-pressed="${CB.sfx === m.id}"><div class="wave sfx">${waveBars(k + 11).map((h, i) => `<i style="height:${Math.round(h * (i % 7 === 0 ? 100 : 40))}%;animation-delay:${-i * 0.05}s"></i>`).join("")}</div><span class="tag">✓</span><span class="lab"><b>${m.name}</b><span>${m.d}</span></span><button class="ply" data-play-s="${m.id}" aria-label="Play ${m.name} palette">${ICON.play}</button></div>`).join("")}</div></section>
 
-        <section class="bsec"><header><h2><span class="n">08</span>Story beats</h2><small>The order the film tells it</small></header>
+        <section class="bsec"><header><h2><span class="n">10</span>Captions</h2><small>Most people watch with the sound off</small></header>
+          <div class="tiles">${CAPTIONS.map((c) => `<button class="tile" data-cap="${c.id}" aria-pressed="${CB.captions === c.id}">${c.html}<span class="tag">✓</span><span class="lab"><b>${c.name}</b><span>${c.d}</span></span></button>`).join("")}</div></section>
+
+        <section class="bsec"><header><h2><span class="n">11</span>Story beats</h2><small>The order the film tells it</small></header>
           <div class="presets">${Object.keys(STORY).map((k) => `<button class="btn sm ${CB.story === k ? "dark" : ""}" data-story="${esc(k)}">${esc(k)}</button>`).join("")}</div>
           <div class="beats-list" id="beats">${CB.beats.map((b, i) => `<div class="beat-row"><span class="ix">${pad(i + 1)}</span><label class="sr" for="beat${i}">Beat ${i + 1}</label><input id="beat${i}" data-beat="${i}" maxlength="120" value="${esc(b)}"><span class="mv"><button data-mv="${i}:-1" aria-label="Move up" ${i ? "" : "disabled"}>${ICON.up}</button><button data-mv="${i}:1" aria-label="Move down" ${i < CB.beats.length - 1 ? "" : "disabled"}>${ICON.down}</button><button data-rmb="${i}" aria-label="Remove beat">${ICON.x}</button></span></div>`).join("")}</div>
           <button class="btn sm" id="addBeat" style="justify-self:start" ${CB.beats.length >= 8 ? "disabled" : ""}>${ICON.plus}Add a beat</button></section>
 
-        <section class="bsec"><header><h2><span class="n">09</span>Brand</h2><button class="btn sm ghost" id="cvBrand">Use Création Virale brand</button></header>
+        <section class="bsec"><header><h2><span class="n">12</span>Brand</h2><button class="btn sm ghost" id="cvBrand">Use Création Virale brand</button></header>
           <div class="field"><label>Colours (the first one leads)</label><div class="colors" id="cols">${CB.brand.colors.map((c, i) => `<div class="c" style="background:${esc(c)}"><input type="color" value="${esc(c)}" data-col="${i}" aria-label="Brand colour ${i + 1}"><button data-rmc="${i}" aria-label="Remove colour">×</button></div>`).join("")}${CB.brand.colors.length < 6 ? `<button class="add" id="addCol" aria-label="Add a colour">+</button>` : ""}</div></div>
           <div class="two"><div class="field"><label for="bFont">Display typeface</label><select id="bFont">${FONTS.map((f) => `<option ${CB.brand.font === f ? "selected" : ""}>${f}</option>`).join("")}</select></div>
           <div class="field"><label for="bNotes">Must include (optional)</label><input id="bNotes" maxlength="200" placeholder="e.g. the 59× Sushi X result" value="${esc(CB.notes)}"></div></div>
@@ -106,9 +125,9 @@ VIEWS.create = {
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><h3>The brief</h3><span class="eyebrow">Live</span></div>
         <div class="meter" id="meter"></div>
         <div class="brief-out" id="briefOut"></div>
-        <button class="btn primary" id="genBtn" style="height:48px">${ICON.wand}Generate 30 key frames</button>
-        <small style="color:var(--muted);font-size:12.5px;line-height:1.45">Claude reads this brief, builds the film in code and posts 30 key frames here as version “preview”. You comment on them like any video, then approve the final render.</small>
-        <button class="btn sm ghost" id="resetBrief" style="justify-self:start">Start over</button>
+        <button class="btn primary" id="genBtn" style="height:48px">${ICON.wand}Generate hooks + 30 key frames</button>
+        <small style="color:var(--muted);font-size:12.5px;line-height:1.45">Claude reads this brief, builds the film in code and posts 5 hook options plus 30 key frames here as version “preview”. You pick a hook, comment on the frames like any video, then approve the final render.</small>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="saveStyle">${ICON.bookmark}Save as style</button><button class="btn sm ghost" id="resetBrief">Start over</button></div>
       </div></aside></main>`;
     this.bind();
     this.paint();
@@ -155,7 +174,26 @@ VIEWS.create = {
     on("[data-rm]", "click", (e) => { CB.images.splice(+e.currentTarget.dataset.rm, 1); this.reRender(); });
     $("#bFiles").onchange = (e) => this.upload([...e.target.files]);
     $("#genBtn").onclick = (e) => this.generate(e.currentTarget);
+    on("[data-hf]", "click", (e) => { const id = e.currentTarget.dataset.hf, i = CB.hooks.indexOf(id); i >= 0 ? CB.hooks.splice(i, 1) : CB.hooks.push(id); this.reRender(); });
+    on("[data-cap]", "click", (e) => { CB.captions = e.currentTarget.dataset.cap; this.reRender(); });
+    $("#trendOn").onclick = () => { CB.trend = { ...CB.trend, on: !CB.trend.on }; this.reRender(); };
+    $("#trendLink") && txt("#trendLink", (v) => (CB.trend = { ...CB.trend, link: v.trim() }));
+    on("[data-shot-p]", "input", (e) => { CB.shots[+e.target.dataset.shotP].prompt = e.target.value; saveDraft(); this.paint(); });
+    on("[data-shot-k]", "change", (e) => { CB.shots[+e.target.dataset.shotK].kind = e.target.value; saveDraft(); this.paint(); });
+    on("[data-rms]", "click", (e) => { CB.shots.splice(+e.currentTarget.dataset.rms, 1); this.reRender(); });
+    $("#addShot").onclick = () => { CB.shots.push({ prompt: "", kind: "video" }); this.reRender(); setTimeout(() => $(`#shot${CB.shots.length - 1}`)?.focus(), 20); };
+    $("#saveStyle").onclick = () => saveStyleSheet({ recipe: recipeOf(CB), fromName: CB.client || CB.name || "Brief Builder", suggest: CB.styleName ? "" : [CB.client, STYLES.find((x) => x.id === CB.styles[0])?.name].filter(Boolean).join(" · ") });
+    this.paintLibrary();
     $("#resetBrief").onclick = () => { CB = freshBrief(); this.reRender(); toast("Brief cleared"); };
+  },
+  paintLibrary() {
+    const el = $("#lib"); if (!el) return;
+    const L = ST.styles;
+    el.hidden = !L.length && !CB.styleName;
+    el.innerHTML = `<header><h2>${ICON.bookmark}Style library</h2><small>${L.length ? "Start from a recipe you already love" : ""}</small></header>
+      ${CB.styleName ? `<p class="hint">${ICON.sparkle}<span>Built from “${esc(CB.styleName)}”. Change anything below; the library copy stays as it is.</span></p>` : ""}
+      <div class="slib">${L.map((x) => `<button class="lchip ${CB.styleId === x.id ? "on" : ""}" data-use-style="${esc(x.id)}">${x.posterAssetId ? `<img src="${blobUrl(x.posterAssetId)}" alt="">` : `<i style="background:${esc(x.recipe?.brand?.colors?.[0] || "var(--accent)")}"></i>`}<span><b>${esc(x.name)}</b><small>${esc(recipeChips(x.recipe || {}).slice(0, 2).join(" · "))}</small></span></button>`).join("")}</div>`;
+    bindStyleCards(el);
   },
   reRender() { saveDraft(); const y = scrollY; SYNTH.stop(); this.render(); scrollTo(0, y); },
   async upload(files) {
@@ -177,23 +215,27 @@ VIEWS.create = {
       ["FORMAT", `${CB.format} · ${CB.duration} s (${CB.duration * 2} beats at 120 BPM)`],
       ["STYLE", st],
       ["ENERGY", `${en.name} · ${en.d}`],
-      ["MUSIC", `${mu.name} · ${mu.d}`],
+      ["HOOKS", CB.hooks.length ? `5 options from ${CB.hooks.map(hookName).join(", ")}` : "—"],
+      ["MUSIC", `${mu.name} · ${mu.d}${CB.trend.on ? `\n  Trend-matched: original track styled on current trending sounds${CB.trend.link ? `\n  Reference: ${CB.trend.link}` : ""}` : ""}`],
       ["SOUND", `${sd.name} · ${sd.d}`],
+      ["CAPTIONS", captionName(CB.captions)],
+      ...(CB.shots.some((x) => x.prompt.trim()) ? [["AI SHOTS", CB.shots.filter((x) => x.prompt.trim()).map((x, i) => `\n  ${pad(i + 1)} [${x.kind === "image" ? "still" : "video"}] ${x.prompt.trim()}`).join("")]] : []),
+      ...(CB.styleName ? [["LIBRARY", `Built from the saved style “${CB.styleName}”`]] : []),
       ["STORY", CB.beats.filter((b) => b.trim()).map((b, i) => `\n  ${pad(i + 1)} ${b}`).join("")],
       ["BRAND", `${CB.brand.colors.join(" ")} · ${CB.brand.font}${CB.brand.rules ? `\n  ${CB.brand.rules.replace(/\n/g, "\n  ")}` : ""}`],
       ...(CB.notes ? [["INCLUDE", CB.notes]] : []),
-      ["DELIVERY", "30 key frames for review → corrections → final render"],
+      ["DELIVERY", "5 hooks + 30 key frames → pick a hook, corrections → final render"],
     ];
   },
   paint() {
     const out = $("#briefOut"); if (!out) return;
     const s = this.summary();
     out.innerHTML = s.map(([k, v]) => `<b>${k.padEnd(9, " ")}</b>${esc(v)}`).join("\n");
-    const checks = [!!CB.name.trim(), !!(CB.url || CB.images.length || CB.library), CB.styles.length > 0, !!CB.music, !!CB.sfx, CB.beats.filter((b) => b.trim()).length >= 2, CB.brand.colors.length > 0];
+    const checks = [!!CB.name.trim(), !!(CB.url || CB.images.length || CB.library || CB.shots.some((x) => x.prompt.trim())), CB.styles.length > 0, !!CB.music, !!CB.sfx, CB.beats.filter((b) => b.trim()).length >= 2, CB.brand.colors.length > 0, CB.hooks.length > 0];
     const pc = Math.round((checks.filter(Boolean).length / checks.length) * 100);
-    const missing = [!checks[0] && "a name", !checks[1] && "a source", !checks[5] && "two story beats"].filter(Boolean);
+    const missing = [!checks[0] && "a name", !checks[1] && "a source", !checks[5] && "two story beats", !checks[7] && "a hook formula"].filter(Boolean);
     $("#meter").innerHTML = `<div class="t"><i style="width:${pc}%"></i></div><small><span>${pc === 100 ? "Ready to send" : `Add ${missing.join(", ") || "the rest"}`}</span><span class="num">${pc}%</span></small>`;
-    $("#genBtn").disabled = !(checks[0] && checks[1] && checks[5]);
+    $("#genBtn").disabled = !(checks[0] && checks[1] && checks[5] && checks[7]);
   },
   async generate(btn) {
     if (!CAP.db) return toast("Open this page on claude.ai to send the brief");
@@ -201,13 +243,14 @@ VIEWS.create = {
     const slug = (CB.name || "video").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "video";
     const pid = `${slug}-${Math.random().toString(36).slice(2, 6)}`, rid = newId("r");
     const summary = this.summary().map(([k, v]) => `${k}: ${v}`).join("\n");
-    const text = `Motion Studio · NEW VIDEO BRIEF ${rid}\n${summary}\n\nBuild the film, then post 30 key frames as a “frames” version for review. Do not render the video until it is approved.\nData: projects/${pid}/requests/${rid}`;
+    const text = `Motion Studio · NEW VIDEO BRIEF ${rid}\n${summary}\n\nBuild the film, then post 30 key frames as a “frames” version for review, and 5 alternative openings (first 2 s, 3–4 frames each) as hookOptions on this request. Quote every AI shot (model + credits) in shots[] and generate nothing until it is approved. Do not render the video until a hook is picked and the frames are approved.\nData: projects/${pid}/requests/${rid}`;
     const thread = await notifyClaude(text, btn);
     try {
       await dbw.set(`projects/${pid}`, { name: CB.name.trim(), client: CB.client.trim() || null, format: CB.format, duration: CB.duration, status: "briefing",
         brief: { ...JSON.parse(JSON.stringify(CB)), summary }, rules: [CB.brand.rules, "Never render the full video before the key frames are approved."].filter(Boolean).join("\n"),
         pipeline: PIPELINE, createdAt: now(), updatedAt: now() });
-      await dbw.set(`projects/${pid}/requests/${rid}`, { type: "brief", status: "sent", versionLabel: "brief", createdAt: now(), notified: !!thread, threadId: thread && thread !== "sent" ? thread : null, text });
+      const shots = CB.shots.filter((x) => x.prompt.trim()).map((x) => ({ id: newId("sh"), prompt: x.prompt.trim(), kind: x.kind || "video", status: "requested" }));
+      await dbw.set(`projects/${pid}/requests/${rid}`, { type: "brief", status: "sent", versionLabel: "brief", createdAt: now(), hooks: CB.hooks.slice(), shots, notified: !!thread, threadId: thread && thread !== "sent" ? thread : null, text });
     } catch (e) { btn.disabled = false; return toast(e?.code === "invalid_argument" ? "You can view this studio but not create projects" : "Could not save the brief. Try again."); }
     try { localStorage.removeItem("cv-brief"); } catch {}
     VIEWS.project.pendingTab = "requests";

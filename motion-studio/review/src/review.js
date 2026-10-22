@@ -85,12 +85,20 @@ function renderVbar() {
   el.innerHTML = `
     <div class="vsel" role="group" aria-label="Versions">${vs.map((v) => `<button data-v="${esc(v.id)}" aria-pressed="${!R.compare && v.id === R.vid}" title="${esc(v.title || "")}">${esc(v.label || "v" + v.n)}<small>${v.kind === "frames" ? "frames" : ago(v.createdAt)}</small></button>`).join("") || `<button disabled>No versions yet</button>`}</div>
     <button class="btn sm ${R.compare ? "dark" : ""}" id="cmpBtn" ${vs.filter((v) => v.kind !== "frames").length < 2 ? "disabled" : ""} aria-pressed="${!!R.compare}">${ICON.compare}Compare</button>
+    <button class="btn sm" id="hookBtn" ${!R.ver ? "disabled" : ""}>${ICON.hook}Hook lab</button>
     <span class="grow"></span>
+    <button class="btn sm ghost" id="styleBtn" ${!R.ver ? "disabled" : ""}>${ICON.bookmark}Save style</button>
     <button class="btn sm ghost" id="rulesBtn">${ICON.book}Brief &amp; rules</button>
     <button class="btn sm" id="dlBtn" ${!R.ver || R.ver.kind === "frames" ? "disabled" : ""}>${ICON.download}Download</button>`;
   $$("[data-v]", el).forEach((b) => (b.onclick = () => setVersion(b.dataset.v)));
   $("#cmpBtn").onclick = toggleCompare;
   $("#rulesBtn").onclick = openRules;
+  $("#hookBtn").onclick = () => openHookLabSheet(R.pid, R.ver);
+  $("#styleBtn").onclick = () => {
+    const p = P(R.pid), v = R.ver;
+    const recipe = recipeOf({ ...freshBrief(), ...(p.brief || { brand: { colors: [], font: "", rules: p.rules || "" } }), duration: Math.round(v?.duration || p.duration || 30) });
+    saveStyleSheet({ recipe, posterAssetId: v?.posterAssetId || null, fromName: `${p.name} · ${v?.label || ""}`, fromPid: R.pid, fromVid: v?.id || null, suggest: p.name });
+  };
   $("#dlBtn").onclick = download;
 }
 
@@ -655,6 +663,7 @@ function renderRequests(el) {
   el.innerHTML = `<div id="reqAnchor"></div>` + (reqs.length ? reqs.map(requestCard).join("") : `<div class="empty"><b>No requests yet</b><span>Send corrections from the Comments tab. Each pass shows up here with its preview frames.</span></div>`);
   $$("[data-rq]", el).forEach((b) => (b.onclick = () => requestAction(b.dataset.rq, b.dataset.a, b)));
   $$(".pv button", el).forEach((b) => (b.onclick = () => openPreview(b.dataset.rq, +b.dataset.i)));
+  bindViral(el, R.pid);
 }
 function requestCard(r) {
   const k = reqStep(r.status), n = r.commentIds?.length || 0;
@@ -663,8 +672,9 @@ function requestCard(r) {
     <div class="top"><div><h4>${esc(REQ_LABEL[r.type] || "Request")}${r.versionLabel ? ` · ${esc(r.versionLabel)}` : ""}${rv ? ` → ${esc(rv.label)}` : ""}</h4><small>${ago(r.createdAt)}${n ? ` · ${plural(n, "comment")}` : ""}${r.notified === false ? " · waiting for Claude" : ""}</small></div>${reqStatusPill(r.status)}</div>
     <div class="steps" aria-label="Progress">${REQ_STEPS.map((s, i) => `<div class="${i < k || (i === k && r.status === "done") ? "on" : i === k ? "on now" : ""}"><i></i><span>${s}</span></div>`).join("")}</div>
     ${r.claudeNote ? `<div class="claude-note">${ICON.sparkle}<span>${esc(r.claudeNote)}</span></div>` : ""}
+    ${hookLabHTML(r)}${shotsHTML(r)}
     ${r.previewFrames?.length ? `<div class="pv">${r.previewFrames.map((f, i) => `<button data-rq="${esc(r.id)}" data-i="${i}" style="background-image:url('${blobUrl(f.assetId)}')" aria-label="Preview frame at ${fmtTC(f.t)}"><span>${fmtTC(f.t)}</span></button>`).join("")}</div>` : ""}
-    ${r.status === "preview_ready" ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-rq="${esc(r.id)}" data-a="approve">${ICON.check}Approve &amp; render</button><button class="btn sm" data-rq="${esc(r.id)}" data-a="changes">Ask for changes</button></div>` : ""}
+    ${r.status === "preview_ready" ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary sm" data-rq="${esc(r.id)}" data-a="approve" ${r.hookOptions?.length && !r.hookPick ? `disabled title="Pick a hook first"` : ""}>${ICON.check}Approve &amp; render</button><button class="btn sm" data-rq="${esc(r.id)}" data-a="changes">Ask for changes</button>${r.hookOptions?.length && !r.hookPick ? `<small>Pick a hook first</small>` : ""}</div>` : ""}
     ${rv ? `<button class="btn sm" data-rq="${esc(r.id)}" data-a="open">${ICON.film}Open ${esc(rv.label)}</button>` : ""}
     ${r.notified === false && r.status === "sent" ? `<button class="btn sm ghost" data-rq="${esc(r.id)}" data-a="resend">${ICON.send}Send to Claude again</button>` : ""}
   </article>`;
@@ -675,7 +685,8 @@ async function requestAction(rid, a, btn) {
   if (a === "open") return setVersion(r.resultVersion);
   if (a === "approve") {
     btn.disabled = true;
-    const text = `Motion Studio · APPROVED ${rid}\nProject: ${p.name} · ${r.versionLabel || ""}\nThe preview frames look right: go ahead with the final render.\nData: ${path}`;
+    const hk = r.hookPick && r.hookOptions?.find((h) => h.id === r.hookPick);
+    const text = `Motion Studio · APPROVED ${rid}\nProject: ${p.name} · ${r.versionLabel || ""}\nThe preview frames look right: go ahead with the final render.${hk ? `\nOpening: hook ${hk.id} · ${hk.name}` : ""}\nData: ${path}`;
     const thread = await notifyClaude(text, btn);
     try { await dbw.update(path, { status: "approved", approvedAt: now() }); } catch { toast("Could not save the approval"); btn.disabled = false; return; }
     if (thread) toast("Approved: Claude is rendering"); else fallbackSheet(text, "Approval");

@@ -46,6 +46,11 @@ const ICON = {
   down: I('<path d="M6 10l6 6 6-6"/>'),
   sparkle: I('<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9-1.9 5.6-1.9-5.6-5.6-1.9 5.6-1.9z"/>'),
   film: I('<rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 3.5v17M16 3.5v17M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4"/>'),
+  hook: I('<path d="M13 3v10.5a4.5 4.5 0 1 1-9 0V12"/><path d="M13 3l3 3M13 3l-3 3"/><path d="M18 14l2 2-2 2"/>'),
+  bookmark: I('<path d="M7 4h10v16l-5-3.5L7 20z"/>'),
+  camera: I('<rect x="3.5" y="6.5" width="13" height="11" rx="2.5"/><path d="M16.5 10.5l4-2.5v8l-4-2.5"/>'),
+  trend: I('<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>'),
+  caption: I('<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M7 14.5h4M13 14.5h4M7 11h10"/>'),
   wand: I('<path d="M5 19L15.5 8.5"/><path d="M14 4v3M18.5 5.5l-2 2M20 10h-3"/><path d="M13.5 10.5l-2-2"/>'),
   sun: I('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),
   moon: I('<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>'),
@@ -70,6 +75,7 @@ const ST = {
   booted: false,
   projects: [],
   versions: {}, comments: {}, requests: {},       // pid -> [ {id, ...data} ]
+  styles: [],                                       // the style library: saved recipes
   subs: {},                                         // pid -> [unsubscribe]
   route: { view: "home", pid: null, vid: null },
   claude: "unknown",                                // canSendToClaude snapshot
@@ -100,6 +106,8 @@ function startData() {
     ST.booted = true;
     changed("projects");
   }, (e) => { console.warn("db projects", e?.code); ST.booted = true; changed("projects"); });
+  CAP.db.collection("styles").orderBy("createdAt", "desc").limit(40).onSnapshot((s) => { ST.styles = rows(s); changed("styles"); },
+    (e) => console.warn("db styles", e?.code));
 }
 
 /* writes: one at a time per document, only on a viewer action */
