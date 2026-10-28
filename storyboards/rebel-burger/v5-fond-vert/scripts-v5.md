@@ -212,11 +212,19 @@
 
 
 ## Prompts FX IA (image de départ = la vraie frame du plateau, caméra fixe, 3–5 s)
-Négatif commun : 
+Négatif commun : `no text, no face change, keep cap, jacket, gloves and RB logo identical, no camera shake, no cuts`
 
-**Idée 2 – Arrêt du temps** : 
+**Idée 2 – Arrêt du temps**
+```
+Locked-off shot. As the man lowers his sunglasses, time freezes: crumbs and droplets hang in the air, the smash burger lifts off the wooden board and slowly spins 360 degrees in a golden glow. Time resumes and his gloved hand snatches it out of the air. Photorealistic, 4 seconds.
+```
 
-**Idée 8 – Pierre vs feu** : 
+**Idée 8 – Pierre vs feu**
+```
+Locked-off shot. The man holds a plain poutine and a loaded poutine. The plain one turns gray like stone, cracks and crumbles into dust; the loaded one bursts into a small fire. He blows the flame out like a birthday candle and smirks. Photorealistic, 4 seconds.
+```
 
-**Idée 11 – Duel de poutines** : 
-
+**Idée 11 – Duel de poutines**
+```
+Locked-off shot. Two poutines slide in fast from the left and right edges of the table and collide in the center with sparks and a gravy splash. They square off like boxers wearing tiny red gloves, a red electric arc crackling between them, while the man spreads his arms like a referee. Photorealistic, playful, 5 seconds.
+```
