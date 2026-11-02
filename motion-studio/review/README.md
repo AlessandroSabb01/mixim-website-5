@@ -42,3 +42,10 @@ The page posts a comment thread with `sendToClaude`, which wakes the watching se
 - **Style library.** Pages write `styles/{sid}` themselves; "Use this style" loads the recipe into the Brief Builder.
 
 Alessandro confirms fixes in the page (Check fix → Confirm fixed / Reopen); Claude never marks his comments resolved.
+
+## Text films (film5): Qui on est / Ce qu'on fait / Pourquoi nous
+
+- `film5/` is one film: `?v=1|2|3` picks the video, `?k=a|b|c` the hook (pattern interrupt / shock stat / question).
+- Soundtrack: `assets/cv-text/track.mp3` (112.4 BPM). Before a render: `ffmpeg -i assets/cv-text/track.mp3 -ar 48000 -ac 2 build/cvtext-track.wav`,
+  then `node render.mjs --film film5 --qs "v=1&k=a" --out cv-qui-on-est-a`.
+- Motion Studio projects: `cv-qui-on-est`, `cv-ce-quon-fait`, `cv-pourquoi-nous` (key frames `p1`, Hook lab on requests `r_cvtext1..3`).

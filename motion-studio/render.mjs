@@ -21,6 +21,7 @@ const CFG = {
   film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
+  film5: { score: null, len: 30, tag: "-text", music: "build/cvtext-track.wav", beats: "beats-cvtext.json", bpm: 112 },   // supplied MP3; --qs "v=1&k=a"
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
 }[FILM];
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
@@ -44,7 +45,7 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 
 // ---------- audio: score + measured grid ----------
 if (!opt("skip-audio", false)) {
-  console.log("score…"); run("python3", [SCORE, MUSIC]);
+  if (SCORE) { console.log("score…"); run("python3", [SCORE, MUSIC]); }
   console.log("beat grid…"); run("python3", ["audio/beats.py", MUSIC, BEATS]);
 }
 
@@ -54,7 +55,7 @@ async function openFilm(w, h) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   page.on("pageerror", (e) => console.error("page error:", e.message));
   page.on("console", (m) => { if (m.type() === "error") console.error("console:", m.text()); });
-  await page.goto(`${BASE}/${FILM}/index.html?w=${w}&h=${h}`);
+  await page.goto(`${BASE}/${FILM}/index.html?w=${w}&h=${h}${opt("qs", "") ? "&" + opt("qs", "") : ""}`);
   const info = await page.evaluate(() => window.ready);
   const cdp = await page.context().newCDPSession(page);
   const shot = async (t) => {
