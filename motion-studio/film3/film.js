@@ -513,11 +513,12 @@
   /* ===== process (b18-30): rolling outline numbers, slammed titles, one shape morphing per step, a micro-graphic per step ===== */
   const STEPS = [
     ["01", "Stratégie", "On analyse votre entreprise, votre clientèle\net vos objectifs.", "step-strat", "circle", 700],
-    ["02", "Production", "Photo et vidéo pro, avec coaching\ndevant la caméra.", "step-prod", "squircle", 760],
+    ["02", "Production", "Photo et vidéo pro, avec coaching\ndevant la caméra.", "step-prod", "squircle", 600],
     ["03", "Montage", "Montage dynamique, sous-titres, musique\net formats verticaux.", "step-mont", "pill", 800],
     ["04", "Diffusion", "On publie sur les bonnes plateformes,\nau bon moment.", "step-diff", "arch", 780],
   ];
   const PS = { x: W / 2, y: 1270 };
+  const CORNER = 88;                                           // viewfinder corner size (step 02)
   const PLAT = [["Instagram", "heart", -290, -440], ["TikTok", "play", 250, -330], ["Facebook", "eye", -300, 330], ["YouTube", "play", 230, 450]];
   function buildProcess() {
     const shL = layer(7), mL = layer(8), tx = layer(9);
@@ -538,9 +539,9 @@
     dash.innerHTML = `<svg viewBox="0 0 880 880" width="880" height="880"><circle cx="440" cy="440" r="436" fill="none" stroke="${C.blueHi}" stroke-width="5" stroke-dasharray="4 26" stroke-linecap="round"/></svg>`;
     const ticks = [0, 1, 2, 3].map(() => el(mL, { width: "8px", height: "80px", borderRadius: "4px", background: C.white, transformOrigin: "50% 50%", boxShadow: `0 0 24px ${rgba(C.blue, 0.9)}` }));
     // 02 production: viewfinder corners + REC timecode
-    const corners = [0, 1, 2, 3].map((k) => el(mL, { width: "110px", height: "110px", boxSizing: "border-box", borderColor: C.white, borderStyle: "solid", borderWidth: `${k < 2 ? 8 : 0}px ${k % 2 ? 8 : 0}px ${k >= 2 ? 8 : 0}px ${k % 2 ? 0 : 8}px`, borderRadius: ["22px 0 0 0", "0 22px 0 0", "0 0 0 22px", "0 0 22px 0"][k] }));
-    const rec = el(mL, { display: "flex", alignItems: "center", gap: "18px", ...fnt(38, 500, 1, 0.02, '"Geist Mono"'), color: C.white, whiteSpace: "pre" });
-    const recDot = el(rec, { width: "26px", height: "26px", borderRadius: "50%", background: "#FF3B3B", boxShadow: "0 0 24px rgba(255,59,59,.9)", position: "relative" }, "div", "");
+    const corners = [0, 1, 2, 3].map((k) => el(mL, { width: CORNER + "px", height: CORNER + "px", boxSizing: "border-box", borderColor: C.white, borderStyle: "solid", borderWidth: `${k < 2 ? 6 : 0}px ${k % 2 ? 6 : 0}px ${k >= 2 ? 6 : 0}px ${k % 2 ? 0 : 6}px`, borderRadius: ["18px 0 0 0", "0 18px 0 0", "0 0 0 18px", "0 0 18px 0"][k] }));
+    const rec = el(mL, { display: "flex", alignItems: "center", gap: "14px", ...fnt(30, 500, 1, 0.02, '"Geist Mono"'), color: C.white, whiteSpace: "pre" });
+    const recDot = el(rec, { width: "20px", height: "20px", borderRadius: "50%", background: "#FF3B3B", boxShadow: "0 0 20px rgba(255,59,59,.9)", position: "relative" }, "div", "");
     const recTxt = el(rec, { position: "relative" }, "span", "");
     // 03 montage: glass timeline with coloured clips and a playhead
     const panel = el(mL, { width: "900px", height: "140px", borderRadius: "30px", background: "rgba(12,12,16,.82)", border: "2px solid rgba(255,255,255,.12)", boxSizing: "border-box", overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,.45)" });
@@ -588,13 +589,13 @@
       P_.ticks.forEach((k_, k) => { const ang = (k * Math.PI) / 2, rad = 520 + (1 - a) * 200; T(k_, { x: PS.x + Math.sin(ang) * rad - 4, y: PS.y - Math.cos(ang) * rad - 40, r: (k * 90), op: on_ ? a : 0 }); }); }
     // 02 production
     { const a = win(21, 0.2), on_ = b >= 20.9 && b < 24.05;
-      const hw = (760 * SH.squircle.a) / 2 + 40, hh = 760 / 2 + 40;
+      const vf = STEPS[1][5], hw = (vf * SH.squircle.a) / 2 + 32, hh = vf / 2 + 32;
       P_.corners.forEach((c, k) => { const sxk = k % 2 ? 1 : -1, syk = k < 2 ? -1 : 1, e = spring(since(t, 21.2) + 0.02, 2.2, 7), off = (1 - clamp(e, 0, 1.3)) * 140;
-        T(c, { x: PS.x + sxk * (hw + off) - (sxk > 0 ? 110 : 0), y: PS.y + syk * (hh + off) - (syk > 0 ? 110 : 0), op: on_ && since(t, 21.2) > -0.02 ? (1 - (b >= 23.72 ? ez.inExpo(pb(t, 23.72, 23.98)) : 0)) : 0 }); });
+        T(c, { x: PS.x + sxk * (hw + off) - (sxk > 0 ? CORNER : 0), y: PS.y + syk * (hh + off) - (syk > 0 ? CORNER : 0), op: on_ && since(t, 21.2) > -0.02 ? (1 - (b >= 23.72 ? ez.inExpo(pb(t, 23.72, 23.98)) : 0)) : 0 }); });
       const lt = Math.max(0, t - bt(21));
       P_.recTxt.textContent = `REC  00:00:${String(Math.floor(lt)).padStart(2, "0")}:${String(Math.floor((lt % 1) * 30)).padStart(2, "0")}`;
       P_.recDot.style.opacity = Math.floor(lt * 2.5) % 2 ? 0.25 : 1;
-      T(P_.rec, { x: PS.x - hw + 6, y: PS.y - hh - 86 + (1 - a) * 30, op: on_ ? a : 0 }); }
+      T(P_.rec, { x: PS.x - hw + 4, y: PS.y - hh - 58 + (1 - a) * 30, op: on_ ? a : 0 }); }
     // 03 montage
     { const a = win(24, 0.1), on_ = b >= 23.9 && b < 27.05;
       T(P_.panel, { x: (W - 900) / 2, y: PS.y + 320 + (1 - a) * 120, rx: (1 - a) * 50, op: on_ ? a : 0 });
@@ -653,9 +654,9 @@
 
   /* ===== results (b33-42): counters, a self-drawing growth curve, carousel whips ===== */
   const RES = [
-    { id: "res-sushi", client: "Sushi X", mult: 59, label: "plus de vues Instagram\nen deux mois", from: 8873, to: 520337, plat: "Instagram", bars: [4.5, 3.3, 1.9, 156, 40.5, 21] },
-    { id: "res-chalet", client: "Au Petit Chalet", mult: 18, label: "plus de vues Facebook", from: 11906, to: 216266, plat: "Facebook", bars: [8.1, 7.8, 7.2, 40, 21.4, 21.2] },
-    { id: "res-mex", client: "Mexicanos", mult: 14, label: "plus de vues TikTok\nen un mois", from: 18218, to: 261432, plat: "TikTok", bars: [3.1, 2.9, 2.4, 297, 30.4, 27.5] },
+    { id: "res-sushi", client: "Sushi X", mult: 59, label: "plus de vues Instagram\nen deux mois", from: 8873, to: 520337, plat: "Instagram", rise: 2.6 },
+    { id: "res-chalet", client: "Au Petit Chalet", mult: 18, label: "plus de vues Facebook", from: 11906, to: 216266, plat: "Facebook", rise: 1.9 },
+    { id: "res-mex", client: "Mexicanos", mult: 14, label: "plus de vues TikTok\nen un mois", from: 18218, to: 261432, plat: "TikTok", rise: 2.25 },
   ];
   const CH_ = { x: 60, y: 950, w: W - 120, h: 600, px: 50, pt: 70, ph: 300 };
   function buildResults() {
@@ -672,15 +673,16 @@
       // chart card
       const card = el(root, { width: CH_.w + "px", height: CH_.h + "px", borderRadius: "44px", background: "rgba(12,12,16,.8)", border: "2px solid rgba(255,255,255,.1)", boxSizing: "border-box", boxShadow: "0 40px 100px rgba(0,0,0,.45)", overflow: "hidden" });
       T(card, { x: CH_.x, y: CH_.y });
-      const cw = CH_.w - 2 * CH_.px, mx = Math.max(...r.bars);
-      const pts = r.bars.map((v, k) => [CH_.px + (k / (r.bars.length - 1)) * cw, CH_.pt + CH_.ph * (1 - 0.05 - 0.95 * (v / mx))]);
+      // growth: starts on the floor under AVANT, keeps climbing after APRÈS and ends at the top right
+      const cw = CH_.w - 2 * CH_.px, NP = 16;
+      const pts = Array.from({ length: NP }, (_, k) => { const u = k / (NP - 1); return [CH_.px + u * cw, CH_.pt + CH_.ph * (1 - 0.05 - 0.95 * Math.pow(u, r.rise))]; });
       const cy_ = (y) => clamp(y, CH_.pt - 10, CH_.pt + CH_.ph);
       let dPath = `M${pts[0][0]},${pts[0][1]}`;
       for (let k = 0; k < pts.length - 1; k++) {
         const p0 = pts[Math.max(0, k - 1)], p1 = pts[k], p2 = pts[k + 1], p3 = pts[Math.min(pts.length - 1, k + 2)];
         dPath += ` C${p1[0] + (p2[0] - p0[0]) / 6},${cy_(p1[1] + (p2[1] - p0[1]) / 6)} ${p2[0] - (p3[0] - p1[0]) / 6},${cy_(p2[1] - (p3[1] - p1[1]) / 6)} ${p2[0]},${p2[1]}`;
       }
-      const base = CH_.pt + CH_.ph, dx = (pts[2][0] + pts[3][0]) / 2;
+      const base = CH_.pt + CH_.ph, dx = CH_.px + cw / 2;
       card.insertAdjacentHTML("beforeend", `<svg class="a" viewBox="0 0 ${CH_.w} ${CH_.h}" width="${CH_.w}" height="${CH_.h}" style="overflow:visible">
         <defs><linearGradient id="st${ri}" x1="0" x2="1"><stop offset="0" stop-color="${C.blueHi}"/><stop offset=".55" stop-color="${C.blue}"/><stop offset="1" stop-color="${acc}"/></linearGradient>
         <linearGradient id="ar${ri}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${C.blue}" stop-opacity=".45"/><stop offset="1" stop-color="${C.blue}" stop-opacity="0"/></linearGradient>
