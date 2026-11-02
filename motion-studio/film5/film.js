@@ -24,11 +24,13 @@
     inExpo: (t) => (t <= 0 ? 0 : Math.pow(2, 10 * t - 10)),
     inOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
     outCubic: (t) => 1 - Math.pow(1 - t, 3),
+    inOutExpo: (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2),
   };
   const spring = (dt, f = 2.2, d = 8) => (dt <= 0 ? 0 : 1 - Math.exp(-d * dt) * Math.cos(2 * Math.PI * f * dt));
 
   /* ---------- beat grid ---------- */
-  let BTS = [], PER = 0.5336;
+  const BPM = { 1: 122, 2: 128, 3: 134 }[VID], LEN = 20;
+  let BTS = [0], PER = 60 / BPM;
   const bt = (b) => BTS[0] + b * PER;
   const tb = (t) => (t - BTS[0]) / PER;
 
@@ -42,6 +44,7 @@
     e.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${s * sx},${s * sy})`;
     e.style.opacity = op;
   }
+  const TYPE_CPS = 48, DEL_CPS = 80;
   const FF = "Geist, sans-serif", MONO = '"Geist Mono", monospace';
 
   /* ---------- copy ----------
@@ -105,12 +108,13 @@
     ],
   };
   const CLOSE = [{ d: 4, bg: "paper", kind: "stack", top: "Écris-nous", line: "**VIRAL**", size: 250, box: true, sub: "en DM." }];
-  const TOPIC = { 1: "QUI ON EST", 2: "CE QU'ON FAIT", 3: "POURQUOI NOUS" }[VID];
 
   /* ---------- timeline: the first card is on screen at t = 0 ---------- */
   const SC = [];
-  let cur = -0.53;
-  [...HOOKS[VID][HK], ...BODY[VID], ...CLOSE].forEach((s, i) => { SC.push({ ...s, i, b0: cur, b1: cur + s.d, text0: [s.top, s.line, s.lead, s.items && s.items.join(" / "), s.value != null && `${s.label ? s.label + " " : ""}${String(s.value).replace(".", ",")}${s.suf} ${s.sub}`, s.box && s.sub].filter(Boolean).join(" ") }); cur += s.d; });
+  const END_BEATS = 5, SEQ = [...HOOKS[VID][HK], ...BODY[VID], ...CLOSE];
+  const KS = (LEN / PER - END_BEATS) / SEQ.reduce((a, s) => a + s.d, 0);
+  let cur = 0;
+  SEQ.map((s) => ({ ...s, d: Math.max(1, Math.round(s.d * KS * 2) / 2) })).forEach((s, i) => { SC.push({ ...s, i, b0: cur, b1: cur + s.d, text0: [s.top, s.line, s.lead, s.items && s.items.join(" / "), s.value != null && `${s.label ? s.label + " " : ""}${String(s.value).replace(".", ",")}${s.suf} ${s.sub}`, s.box && s.sub].filter(Boolean).join(" ") }); cur += s.d; });
   const END = { b0: cur };
 
   /* ---------- text: rows of word masks, measured once so type-on grows from a fixed left edge ---------- */
@@ -192,10 +196,8 @@
   const bgL = el(stage, { width: W + "px", height: H + "px" });
   const cardsL = el(stage, { width: W + "px", height: H + "px" });
   const wipe = el(stage, { width: W + "px", height: H + "px", transformOrigin: "50% 100%" });
-  const hud = el(stage, { width: W + "px", height: H + "px" });
-  const lab = (txt, css) => { const e = el(hud, { font: `500 23px/1 ${MONO}`, letterSpacing: "0.14em", whiteSpace: "pre", ...css }); e.textContent = txt; return e; };
-  const HUD = [lab("CRÉATION VIRALE", { left: "60px", top: "86px" }), lab(`0${VID} / 03`, { right: "60px", top: "86px", left: "auto" }),
-    lab(TOPIC, { left: "60px", top: H - 112 + "px" }), lab("QUÉBEC · 2026", { right: "60px", top: H - 112 + "px", left: "auto" })];
+  const edge = el(wipe, { width: W + "px", height: "14px", background: "#C6FF3D" });      // the wipe's leading edge
+  const flash = el(stage, { width: W + "px", height: H + "px" });                            // slam flash
 
   function build(s) {
     const pal = BG[s.bg], root = el(cardsL, { width: W + "px", height: H + "px" });
@@ -266,18 +268,18 @@
     const d = t - bt(s.b0);
     T(tbk.root, { y: y0 });
     if (mode === "type") {
-      const n = Math.floor(Math.max(0, d) * 36);
+      const n = Math.floor(Math.max(0, d) * TYPE_CPS);
       typeTo(tbk, n, n < tbk.total || Math.floor(t * 2.6) % 2 === 0);
     } else {
       resetType(tbk);
       let k = 0;
       tbk.rows.forEach((r) => r.words.forEach((w) => {
-        const p = mode === "rise" ? ez.outExpo(clamp((d - 0.07 * k) / 0.45)) : 1;
+        const p = mode === "rise" ? ez.outExpo(clamp((d - 0.045 * k) / 0.32)) : 1;
         w.ink.style.transform = mode === "rise" ? `translateY(${(1 - p) * 105}%)` : "";
         k++;
       }));
       if (mode === "slam") {
-        const e = ez.outExpo(clamp(d / 0.32)), j = d > 0 ? 14 * Math.exp(-d / 0.09) : 0;
+        const e = ez.outExpo(clamp(d / 0.24)), j = d > 0 ? 18 * Math.exp(-d / 0.07) : 0;
         tbk.root.style.transformOrigin = `50% ${tbk.h / 2}px`;
         T(tbk.root, { x: j * Math.sin(d * 90), y: y0 + j * Math.cos(d * 70), s: lerp(1.7, 1, e) });
       }
@@ -316,7 +318,7 @@
       tbk.rows[0].wrap.style.marginLeft = s.lx + "px";
       T(tbk.root, { y: s.ty });
       const din = t - bt(sb), dout = bt(sb + seg) - t;
-      const nIn = Math.floor(Math.max(0, din) * 34), nOut = i < n - 1 ? Math.floor(Math.max(0, dout) * 55) : 1e9;
+      const nIn = Math.floor(Math.max(0, din) * TYPE_CPS), nOut = i < n - 1 ? Math.floor(Math.max(0, dout) * DEL_CPS) : 1e9;
       const nv = Math.min(nIn, nOut, tbk.total);
       typeTo(tbk, nv, nv < tbk.total || Math.floor(t * 2.6) % 2 === 0);
       T(s.label, { x: s.lx, y: s.ty - 70, op: clamp(din / 0.3) });
@@ -325,7 +327,7 @@
     } else if (s.kind === "wheel") {   // fixed lead word + a rolling column; the active line is bold, the last one takes the accent
       const n = s.items.length, step = (s.d - 0.6) / n;
       const raw = (b - s.b0 - 0.35) / step, i = clamp(Math.floor(raw), 0, n - 1);
-      const e = ez.outExpo(clamp(((raw - i) * step * PER) / 0.38));
+      const e = ez.outExpo(clamp(((raw - i) * step * PER) / 0.26));
       const sp = s.size * 1.32, cy = H / 2;
       const scroll = (i - 1 + (i > 0 ? e : 1)) * sp;
       const lx = s.lx;
@@ -358,42 +360,111 @@
     const k = SC.findIndex((s) => b >= s.b0 && b < s.b1);
     const s = k >= 0 ? SC[k] : null;
     const inEnd = b >= END.b0;
-    // background + wipe into the next card's colour (alternating up / sideways)
     const pal = s ? s.pal : BG.blue;
-    bgL.style.background = pal.bg;
+    bgL.style.background = inEnd ? BG.blue.bg : pal.bg;
     SC.forEach((c) => show(c.root, c === s));
-    if (s) paintCard(s, t);
+    // camera: a kick punch on every beat, a harder one on the bar
+    const ph = (b - Math.floor(b)) * PER, bar = Math.floor(b) % 4 === 0;
+    const kick = Math.exp(-ph / 0.07) * (bar ? 1 : 0.55);
+    cardsL.style.transformOrigin = "50% 50%";
+    T(cardsL, { s: 1 + 0.014 * kick });
+    if (s) {
+      paintCard(s, t);
+      // every card settles in and lifts out: the cut never feels static
+      const din = t - bt(s.b0), dout = bt(s.b1) - t;
+      const ei = ez.outExpo(clamp(din / 0.28)), eo = ez.inExpo(clamp(1 - dout / 0.22));
+      s.root.style.transformOrigin = "50% 50%";
+      const push = 1 + 0.045 * clamp(din / (bt(s.b1) - bt(s.b0)));            // a slow push-in: no card ever holds still
+      T(s.root, { y: (1 - ei) * 46 - eo * 70, s: lerp(1.05, 1, ei) * (1 - 0.05 * eo) * push, op: 1 - eo * 0.9 });
+    }
+    // wipe into the next colour: alternating up / sideways, expo in-out, lime leading edge
     const nx = inEnd ? null : SC[k + 1] || { pal: BG.blue, i: SC.length, b0: END.b0 };
     let wp = 0;
     if (nx && s && nx.pal !== s.pal) { const w0 = bt(nx.b0) - 0.2; wp = clamp((t - w0) / 0.2); }
     show(wipe, wp > 0 && wp < 1);
-    if (wp > 0 && wp < 1) { wipe.style.background = nx.pal.bg; wipe.style.transformOrigin = nx.i % 2 ? "50% 100%" : "0 50%"; wipe.style.transform = nx.i % 2 ? `scaleY(${ez.inOutCubic(wp)})` : `scaleX(${ez.inOutCubic(wp)})`; }
-    // hud
-    show(hud, !inEnd);
-    HUD.forEach((h) => (h.style.color = pal.mute));
+    if (wp > 0 && wp < 1) {
+      const e = ez.inOutExpo(wp), up = nx.i % 2;
+      wipe.style.background = nx.pal.bg;
+      wipe.style.transformOrigin = "0 0";
+      if (up) { T(wipe, { y: H * (1 - e) }); Object.assign(edge.style, { width: W + "px", height: "14px", transform: "translate(0,-14px)" }); }
+      else { T(wipe, { x: -W * (1 - e) }); Object.assign(edge.style, { width: "14px", height: H + "px", transform: `translate(${W}px,0)` }); }
+    }
+    // slam flash: one hit of the accent on each slammed card
+    const fl = s && s.fx === "slam" ? Math.exp(-Math.max(0, t - bt(s.b0)) / 0.05) * (t >= bt(s.b0) ? 1 : 0) : 0;
+    show(flash, fl > 0.02); if (fl > 0.02) { flash.style.background = s.pal.acc; flash.style.opacity = 0.55 * fl; }
     // end card
     show(endL, inEnd);
     if (inEnd) {
-      bgL.style.background = BG.blue.bg;
       const d = t - bt(END.b0);
-      const e = spring(d, 1.6, 7);
+      const e = spring(d, 1.7, 7.5);
       const lw = 640, lh = lw * (160 / 221);
-      const bp = Math.exp(-((b - END.b0) % 2) * PER / 0.14) * (b - END.b0 > 1.5 ? 1 : 0);      // a kick on every other beat
-      T(logo, { x: (W - lw) / 2, y: H / 2 - lh / 2 - 190, s: (0.4 + 0.6 * clamp(e, 0, 1.2)) * (1 + 0.035 * bp), op: clamp(d / 0.15) });
-      const pp = spring(d - 0.9, 1.8, 7);
-      T(pill, { x: (W - pill.offsetWidth) / 2, y: H / 2 + 170, s: Math.max(0.001, clamp(pp, 0, 1.15)) * (1 + 0.05 * bp), op: d > 0.9 ? 1 : 0 });
-      pill.style.boxShadow = `0 0 0 ${Math.round(14 * bp)}px rgba(198,255,61,${0.55 * bp})`;
+      const bp = Math.exp(-((b - END.b0) % 1) * PER / 0.09) * (b - END.b0 > 1 ? 1 : 0);
+      T(logo, { x: (W - lw) / 2, y: H / 2 - lh / 2 - 190, s: (0.35 + 0.65 * clamp(e, 0, 1.2)) * (1 + 0.03 * bp), r: (1 - clamp(e, 0, 1)) * -8, op: clamp(d / 0.1) });
+      const pp = spring(d - 0.55, 2, 8);
+      T(pill, { x: (W - pill.offsetWidth) / 2, y: H / 2 + 170, s: Math.max(0.001, clamp(pp, 0, 1.15)) * (1 + 0.045 * bp), op: d > 0.55 ? 1 : 0 });
+      pill.style.boxShadow = `0 0 0 ${Math.round(16 * bp)}px rgba(198,255,61,${0.5 * bp})`;
+      const fe = Math.exp(-Math.max(0, d) / 0.06);
+      show(flash, fe > 0.02); if (fe > 0.02) { flash.style.background = "#FFFFFF"; flash.style.opacity = 0.6 * fe; }
     }
   }
 
+  /* ---------- sound design: every visual event has its own cue; each film has its own palette ---------- */
+  const PAL = {
+    1: { key: "key", del: "tick", wipeU: "air", wipeS: "air", slam: ["bloom", "thump"], rise: "tap", scroll: "whoosh-s", strike: "swipe", wheel: "glint", count: "blip", land: "thump", box: "glass", logo: ["bloom", "shimmer"], pill: "ding" },
+    2: { key: "click", del: "tick", wipeU: "zip", wipeS: "swipe", slam: ["slam", "thump"], rise: "tick", scroll: "whoosh-s", strike: "zip", wheel: "wheel", count: "blip", land: "slam", box: "select", logo: ["impact", "sparkle"], pill: "pop" },
+    3: { key: "key", del: "tick", wipeU: "whoosh-s", wipeS: "zip", slam: ["impact", "slam"], rise: "tap", scroll: "whoosh-s", strike: "swipe", wheel: "blip", count: "blip", land: "impact", box: "glint", logo: ["impact", "sparkle"], pill: "ding" },
+  }[VID];
+  const tb2 = (sec) => sec / PER;
+  function buildCues() {
+    const cues = [], cue = (beat, type, gain = 1, extra = {}) => cues.push({ beat: +beat.toFixed(4), type, gain, pan: extra.pan || 0, ...extra });
+    const keys = (b0, n, cps, gain = 0.32) => { for (let i = 0; i < n; i += 1) cue(b0 + tb2(i / cps), PAL.key, gain * (0.8 + 0.2 * ((i * 7) % 3) / 2), { var: i % 5, pan: ((i % 3) - 1) * 0.12 }); };
+    SC.forEach((s, i) => {
+      const nx = SC[i + 1];
+      if (i > 0 && SC[i - 1].pal !== s.pal) cue(s.b0, s.i % 2 ? PAL.wipeU : PAL.wipeS, 0.55, { dir: s.i % 2 ? 1 : -1 });
+      if (!s.kind) {
+        if (s.fx === "type") keys(s.b0, Math.min(s.tb.total, 40), TYPE_CPS);
+        if (s.fx === "rise") s.tb.rows.flatMap((r) => r.words).forEach((w, k) => cue(s.b0 + tb2(0.045 * k), PAL.rise, 0.45, { pan: (k % 2 ? 0.2 : -0.2) }));
+        if (s.fx === "slam") PAL.slam.forEach((ty, k) => cue(s.b0, ty, k ? 0.7 : 0.85));
+        if (s.fx === "scroll") { cue(s.b0, PAL.scroll, 0.7); cue(s.b0 + tb2(0.45), PAL.land, 0.6); }
+        if (s.fx === "strike") { s.tb.rows.flatMap((r) => r.words).forEach((w, k) => cue(s.b0 + tb2(0.045 * k), PAL.rise, 0.4)); cue(s.b0 + 1, PAL.strike, 0.8); }
+      } else if (s.kind === "stack") {
+        cue(s.b0, PAL.rise, 0.45);
+        if (s.box) { PAL.slam.forEach((ty, k) => cue(s.b0 + 0.75, ty, k ? 0.6 : 0.8)); cue(s.b0 + 1.1, PAL.box, 0.7); }
+        else keys(s.b0 + 0.75, Math.min(s.tb.total, 40), TYPE_CPS);
+        if (s.sub) cue(s.b0 + 1.75, PAL.rise, 0.45);
+      } else if (s.kind === "swap") {
+        const n = s.items.length, seg = s.d / n;
+        s.tbs.forEach((tbk, k) => {
+          const sb = s.b0 + k * seg;
+          keys(sb, tbk.total, TYPE_CPS, 0.36);
+          if (k < n - 1) { const nd = tbk.total; for (let j = 0; j < nd; j += 2) cue(sb + seg - tb2((nd - j) / DEL_CPS), PAL.del, 0.22); }
+        });
+      } else if (s.kind === "wheel") {
+        const n = s.items.length, step = (s.d - 0.6) / n;
+        cue(s.b0, PAL.rise, 0.5);
+        for (let k = 1; k < n; k++) cue(s.b0 + 0.35 + k * step, PAL.wheel, 0.5, { step: k, pan: 0.15 });
+        cue(s.b0 + 0.35 + (n - 1) * step, PAL.box, 0.5);
+      } else if (s.kind === "count") {
+        const dur = 1.1 * PER * 2;
+        for (let k = 0; k < 9; k++) cue(s.b0 + tb2(dur * (1 - Math.pow(1 - k / 9, 2.2)) * 0.9), PAL.count, 0.32, { step: k });
+        cue(s.b0 + tb2(dur), PAL.land, 0.85);
+        cue(s.b0 + 1, PAL.rise, 0.4);
+      }
+    });
+    PAL.logo.forEach((ty, k) => cue(END.b0, ty, k ? 0.6 : 0.9));
+    cue(END.b0 + tb2(0.55), PAL.pill, 0.7);
+    return cues;
+  }
+
   window.ready = (async () => {
-    const [beats, svg] = await Promise.all([fetch("../beats-cvtext.json").then((r) => r.json()), fetch("../assets/brand/logo-white.svg").then((r) => r.text())]);
-    BTS = beats.beats; PER = beats.period;
+    const svg = await fetch("../assets/brand/logo-white.svg").then((r) => r.text());
+    // the score is synthesized on this exact grid; a measured grid (if rendered) only confirms it
+    try { const g = await fetch(`../beats5-v${VID}.json`).then((r) => (r.ok ? r.json() : null)); if (g && Math.abs(g.period - PER) < 0.002) { BTS = [g.t0]; PER = g.period; } } catch {}
     await Promise.all(["400 100px Geist", "500 100px Geist", "600 100px Geist", "700 100px Geist", "800 100px Geist", '500 20px "Geist Mono"'].map((f) => document.fonts.load(f)));
     logo.innerHTML = svg.replace("<svg ", '<svg width="640" height="463" viewBox="0 0 221 160" ');
-    HUD.forEach((h, k) => { if (k % 2) h.style.left = W - 60 - h.getBoundingClientRect().width + "px"; });
     SC.forEach(build);
-    window.CUES = [];
+    window.CUES = buildCues();
+    window.SECTIONS = { bpm: BPM, len: LEN, end: END.b0, hookEnd: SC.filter((c) => c.i < HOOKS[VID][HK].length).at(-1).b1, scenes: SC.map((c) => ({ b0: c.b0, b1: c.b1, kind: c.kind || c.fx, bg: c.bg })) };
     window.SCENES = SC.map((c) => ({ t0: bt(c.b0), t1: bt(c.b1), kind: c.kind || c.fx, text: c.text0.replace(/\*\*/g, "").replace(/\|/g, " "), hook: c.i < HOOKS[VID][HK].length }));
     window.SCENES.push({ t0: bt(END.b0), t1: 30, kind: "end", text: "Logo + Écris-nous VIRAL en DM" });
     window.seek = seek;

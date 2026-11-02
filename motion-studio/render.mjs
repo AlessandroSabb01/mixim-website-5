@@ -21,9 +21,14 @@ const CFG = {
   film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
-  film5: { score: null, len: 30, tag: "-text", music: "build/cvtext-track.wav", beats: "beats-cvtext.json", bpm: 112 },   // supplied MP3; --qs "v=1&k=a"
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
-}[FILM];
+}[FILM] || film5Cfg();
+// film5: the three text films; --qs "v=1&k=a" picks film and hook, each has its own score and tempo
+function film5Cfg() {
+  const q = new URLSearchParams(String(opt("qs", "v=1&k=a"))), v = q.get("v") || "1", k = q.get("k") || "a";
+  process.env.FILM_V = v; process.env.FILM_K = k;
+  return { score: "audio/music5.py", len: 20, tag: `-text${v}${k}`, music: `build/music5-v${v}${k}.wav`, beats: `beats5-v${v}.json`, bpm: { 1: 122, 2: 128, 3: 134 }[v] };
+}
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
 const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
 process.env.FILM_LEN = String(LEN);

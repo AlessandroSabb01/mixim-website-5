@@ -1,0 +1,212 @@
+{
+ "bpm": 122,
+ "len": 20,
+ "end": 36,
+ "hookEnd": 5.5,
+ "scenes": [
+  {
+   "b0": 0,
+   "b1": 1,
+   "kind": "slam",
+   "bg": "ink"
+  },
+  {
+   "b0": 1,
+   "b1": 3,
+   "kind": "type",
+   "bg": "paper"
+  },
+  {
+   "b0": 3,
+   "b1": 4,
+   "kind": "scroll",
+   "bg": "blue"
+  },
+  {
+   "b0": 4,
+   "b1": 5.5,
+   "kind": "rise",
+   "bg": "blue"
+  },
+  {
+   "b0": 5.5,
+   "b1": 8,
+   "kind": "stack",
+   "bg": "paper"
+  },
+  {
+   "b0": 8,
+   "b1": 10.5,
+   "kind": "rise",
+   "bg": "blue"
+  },
+  {
+   "b0": 10.5,
+   "b1": 12,
+   "kind": "type",
+   "bg": "ink"
+  },
+  {
+   "b0": 12,
+   "b1": 13.5,
+   "kind": "strike",
+   "bg": "ink"
+  },
+  {
+   "b0": 13.5,
+   "b1": 15,
+   "kind": "type",
+   "bg": "paper"
+  },
+  {
+   "b0": 15,
+   "b1": 17.5,
+   "kind": "slam",
+   "bg": "blue"
+  },
+  {
+   "b0": 17.5,
+   "b1": 22,
+   "kind": "swap",
+   "bg": "blue"
+  },
+  {
+   "b0": 22,
+   "b1": 27.5,
+   "kind": "wheel",
+   "bg": "ink"
+  },
+  {
+   "b0": 27.5,
+   "b1": 29,
+   "kind": "rise",
+   "bg": "paper"
+  },
+  {
+   "b0": 29,
+   "b1": 33,
+   "kind": "slam",
+   "bg": "blue"
+  },
+  {
+   "b0": 33,
+   "b1": 36,
+   "kind": "stack",
+   "bg": "paper"
+  }
+ ],
+ "cues": 148,
+ "scenesText": [
+  {
+   "t0": 0,
+   "t1": 0.4918032786885246,
+   "kind": "slam",
+   "text": "STOP.",
+   "hook": true
+  },
+  {
+   "t0": 0.4918032786885246,
+   "t1": 1.4754098360655736,
+   "kind": "type",
+   "text": "Ton prochain client",
+   "hook": true
+  },
+  {
+   "t0": 1.4754098360655736,
+   "t1": 1.9672131147540983,
+   "kind": "scroll",
+   "text": "scrolle.",
+   "hook": true
+  },
+  {
+   "t0": 1.9672131147540983,
+   "t1": 2.7049180327868854,
+   "kind": "rise",
+   "text": "En ce moment.",
+   "hook": true
+  },
+  {
+   "t0": 2.7049180327868854,
+   "t1": 3.9344262295081966,
+   "kind": "stack",
+   "text": "On est Création Virale.",
+   "hook": false
+  },
+  {
+   "t0": 3.9344262295081966,
+   "t1": 5.163934426229508,
+   "kind": "rise",
+   "text": "Une agence québécoise.",
+   "hook": false
+  },
+  {
+   "t0": 5.163934426229508,
+   "t1": 5.9016393442622945,
+   "kind": "type",
+   "text": "On ne fait pas",
+   "hook": false
+  },
+  {
+   "t0": 5.9016393442622945,
+   "t1": 6.639344262295082,
+   "kind": "strike",
+   "text": "du contenu.",
+   "hook": false
+  },
+  {
+   "t0": 6.639344262295082,
+   "t1": 7.377049180327869,
+   "kind": "type",
+   "text": "On fait du contenu",
+   "hook": false
+  },
+  {
+   "t0": 7.377049180327869,
+   "t1": 8.60655737704918,
+   "kind": "slam",
+   "text": "qu'on regarde.",
+   "hook": false
+  },
+  {
+   "t0": 8.60655737704918,
+   "t1": 10.819672131147541,
+   "kind": "swap",
+   "text": "Stratèges. / Créateurs. / Raconteurs.",
+   "hook": false
+  },
+  {
+   "t0": 10.819672131147541,
+   "t1": 13.524590163934427,
+   "kind": "wheel",
+   "text": "Pour les restos / les boutiques / les cliniques / les gyms / les salons / les entreprises d'ici",
+   "hook": false
+  },
+  {
+   "t0": 13.524590163934427,
+   "t1": 14.262295081967213,
+   "kind": "rise",
+   "text": "qui méritent",
+   "hook": false
+  },
+  {
+   "t0": 14.262295081967213,
+   "t1": 16.229508196721312,
+   "kind": "slam",
+   "text": "d'être vues.",
+   "hook": false
+  },
+  {
+   "t0": 16.229508196721312,
+   "t1": 17.704918032786885,
+   "kind": "stack",
+   "text": "Écris-nous VIRAL en DM.",
+   "hook": false
+  },
+  {
+   "t0": 17.704918032786885,
+   "t1": 30,
+   "kind": "end",
+   "text": "Logo + Écris-nous VIRAL en DM"
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+ "bpm": 134,
+ "len": 20,
+ "end": 40,
+ "hookEnd": 6,
+ "scenes": [
+  {
+   "b0": 0,
+   "b1": 2,
+   "kind": "slam",
+   "bg": "ink"
+  },
+  {
+   "b0": 2,
+   "b1": 4,
+   "kind": "type",
+   "bg": "paper"
+  },
+  {
+   "b0": 4,
+   "b1": 6,
+   "kind": "slam",
+   "bg": "blue"
+  },
+  {
+   "b0": 6,
+   "b1": 10.5,
+   "kind": "count",
+   "bg": "blue"
+  },
+  {
+   "b0": 10.5,
+   "b1": 15,
+   "kind": "count",
+   "bg": "ink"
+  },
+  {
+   "b0": 15,
+   "b1": 19.5,
+   "kind": "count",
+   "bg": "blue"
+  },
+  {
+   "b0": 19.5,
+   "b1": 24.5,
+   "kind": "swap",
+   "bg": "paper"
+  },
+  {
+   "b0": 24.5,
+   "b1": 29,
+   "kind": "count",
+   "bg": "ink"
+  },
+  {
+   "b0": 29,
+   "b1": 31.5,
+   "kind": "type",
+   "bg": "paper"
+  },
+  {
+   "b0": 31.5,
+   "b1": 36.5,
+   "kind": "slam",
+   "bg": "blue"
+  },
+  {
+   "b0": 36.5,
+   "b1": 40,
+   "kind": "stack",
+   "bg": "paper"
+  }
+ ],
+ "cues": 117,
+ "scenesText": [
+  {
+   "t0": 0,
+   "t1": 0.8955223880597015,
+   "kind": "slam",
+   "text": "Les likes,",
+   "hook": true
+  },
+  {
+   "t0": 0.8955223880597015,
+   "t1": 1.791044776119403,
+   "kind": "type",
+   "text": "ça paie pas",
+   "hook": true
+  },
+  {
+   "t0": 1.791044776119403,
+   "t1": 2.6865671641791047,
+   "kind": "slam",
+   "text": "le loyer.",
+   "hook": true
+  },
+  {
+   "t0": 2.6865671641791047,
+   "t1": 4.701492537313433,
+   "kind": "count",
+   "text": "SUSHI X 59× sur Instagram.",
+   "hook": false
+  },
+  {
+   "t0": 4.701492537313433,
+   "t1": 6.7164179104477615,
+   "kind": "count",
+   "text": "AU PETIT CHALET 18× sur Facebook.",
+   "hook": false
+  },
+  {
+   "t0": 6.7164179104477615,
+   "t1": 8.73134328358209,
+   "kind": "count",
+   "text": "MEXICANOS 14× sur TikTok.",
+   "hook": false
+  },
+  {
+   "t0": 8.73134328358209,
+   "t1": 10.970149253731345,
+   "kind": "swap",
+   "text": "Pas de chance. / Une méthode.",
+   "hook": false
+  },
+  {
+   "t0": 10.970149253731345,
+   "t1": 12.985074626865671,
+   "kind": "count",
+   "text": "NOS CLIENTS 7,5 M+ vues générées.",
+   "hook": false
+  },
+  {
+   "t0": 12.985074626865671,
+   "t1": 14.104477611940299,
+   "kind": "type",
+   "text": "La prochaine ?",
+   "hook": false
+  },
+  {
+   "t0": 14.104477611940299,
+   "t1": 16.34328358208955,
+   "kind": "slam",
+   "text": "La tienne.",
+   "hook": false
+  },
+  {
+   "t0": 16.34328358208955,
+   "t1": 17.910447761194032,
+   "kind": "stack",
+   "text": "Écris-nous VIRAL en DM.",
+   "hook": false
+  },
+  {
+   "t0": 17.910447761194032,
+   "t1": 30,
+   "kind": "end",
+   "text": "Logo + Écris-nous VIRAL en DM"
+  }
+ ]
+}
