@@ -212,6 +212,7 @@ tailwind.config = { theme: { extend: {
           <th class="px-3 py-3">Actions</th>
           <th class="px-3 py-3">Quartier</th>
           <th class="px-3 py-3">Statut</th>
+          <th class="px-3 py-3">Date</th>
           <th class="px-3 py-3">Temp.</th>
           <th class="px-3 py-3">Notes</th>
         </tr>
@@ -538,6 +539,9 @@ function renderStats(view) {
     stat('Taux conversion', rate + '%', `${conv} meetings/clients ÷ contactés`, 'glow-accent', 'text-accent-soft') +
     stat('Tier S · A', `${leads.filter(l => l.potential === 'S').length} · ${leads.filter(l => l.potential === 'A').length}`, `${leads.filter(l => l.nws).length} NWS (besoin d’un site)`, '', 'text-amber-300');
 }
+// Date of the last contact: filled automatically when the status changes, editable by hand.
+const dayOf = v => { if (!v) return ''; const d = new Date(v); return isNaN(d) ? '' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const dateHtml = (l, extra = 'h-8 rounded-full px-3 text-xs') => `<input type="date" data-inline="lastContact" data-id="${l.id}" aria-label="Date du dernier contact" value="${dayOf(l.lastContact)}" class="mono border border-line bg-surface text-fg outline-none focus:border-accent ${extra}">`;
 const selectHtml = (field, id, opts, cur, cls, extra = 'rounded-full px-3 py-1 text-xs') =>
   `<select data-inline="${field}" data-id="${id}" aria-label="${field === 'temp' ? 'Température' : 'Statut'}" class="border font-medium outline-none ${extra} ${cls}">${opts.map(o => `<option ${o===cur?'selected':''} value="${o}">${field==='temp'?TEMP_ICON[o]+' ':''}${o}</option>`).join('')}</select>`;
 
@@ -581,6 +585,7 @@ function cardHtml(l, o = {}) {
   ${l.why ? `<p class="mt-2.5 text-[12.5px] leading-[1.35] text-accent-soft">${esc(l.why)}</p>` : ''}
   ${l.status === 'Mailed' ? `<button data-replied="${l.id}" class="btn-g mt-3 w-full border-teal-500/50 bg-teal-500/10 text-teal-300">↩ A répondu au courriel</button>` : ''}
   <div class="mt-3 grid grid-cols-2 gap-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status], 'h-11 w-full rounded-xl px-3')}${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp], 'h-11 w-full rounded-xl px-3')}</div>
+  <label class="mt-2 flex items-center justify-between gap-3 text-xs text-muted">Date du dernier contact ${dateHtml(l, 'h-11 rounded-xl px-3')}</label>
   <div class="mt-2 grid grid-cols-[1fr_1fr_auto] gap-2">
     ${tel ? `<a href="tel:${esc(tel)}" data-call="${l.id}" class="btn-p">${ICON.phone}Appeler</a>` : '<span class="btn-g text-muted opacity-50">Pas de numéro</span>'}
     <button data-msg="${l.id}" class="btn-g">${ICON.mail}Message</button>
@@ -670,6 +675,7 @@ function render() {
         <button data-del="${l.id}" aria-label="Supprimer" class="rounded-full border border-line px-2.5 py-1 text-xs hover:border-rose-500 hover:text-rose-400">✕</button></div></div></td>
       <td class="px-3 py-2 text-xs"><div class="text-neutral-200">${esc(l.hood)}</div><div class="text-neutral-500">${esc(l.address.split(',')[0])}</div>${l.dist != null ? `<div class="mt-0.5" style="color:${(ringOf(l.dist) || { color: '#737373' }).color}">${ringOf(l.dist) ? '●' : '○'} ${l.dist} km${l.geoExact === false ? ' (approx.)' : ''}</div>` : ''}</td>
       <td class="px-3 py-2">${selectHtml('status', l.id, STATUSES, l.status, STATUS_CLS[l.status])}</td>
+      <td class="px-3 py-2">${dateHtml(l)}</td>
       <td class="px-3 py-2">${selectHtml('temp', l.id, TEMPS, l.temp, TEMP_CLS[l.temp])}</td>
       <td class="px-3 py-2 max-w-[240px]"><div contenteditable="true" data-note="${l.id}" class="rounded px-1 text-xs text-neutral-300 outline-none focus:bg-surface-2 focus:ring-1 focus:ring-accent">${esc(l.notes)}</div></td>
     </tr>`).join('');
@@ -681,6 +687,7 @@ function update(id, patch) {
   if (patch.status && patch.status !== l.status && patch.status !== 'To be called') patch.lastContact = new Date().toISOString();
   if (patch.status === 'Client' || patch.status === 'Meeting booked') patch.temp = 'Hot';
   if (patch.category) patch.tier = CATS[patch.category].tier;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(patch.lastContact || '')) patch.lastContact = new Date(patch.lastContact + 'T12:00:00').toISOString();
   Object.assign(l, patch); withPotential(l); save(); render();
 }
 
