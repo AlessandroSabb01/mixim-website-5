@@ -2,7 +2,7 @@
 import {chromium} from 'playwright';
 import fs from 'fs';
 const OUT='assets/shots';fs.mkdirSync(OUT,{recursive:true});
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',proxy:{server:process.env.HTTPS_PROXY}});
+const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',proxy:{server:process.env.HTTPS_PROXY}});
 const views={desktop:{viewport:{width:1440,height:900},deviceScaleFactor:2},mobile:{viewport:{width:430,height:932},deviceScaleFactor:3,isMobile:true,hasTouch:true}};
 const only=process.argv[2];
 for(const [name,opt] of Object.entries(views)){

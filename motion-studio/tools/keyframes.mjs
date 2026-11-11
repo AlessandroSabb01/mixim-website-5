@@ -10,7 +10,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".jpg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".css": "text/css" };
 const srv = http.createServer((q, r) => { const p = path.join(ROOT, decodeURIComponent(q.url.split("?")[0])); if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { r.writeHead(404); return r.end(); } r.writeHead(200, { "content-type": MIME[path.extname(p)] || "application/octet-stream" }); fs.createReadStream(p).pipe(r); });
 await new Promise((res) => srv.listen(0, "127.0.0.1", res));
-const br = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--force-color-profile=srgb", "--font-render-hinting=none"] });
+const br = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--force-color-profile=srgb", "--font-render-hinting=none"] });
 const pg = await br.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: OW / 1080 });
 pg.on("pageerror", (e) => console.error("page error:", e.message));
 await pg.goto(`http://127.0.0.1:${srv.address().port}/${FILM}/index.html${QS ? "?" + QS : ""}`);

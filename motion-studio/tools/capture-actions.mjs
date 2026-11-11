@@ -2,7 +2,7 @@
 import {chromium} from 'playwright';
 import fs from 'fs';
 const OUT='assets/states';
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',proxy:{server:process.env.HTTPS_PROXY}});
+const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',proxy:{server:process.env.HTTPS_PROXY}});
 const ctx=await b.newContext({viewport:{width:430,height:932},deviceScaleFactor:3,locale:'fr-CA'});
 const p=await ctx.newPage();await p.goto('https://creationvirale.com/',{waitUntil:'networkidle'});
 await p.getByRole('button',{name:'Tout accepter'}).click().catch(()=>{});await p.waitForTimeout(400);

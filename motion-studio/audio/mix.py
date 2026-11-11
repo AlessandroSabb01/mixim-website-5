@@ -266,6 +266,25 @@ for c in cues:
 sfx = reverb(sfx, 1.6, 0.45, 0.2, hp=500)  # one shared, airy room: everything sits in the same space
 mix = music * 0.85 + sfx * 0.8
 
+# ---- optional voice-over (film6): the bed sits ~11 dB under the voice and ducks a further 6 dB while it speaks ----
+import os, subprocess
+if os.environ.get("VO_FILE"):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", os.environ["VO_FILE"], "-ac", "2", "-ar", str(SR), "-f", "f32le", "-"], capture_output=True).stdout
+    vo = np.frombuffer(raw, np.float32).reshape(-1, 2).astype(np.float64)
+    vtrack = np.zeros_like(mix)
+    place(vtrack, vo, float(os.environ.get("VO_OFF", "0")))
+    m_ = pyln.Meter(SR)
+    lv, lb = m_.integrated_loudness(vtrack), m_.integrated_loudness(mix)
+    mix = mix * db(lv - float(os.environ.get("VO_BED_DB", "11")) - lb)
+    e = np.abs(vtrack).max(axis=1)
+    k = n(0.12); e = np.convolve(e, np.ones(k) / k, mode="same")
+    speak = np.clip(e / (e.max() * 0.08), 0, 1)
+    att = n(0.04); rel = n(0.25); g = np.zeros_like(speak); cur = 0.0
+    for i in range(0, len(speak), 64):
+        tgt = speak[i]; a = 64 / (att if tgt > cur else rel); cur += (tgt - cur) * min(1, a); g[i:i + 64] = cur
+    mix = mix * db(-6 * g)[:, None] + vtrack
+    print(f"vo: {lv:.1f} LUFS, bed set {os.environ.get('VO_BED_DB', '11')} dB under")
+
 # ---- master: loudness to -14 LUFS, true peak <= -1 dBTP ----
 meter = pyln.Meter(SR)
 target = -14.0

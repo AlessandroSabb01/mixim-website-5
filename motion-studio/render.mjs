@@ -22,12 +22,18 @@ const CFG = {
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
-}[FILM] || film5Cfg();
+}[FILM] || (FILM === "film6" ? film6Cfg() : film5Cfg());
 // film5: the three text films; --qs "v=1&k=a" picks film and hook, each has its own score and tempo
 function film5Cfg() {
   const q = new URLSearchParams(String(opt("qs", "v=1&k=a"))), v = q.get("v") || "1", k = q.get("k") || "a";
   process.env.FILM_V = v; process.env.FILM_K = k;
   return { score: "audio/music5.py", len: 20, tag: `-text${v}${k}`, music: `build/music5-v${v}${k}.wav`, beats: `beats5-v${v}.json`, bpm: { 1: 122, 2: 128, 3: 134 }[v] };
+}
+// film6: Import-Rama ads, --qs "v=1&k=a" (a = motion design, b = AI b-roll); score + voice-over
+function film6Cfg() {
+  const q = new URLSearchParams(String(opt("qs", "v=1&k=a"))), v = q.get("v") || "1", k = q.get("k") || "a";
+  process.env.FILM_V = v; process.env.FILM_K = k;
+  return { score: "audio/music6.py", len: { 1: 14.5 }[v] || 15, tag: `-imp${v}${k}`, music: `build/music6-v${v}.wav`, beats: `beats6-v${v}.json`, bpm: 120 };
 }
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
 const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
@@ -54,7 +60,7 @@ if (!opt("skip-audio", false)) {
   console.log("beat grid…"); run("python3", ["audio/beats.py", MUSIC, BEATS]);
 }
 
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--force-color-profile=srgb", "--disable-lcd-text", "--font-render-hinting=none"] });
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--force-color-profile=srgb", "--disable-lcd-text", "--font-render-hinting=none"] });
 
 async function openFilm(w, h) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
@@ -76,6 +82,8 @@ let mixed = false;
 async function ensureMix(film) {
   if (mixed || opt("skip-audio", false)) return;
   const cues = await film.page.evaluate(() => window.CUES);
+  const vo = await film.page.evaluate(() => window.VO || null);
+  if (vo) { process.env.VO_FILE = path.join(ROOT, vo.file); process.env.VO_OFF = String(vo.offset); }
   fs.writeFileSync(path.join(ROOT, CUESF), JSON.stringify(cues, null, 1));
   console.log(`mix (${cues.length} cues)…`);
   run("python3", ["audio/mix.py", MUSIC, BEATS, CUESF, MIX]);

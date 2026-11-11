@@ -1,6 +1,6 @@
 // Reads computed design values (radius, padding, borders, type) of the site's real components -> assets/site-styles.json
 import {chromium} from 'playwright';import fs from 'fs';
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',proxy:{server:process.env.HTTPS_PROXY}});
+const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',proxy:{server:process.env.HTTPS_PROXY}});
 const p=await b.newPage({viewport:{width:430,height:932}});
 const K=['fontFamily','fontSize','fontWeight','lineHeight','letterSpacing','color','backgroundColor','backgroundImage','borderRadius','borderTopWidth','borderTopColor','paddingTop','paddingRight','paddingBottom','paddingLeft','height','width','boxShadow','gap','textTransform'];
 const grab=async(sel,label,root='document')=>p.evaluate(([sel,K])=>{const e=document.querySelector(sel);if(!e)return null;const s=getComputedStyle(e);const r=e.getBoundingClientRect();const o={w:r.width,h:r.height,text:(e.innerText||'').slice(0,60)};for(const k of K)o[k]=s[k];return o},[sel,K]).then(v=>[label,v]);

@@ -1,7 +1,7 @@
 # Motion studio rules
 
 ## Environment
-- Chromium: launch Playwright with executablePath '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' (never `playwright install`).
+- Chromium: launch Playwright with executablePath '/opt/pw-browsers/chromium' (never `playwright install`).
 
 ## Render contract
 - Every film is a pure function of time: `window.seek(t)` paints frame t.
