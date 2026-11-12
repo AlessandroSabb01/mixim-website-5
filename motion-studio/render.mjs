@@ -22,6 +22,7 @@ const CFG = {
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
   film3: { score: "audio/music3m.py", mixer: "audio/mix6.py", len: 31, tag: "-v5", music: "build/music3m.wav", beats: "beats3.json", bpm: 118 },
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
+  film8: { score: "audio/music8.py", mixer: "audio/mix8.py", len: 21.3, tag: "-v6", music: "build/music8.wav", beats: "beats8.json", bpm: 159, nogrid: true },
 }[FILM] || (FILM === "film6" ? film6Cfg() : film5Cfg());
 // film5: the three text films; --qs "v=1&k=a" picks film and hook, each has its own score and tempo
 function film5Cfg() {
@@ -57,7 +58,7 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 // ---------- audio: score + measured grid ----------
 if (!opt("skip-audio", false)) {
   if (SCORE) { console.log("score…"); run("python3", [SCORE, MUSIC]); }
-  console.log("beat grid…"); run("python3", ["audio/beats.py", MUSIC, BEATS]);
+  if (!CFG.nogrid) { console.log("beat grid…"); run("python3", ["audio/beats.py", MUSIC, BEATS]); }   // film8 writes its own grid (steps)
 }
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--force-color-profile=srgb", "--disable-lcd-text", "--font-render-hinting=none"] });
