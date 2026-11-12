@@ -20,7 +20,7 @@ const FILM = String(opt("film", "film"));          // film | film2 | film3
 const CFG = {
   film:  { score: "audio/music.py",  len: 20, tag: "",    music: "build/music.wav",  beats: "beats.json" },
   film2: { score: "audio/music2.py", len: 30, tag: "-v2", music: "build/music2.wav", beats: "beats2.json" },
-  film3: { score: "audio/music3.py", len: 30, tag: "-v3", music: "build/music3.wav", beats: "beats3.json" },
+  film3: { score: "audio/music3m.py", mixer: "audio/mix6.py", len: 31, tag: "-v5", music: "build/music3m.wav", beats: "beats3.json", bpm: 118 },
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
 }[FILM] || (FILM === "film6" ? film6Cfg() : film5Cfg());
 // film5: the three text films; --qs "v=1&k=a" picks film and hook, each has its own score and tempo

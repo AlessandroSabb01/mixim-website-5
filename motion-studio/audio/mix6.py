@@ -31,7 +31,8 @@ cues = json.load(open(cues_path))
 MAP = {"slam": ("pop", -13, 0.35), "pop": ("pop", -11, 0.35), "thump": ("impact", -9, 1.2), "impact": ("impact", -7, 1.2),
        "zip": ("whoosh", -15, 0.7), "air": ("transition", -13, 1.4), "whoosh": ("whoosh", -12, 1.3), "tap": ("tick", -17, 0.2),
        "key": ("click", -15, 0.2), "glint": ("ui-blip", -18, 0.6), "sparkle": ("ding", -19, 1.2), "shimmer": ("ding", -17, 1.5),
-       "bloom": ("ding", -14, 1.6)}
+       "bloom": ("ding", -14, 1.6), "key": ("tick", -21, 0.15), "select": ("click", -15, 0.2), "send": ("whoosh", -13, 1.0),
+       "clap": ("impact", -10, 1.2), "typing": ("typing", -17, 3.0)}
 pool = {}
 kit = {e["category"]: e for e in MAN["default_kit"] if e.get("bundled")}
 for cat in set(c for c, _, _ in MAP.values()):
@@ -43,6 +44,7 @@ cache, used, turn, last = {}, {}, {}, {}
 sfx = np.zeros_like(music)
 for c in cues:
     cat, lv, mx = MAP.get(c["type"], ("pop", -14, 0.35))
+    mx = c.get("dur", mx)                       # a typing run lasts as long as the text being typed
     t = c["t"]
     if t - last.get(cat, -9) < 0.07:          # never stack two of the same sound inside 70 ms
         continue
@@ -66,9 +68,12 @@ meter = pyln.Meter(SR)
 vtrack = np.zeros_like(music)
 if os.environ.get("VO_FILE"):
     place(vtrack, load(os.environ["VO_FILE"]), float(os.environ.get("VO_OFF", "0")))
-lv = meter.integrated_loudness(vtrack)
-music = music * db(lv - 9 - meter.integrated_loudness(music))
-sfx = sfx * db(lv - 10 - meter.integrated_loudness(sfx))
+if os.environ.get("VO_FILE"):
+    lv = meter.integrated_loudness(vtrack)
+    music = music * db(lv - 9 - meter.integrated_loudness(music))
+    sfx = sfx * db(lv - 10 - meter.integrated_loudness(sfx))
+else:                                           # no voice (showreel): music leads, SFX sit ~5 dB under it
+    sfx = sfx * db(meter.integrated_loudness(music) - 5 - meter.integrated_loudness(sfx))
 e = np.abs(vtrack).max(axis=1); kk = n(0.12); e = np.convolve(e, np.ones(kk) / kk, mode="same")
 speak = np.clip(e / (e.max() * 0.08 + 1e-9), 0, 1)
 g = np.zeros_like(speak); cur = 0.0

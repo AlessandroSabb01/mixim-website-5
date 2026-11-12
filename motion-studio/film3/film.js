@@ -266,7 +266,10 @@
   /* ===== hook: one slam per word, footage morphing behind (b0-6) ===== */
   const HOOK = ["Votre", "business", "mérite", "d'exploser."];
   const HOOK_SH = ["circle", "squircle", "arch"];
-  const ORBIT = [["circle", -0.32, -0.27, 330], ["pill", 0.33, -0.22, 400], ["leaf", -0.36, 0.2, 340], ["drop", 0.34, 0.25, 330], ["squircle", 0.02, -0.4, 250], ["arch", 0.0, 0.38, 290]];
+  const ORBIT = [["circle", -0.27, -0.27, 470], ["pill", 0.27, -0.2, 540], ["leaf", -0.29, 0.2, 470], ["drop", 0.28, 0.25, 460], ["squircle", 0.0, -0.39, 360], ["arch", 0.0, 0.37, 400]];
+  // v5: each client clip pushes in slowly on its own detail (the brief: bigger images, zoomed on different spots)
+  const ZOOM_AT = [[50, 35], [40, 60], [60, 45], [45, 30], [55, 65], [50, 50]];
+  const zoomIn = (c, k, d) => { c.img.style.transformOrigin = `${ZOOM_AT[k][0]}% ${ZOOM_AT[k][1]}%`; c.img.style.transform = `scale(${1.18 + 0.22 * clamp(d / 3)})`; };
   function buildHook() {
     const root = layer(4);
     S.hookShapes = ORBIT.map(() => shapeClip(root));
@@ -321,9 +324,9 @@
         const d = since(t, i) + 0.05, e = ez.outExpo(clamp(d / 0.34));
         const from = SH[HOOK_SH[Math.max(0, i - 1)]], to = SH[HOOK_SH[i]];
         const sp = i === 0 ? to : mixShape(from, to, e);
-        const size = lerp(i === 0 ? 0 : [560, 760, 820][i - 1], [560, 760, 820][i], i === 0 ? ez.outBack(clamp(d / 0.4)) : e);
+        const size = lerp(i === 0 ? 0 : [700, 900, 960][i - 1], [700, 900, 960][i], i === 0 ? ez.outBack(clamp(d / 0.4)) : e);
         putShape(c, sp, W / 2, H / 2, Math.max(1, size), { ry: (i % 2 ? -1 : 1) * 75 * (1 - e) * (i ? 1 : 0), r: [0, -7, 6][i] * e, op: clamp((t - bt(-0.1)) / 0.1) });
-        frameOf(c, `hook${i}`, Math.max(0, t));
+        frameOf(c, `hook${i}`, Math.max(0, t)); zoomIn(c, i, since(t, i));
         return;
       }
       // split: b3 -> six shapes spring out to orbit slots, orbit during b3-5.6, collapse into the centre by b6
@@ -334,7 +337,7 @@
       const col = ez.inExpo(pb(t, 5.5, 6.05));
       const cx = W / 2 + rx_ * W * e * (1 - col), cy = H / 2 + ry_ * H * e * (1 - col);
       putShape(c, SH[shp], cx, cy, size * (0.35 + 0.65 * clamp(e, 0, 1.15)) * (1 - 0.9 * col), { z: -200 + 100 * Math.sin(k + b), r: (k % 2 ? 1 : -1) * (8 + 4 * Math.sin(b + k)), ry: 18 * Math.sin(t * 1.3 + k), op: 1 - col });
-      frameOf(c, `hook${k}`, Math.max(0, t) + k * 0.3);
+      frameOf(c, `hook${k}`, Math.max(0, t) + k * 0.3); zoomIn(c, k, since(t, 3));
     });
   }
 
@@ -598,7 +601,7 @@
       T(P_.rec, { x: PS.x - hw + 4, y: PS.y - hh - 58 + (1 - a) * 30, op: on_ ? a : 0 }); }
     // 03 montage
     { const a = win(24, 0.1), on_ = b >= 23.9 && b < 27.05;
-      T(P_.panel, { x: (W - 900) / 2, y: PS.y + 320 + (1 - a) * 120, rx: (1 - a) * 50, op: on_ ? a : 0 });
+      T(P_.panel, { x: (W - 900) / 2, y: PS.y + 320, op: 0 });   // v5: the montage timeline is gone (coordinator note)
       P_.clips.forEach((c, k) => { const e = spring(since(t, 24.25 + k * 0.125) + 0.02, 2.4, 7.5); c.e.style.transform = `translateX(${(1 - clamp(e, 0, 1.2)) * 260}px) scaleX(${Math.max(0.001, clamp(e, 0, 1.2))})`; c.e.style.opacity = e > 0.01 ? 1 : 0; });
       P_.head_.style.transform = `translateX(${28 + 840 * clamp((t - bt(24.5)) / (bt(26.9) - bt(24.5)))}px)`; }
     // 04 diffusion
@@ -726,7 +729,7 @@
       R_.lab.style.transform = `translate(80px,${772 + (1 - ez.outExpo(pr(t, b0 + 0.45, 0.4))) * 30}px)`;
       // clip in a circle, top right
       const ce = spring(since(t, b0 + 0.1), 1.8, 6.5);
-      putShape(R_.shape, SH.circle, W - 170, 440 + 10 * Math.sin(t * 2 + i), 260 * clamp(ce, 0, 1.2), { r: (1 - clamp(ce, 0, 1)) * 30, op: since(t, b0 + 0.1) > 0 ? 1 : 0 });
+      putShape(R_.shape, SH.squircle, W / 2, 1735 + 6 * Math.sin(t * 2 + i), 350 * clamp(ce, 0, 1.2),   /* v5: the client's real footage, big (coordinator note) */ { r: (1 - clamp(ce, 0, 1)) * 30, op: since(t, b0 + 0.1) > 0 ? 1 : 0 });
       frameOf(R_.shape, r.id, Math.max(0, t - bt(b0 - 0.3)));
       // chart draws itself, a glowing head rides the line
       const dp = ez.inOutCubic(pb(t, b0 + 0.5, b0 + 1.8));
@@ -968,21 +971,10 @@
   function buildFlash() {
     S.flash = el(stage, { width: W + "px", height: H + "px", zIndex: 17, mixBlendMode: "screen", background: `radial-gradient(circle at 50% 50%, ${rgba(C.white, 0.9)} 0%, ${rgba(C.blueHi, 0.7)} 25%, ${rgba(C.blue, 0.35)} 55%, ${rgba(C.blue, 0)} 85%)` });
   }
-  function flash(t) {
-    let f = 0;
-    for (const [b, a] of [[3, 0.55], [8, 0.6], [12, 0.25], [18, 0.3], [30, 0.95], [31.5, 0.3], [33, 0.35], [42, 0.4], [43, 0.55], [54, 0.3], [57.5, 0.4]]) {
-      const d = since(t, b); if (d >= -0.04) f = Math.max(f, a * (d < 0 ? (d + 0.04) / 0.04 : Math.exp(-d / (b === 30 ? 0.3 : 0.14))));
-    }
-    T(S.flash, { op: f });
-  }
+  function flash(t) { T(S.flash, { op: 0 }); }            // v5: no whole-frame flashes
   function camera(t, fs) {
-    let s = 1, x = 0, y = 0, r = 0;
+    let s = 1, x = 0, y = 0, r = 0;                         // v5: no camera kicks, shakes or beat zooms
     const b = tb(t);
-    for (const [hb, a] of [[0, 0.03], [1, 0.03], [2, 0.03], [3, 0.08], [6, 0.02], [7, 0.02], [8, 0.07], [12, 0.03], [18, 0.04], [21, 0.03], [24, 0.03], [27, 0.03], [30, 0.1], [31, 0.03], [31.5, 0.05], [32, 0.03], [32.5, 0.03], [33, 0.05], [36, 0.03], [39, 0.03], [42, 0.05], [43, 0.07], [57.5, 0.045], [59, 0.012]]) {
-      const d = since(t, hb); if (d >= 0) s += a * Math.exp(-d / 0.12);
-    }
-    for (const [hb, a] of [[3, 22], [8, 16], [30, 30], [31.5, 14], [43, 18], [57.5, 16]]) { const d = since(t, hb); if (d >= 0 && d < 0.6) { const e = a * Math.exp(-d / 0.13); x += e * sn(d * 30, hb); y += e * sn(d * 30, hb + 50); r += e * 0.025 * sn(d * 22, hb + 9); } }
-    if ((b >= 8 && b < 29.4) || (b >= 30 && b < 42)) s += 0.012 * Math.exp(-(b - Math.floor(b)) * PER / 0.08);
     // form: follow the active field so typing stays legible on a phone
     if (fs.live && fs.focus) { const target = H * 0.5 - fs.fyStage; const f = clamp(b - 45, 0, 1) * clamp(54 - b, 0, 1); y += clamp(target, -600, 200) * 1.12 * f; s *= 1 + 0.12 * f; }
     cam.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;
@@ -1054,7 +1046,7 @@
     cue(44.05, "glint", 0.25, 0, { step: 1 });
     for (const b of [45, 47, 49.5, 50.5]) cue(b, "tap", 0.65, 0.2);
     cue(50.25, "select", 0.7);
-    const keyCues = (s, [b0, per]) => [...s].forEach((ch, i) => { if (ch !== " ") cue(b0 + i * per, "key", 0.45, 0.15, { var: i }); });
+    const keyCues = (s, [b0, per]) => cue(b0, "typing", 0.6, 0.15, { dur: s.length * per * PER });   // v5: one real keyboard take per field (coordinator: new typing sound)
     keyCues(NAME, TYPE.name); keyCues(MAIL, TYPE.mail); keyCues(MSG, TYPE.msg);
     cue(53, "tap", 0.85, 0.2); cue(53.6, "send", 0.55); cue(53.6, "ding", 0.85); cue(53.62, "shimmer", 0.35);
     // ending
