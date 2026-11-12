@@ -33,7 +33,7 @@ function film5Cfg() {
 function film6Cfg() {
   const q = new URLSearchParams(String(opt("qs", "v=1&k=a"))), v = q.get("v") || "1", k = q.get("k") || "a";
   process.env.FILM_V = v; process.env.FILM_K = k;
-  return { score: "audio/music6.py", len: { 1: 14.5 }[v] || 15, tag: `-imp${v}${k}`, music: `build/music6-v${v}.wav`, beats: `beats6-v${v}.json`, bpm: 120 };
+  return { score: "audio/music6.py", len: { 1: 15, 2: 13.2, 3: 30.8 }[v] || 15, tag: `-imp${v}${k}`, music: `build/music6-v${v}.wav`, beats: `beats6-v${v}.json`, bpm: 120 };
 }
 const SCORE = CFG.score, LEN = CFG.len, TAG = CFG.tag, V2 = FILM !== "film";
 const MUSIC = CFG.music, BEATS = CFG.beats, MIX = `build/mix${TAG}.wav`, CUESF = `build/cues${TAG}.json`;
