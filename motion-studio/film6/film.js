@@ -165,7 +165,7 @@
   const T1 = VID !== "1" ? null : { s2: w(3) - 0.07, s3: w(6) - 0.16, s4: w(11) - 0.12, s5: w(22) - 0.2, s6: w(30) - 0.24, end: SC.len };
   // footage plan for k=b: [shot, film start, film end, in-point, speed]
   const SHOTS1 = VID !== "1" ? null : [["s1", 0, T1.s2, 0.5, 1], ["s2", T1.s2, T1.s3, 0.35, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
-    ["s4", T1.s4, w(18) - 0.1, 0.0, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["s6", w(20) + 0.18, T1.s5, 0.9, 1],
+    ["s4", T1.s4, w(14) - 0.08, 0.2, 1], ["qc", w(14) - 0.08, w(18) - 0.1, 0.3, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["s6", w(20) + 0.18, T1.s5, 0.9, 1],
     ["s2", T1.s5, T1.s6, 0.2, 0.5, "blur"]];
 
   function buildFootage() {
@@ -409,6 +409,8 @@
     }) };
   }
   function captions(t) {
+    if (S.c) disp(S.c.root, false);
+    return; // v3: no captions
     if (!FOOT) return;
     const on = t < VX.end - 0.05;
     disp(S.c.root, on);
@@ -668,7 +670,7 @@
       X.r.at2.forEach((a) => cue(a - 0.05, "slam", 0.45));
     }
     return {
-      end: c.end, shots, endLines: ["PRENDS", "RENDEZ-VOUS"], button: "SANS ENGAGEMENT", build, paint, cues,
+      end: c.end, shots, endLines: ["PRENDS", "RENDEZ-VOUS"], button: "FORMULAIRE", build, paint, cues,
       kicks: [[wt("Tu"), 0.03], [wt("ou"), 0.03], [wt("ton"), 0.05], ...ITEMS.map(([, tk]) => [wt(tk), 0.025]), [wt("fabriquer."), 0.05], [wt("Un"), 0.03], [wt("contact,"), 0.04], [wt("salle."), 0.04]],
       flashes: [[wt("ton"), 0.18], [c.s2, 0.22], [c.s4, 0.3]],
       shakes: [[wt("ton"), 14], [wt("fabriquer."), 12], [wt("salle."), 10]],
@@ -858,7 +860,7 @@
       cue(c.s6 - 0.2, "air", 0.5, 0, { dir: 1 }); X.z.at.forEach((a, i) => cue(a - 0.05, "slam", 0.55 + 0.1 * i)); cue(X.z.at[2] - 0.03, "thump", 0.7);
     }
     return {
-      end: c.end, shots, endLines: ["PREMIER", "RENDEZ-VOUS", "GRATUIT"], button: "C'EST GRATUIT", build, paint, cues,
+      end: c.end, shots, endLines: ["PREMIER", "RENDEZ-VOUS", "GRATUIT"], button: "FORMULAIRE", build, paint, cues,
       kicks: [[wt("Ton"), 0.03], [wt("fournisseur…"), 0.05], [wt("personne"), 0.025], [wt("challengé?"), 0.05], [wt("Ce"), 0.02], [wt("en"), 0.03],
         [wt("toi."), 0.04], [wt("Import-Rama"), 0.04], [wt("va"), 0.02], [wt("à"), 0.035], ...st.map((x) => [x + 0.06, 0.022]),
         ...au.map((x) => [x + 0.06, 0.03]), [wt("envoie-nous"), 0.02], [wt("on", 4), 0.02], [wt("ton"), 0.03], [wt("actuel."), 0.05], [wt("Toi,"), 0.03], [wt("t'as"), 0.03], [wt("gérer."), 0.05]],
@@ -872,7 +874,7 @@
   let VX = null;
   const VIDEOS = {
     "1": () => ({
-      end: T1.s6, shots: SHOTS1, endLines: ["PRENEZ", "RENDEZ-VOUS", "GRATUITEMENT"], button: "C'EST GRATUIT",
+      end: T1.s6, shots: SHOTS1, endLines: ["PRENEZ", "RENDEZ-VOUS", "GRATUITEMENT"], button: "FORMULAIRE",
       build() { buildHook(); buildProducts(); buildMonthly(); buildSource(); buildList(); },
       paint(t) { hook(t); products(t); monthly(t); source(t); list(t); },
       cues: cues1,
