@@ -180,7 +180,7 @@
     const [name, a, , inp, sp, mode] = sh;
     shotFrame(S.foot, name, inp + (t - a) * sp);
     // a slow push on every shot, a punch on every cut
-    const k = t - a, punch = 0.06 * Math.exp(-k / 0.18);
+    const k = t - a, punch = 0;   // v2: no zoom punch on cuts, only a steady push
     const listBg = mode === "blur";
     S.foot.img.style.transform = `scale(${(listBg ? 1.18 : 1.04) + 0.025 * k + punch})`;
     S.foot.img.style.filter = listBg ? "blur(22px) brightness(0.55) saturate(0.8)" : "contrast(1.08) saturate(1.05)";
@@ -445,13 +445,13 @@
   }
   function fx(t) {
     let f = 0;
-    for (const [a, g] of [...VX.flashes, [VX.end + 0.08, 0.25]]) { const d = t - a; if (d >= 0) f = Math.max(f, g * Math.exp(-d / 0.09)); }
+    // v2: no full-frame flashes, kicks, shakes or drift; the frame stays still, only the elements move
     T(S.flash, { op: f });
     let s = 1, x = 0, y = 0, r = 0;
-    for (const [a, g] of KICKS) { const d = t - a; if (d >= 0) s += g * Math.exp(-d / 0.12); }
-    for (const [a, g] of VX.shakes) { const d = t - a; if (d >= 0 && d < 0.5) { const e = g * Math.exp(-d / 0.11); x += e * sn(d * 30, a * 10); y += e * sn(d * 30, a * 10 + 9); r += e * 0.02 * sn(d * 20, a * 10 + 3); } }
+    
+    if (0) for (const [a, g] of VX.shakes) { const d = t - a; if (d >= 0 && d < 0.5) { const e = g * Math.exp(-d / 0.11); x += e * sn(d * 30, a * 10); y += e * sn(d * 30, a * 10 + 9); r += e * 0.02 * sn(d * 20, a * 10 + 3); } }
     // a slow handheld drift under everything
-    x += 4 * sn(t * 0.7, 21); y += 4 * sn(t * 0.6, 22);
+    
     cam.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;
     const fr = Math.floor(t * 30 + 1e-6);
     T(S.grain, { x: -Math.floor(hash(fr, 3) * 256), y: -Math.floor(hash(fr, 4) * 256), op: FOOT ? 0.12 : 0.09 });
@@ -908,7 +908,7 @@
     VX = VIDEOS[VID]();
     buildFootage(); VX.build(); buildEnd(); buildCaptions(); buildFX(); VX.cues(); cuesEnd();
     await Promise.all([...document.images].map((im) => (im.complete ? 0 : im.decode().catch(() => {}))));
-    window.CUES = CUES.map((c) => ({ ...c }));
+    window.CUES = CUES.map((c) => ({ ...c, t: BTS[0] + c.beat * PER }));
     window.VO = { file: `assets/imp-ads/vo${VID}.mp3`, offset: OFF };
     window.seek = seek;
     await seek(0);

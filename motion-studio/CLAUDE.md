@@ -17,6 +17,7 @@
 
 ## Sound
 - Score and SFX are synthesized in code unless a track is supplied.
+- film6 (Import-Rama ads) v2+: real sounds only — CC0 library of the sound-effects skill (audio/mix6.py) and Mixkit music (audio/music6m.py). No whole-frame bumps (camera kicks, shakes, flashes, zoom punches); only elements move.
 - Place hits on the measured beat grid (beats.json). Loudness -14 LUFS.
 
 ## Loop before you show me anything
