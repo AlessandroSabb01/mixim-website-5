@@ -687,7 +687,7 @@
     const AUD = [["COMMERÇANT", "Commerçant,", "v3s10"], ["GROSSISTE", "grossiste,", "v3s11"], ["RESTAURATEUR", "restaurateur", "v2s6"], ["MANUFACTURIER", "manufacturier", "v3s12"]];
     const st = STEPS.map(([, , tk]) => wt(tk) - 0.06), au = AUD.map(([, tk]) => wt(tk) - 0.06);
     const shots = [["v3s1", 0, c.s1, 0.2, 0.9], ["s4", c.s1, wt("puis") - 0.08, 0.0, 0.9], ["v3s8", wt("puis") - 0.08, c.s2, 0.15, 1],
-      ["v3s2", c.s2, c.s3, 0.3, 1], ["v3s2", c.s3, st[1], 2.4, 1], ["v3s9", st[1], st[2], 0.3, 1], ["v3s3", st[2], st[3], 0.5, 1],
+      ["v3src", c.s2, c.s3, 0.3, 1], ["v3s2", c.s3, st[1], 2.4, 1], ["v3qc", st[1], st[2], 0.0, 1], ["v3s3", st[2], st[3], 0.5, 1],
       ["s5", st[3], st[4], 0.4, 1], ["v3s5", st[4], st[5], 0.5, 1], ["v3s6", st[5], c.s4, 0.3, 1],
       ["v3s10", c.s4, au[1], 0.4, 1], ["v3s11", au[1], au[2], 0.4, 1], ["v2s6", au[2], au[3], 1.4, 1], ["v3s12", au[3], c.s5, 0.4, 1],
       ["v3s11", c.s5, c.s6, 1.0, 0.6, "blur"], ["v3s7", c.s6, c.end + 0.3, 0.6, 1]];
