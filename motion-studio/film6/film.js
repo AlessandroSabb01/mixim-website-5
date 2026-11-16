@@ -540,7 +540,7 @@
   function V2() {
     const c = { s2: wt("Chaises") - 0.1, s3: wt("on") - 0.12, s4: wt("Un") - 0.12, end: wt("Prends") - 0.24 };
     const tv = wt("vaisselle,") - 0.06, tj = wt("jusqu'à") - 0.1;
-    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["fu_terrace", c.s2, wt("tables,") - 0.06, 0.3, 1], ["fu_column", wt("tables,") - 0.06, tv, 0.3, 1], ["v2s4", tv, wt("déco…") - 0.06, 0.4, 1], ["fu_flowers", wt("déco…") - 0.06, c.s3, 0.3, 1], ["v2s3", c.s3, c.s4, 1.7, 1],
+    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["fu_terrace", c.s2, wt("tables,") - 0.06, 0.3, 1], ["fu_column", wt("tables,") - 0.06, tv, 0.3, 1], ["v2s3", tv, wt("déco…") - 0.06, 1.2, 1], ["fu_flowers", wt("déco…") - 0.06, c.s3, 0.3, 1], ["v2s4", c.s3, c.s4, 0.4, 1],
       ["v2s5", c.s4, tj, 0.5, 1], ["fu_bossini", tj, c.end + 0.3, 0.2, 1]];
     const ITEMS = [["CHAISES", "Chaises"], ["TABLES", "tables,"], ["VAISSELLE", "vaisselle,"], ["DÉCO", "déco…"]];
     const X = {};
