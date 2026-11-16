@@ -217,13 +217,13 @@
   }
 
   /* ----- S2 the three products ----- */
-  const PRODS = [["CONTENANTS", "contenants.webp"], ["USTENSILES", "ustensiles.webp"], ["SACS", "sacs.webp"]];
+  const PRODS = [["CONTENANTS", "pr_boxes"], ["USTENSILES", "pr_group"], ["SACS", "pr_rebel"]];   // real client packaging (team correction)
   function buildProducts() {
     const root = layer(11, { background: FOOT ? "transparent" : C.paper });
     const z = fit("USTENSILES.", W - 2 * M, 800, 250), y0 = FOOT ? 200 : 170, lh = z * 0.9;
     const lines = PRODS.map(([word], i) => line(root, `${word}${dot()}`, z, INK, M, y0 + i * lh));
     const cy = y0 + 3 * lh + 70, ch = H - cy - 150;
-    const cells = FOOT ? [] : PRODS.map(([, src]) => { const c = imgCell(root, A + "img/" + src, W - 2 * M, ch); T(c.box, { x: M, y: cy }); return c; });
+    const cells = FOOT ? [] : PRODS.map(([, sh]) => { const c = cellFoot(root, M, cy, W - 2 * M, ch); c.sh = sh; return c; });
     S.p = { root, lines, cells, cy, ch, z };
   }
   function products(t) {
@@ -240,8 +240,8 @@
       const k = ez.outExpo(pr(t, at[i] - 0.06, 0.42));
       c.box.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`;
       c.box.style.zIndex = i;
-      c.img.style.transform = `scale(${1.18 - 0.14 * k + 0.02 * (t - at[i])})`;
-      vis(c.box, t >= at[i] - 0.06);
+      c.img.style.transform = `scale(${1.12 - 0.1 * k})`;
+      vis(c.box, t >= at[i] - 0.06); if (t >= at[i] - 0.06 && i >= cur - 1) shotFrame(c, c.sh, 0.3 + Math.max(0, t - at[i]));
     });
   }
 
@@ -640,7 +640,8 @@
       const zi = fit("VAISSELLE.", W - 2 * M, 800, 200), yi = FOOT ? 200 : 140;
       r.ls = ITEMS.map(([wd], i) => line(r.root, `${wd}${dot()}`, zi, INK, M, yi + i * zi * 0.9));
       r.at = ITEMS.map(([, tk]) => wt(tk));
-      if (!FOOT) buildPlan(r, yi + 4 * zi * 0.9 + 50);
+      if (!FOOT) { const y0 = yi + 4 * zi * 0.9 + 50, h_ = H - 130 - y0;   // real client furniture (team correction)
+        r.cells = [["fu_terrace", wt("Chaises")], ["fu_flowers", wt("vaisselle,")]].map(([sh, a]) => { const f = cellFoot(r.root, M, y0, W - 2 * M, h_); f.sh = sh; f.a = a; return f; }); }
 
       r = X.f = { root: layer(12, { background: FOOT ? "transparent" : C.red }) };
       const zf = fit("FABRIQUER.", W - 2 * M, 800, 330), zs = fit("ON PEUT AUSSI", W - 2 * M, 700, 170), yf = FOOT ? 240 : 360;
@@ -657,16 +658,21 @@
       r.ls2 = [line(r.root, "DE L'USINE", zd, C.white, M, r.ry + 200), line(r.root, `JUSQU'À TA SALLE${dot()}`, zd, C.white, M, r.ry + 200 + zd * 0.9)];
       r.at2 = [wt("l'usine"), wt("jusqu'à")];
       buildRoute(r);
+      if (!FOOT) { r.cell = cellFoot(r.root, 0, 0, W, H); r.cell.box.style.zIndex = "-1"; r.cell.img.style.filter = "brightness(.42)"; }   // Bossini chairs, full bleed behind the route
     }
     function paint(t) {
       let r = X.h, on = t < c.s2; disp(r.root, on);
       if (on) riseAll(r.ls, r.at, t);
       r = X.p; on = inR(t, c.s2, c.s3 + 0.25); disp(r.root, on);
-      if (on) { const cur = stackSwap(r.ls, r.at, t); if (r.items) planPaint(r, t, cur); }
+      if (on) { stackSwap(r.ls, r.at, t);
+        if (r.cells) r.cells.forEach((f, i) => { const k = ez.outExpo(pr(t, f.a - 0.06, 0.45)); f.box.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`; f.box.style.zIndex = i;
+          vis(f.box, t >= f.a - 0.06); f.img.style.transform = `scale(${1.12 - 0.1 * k})`; if (t >= f.a - 0.06) shotFrame(f, f.sh, 0.3 + Math.max(0, t - f.a)); }); }
       r = X.f; on = inR(t, c.s3, c.s4); disp(r.root, on);
       if (on) { wipeUp(r.root, t, c.s3); riseAll(r.ls, r.at, t); marqueePaint(r.band, t, c.s3); }
       r = X.r; on = inR(t, c.s4, c.end + 0.3); disp(r.root, on);
-      if (on) { riseAll(r.ls, r.at, t); r.ls2.forEach((l, i) => rise(l, pr(t, r.at2[i] - 0.08, RISE), 0, i ? 0.4 : 0.3)); routePaint(r, t); }
+      if (on) { riseAll(r.ls, r.at, t); r.ls2.forEach((l, i) => rise(l, pr(t, r.at2[i] - 0.08, RISE), 0, i ? 0.4 : 0.3)); routePaint(r, t);
+        if (r.cell) { const a = wt("jusqu'à") - 0.06, k = ez.outExpo(pr(t, a, 0.45)); r.cell.box.style.opacity = k; vis(r.cell.box, t >= a);
+          r.cell.img.style.transform = `scale(${1.08 - 0.06 * k})`; if (t >= a) shotFrame(r.cell, "fu_bossini", 0.3 + (t - a)); } }
     }
     function cues() {
       X.h.at.forEach((a, i) => cue(a - 0.04, "slam", 0.5 + 0.1 * i)); cue(X.h.at[0] - 0.02, "thump", 0.7); cue(X.h.at[2], "sparkle", 0.18);
@@ -910,7 +916,7 @@
     const [beats, svg, man] = await Promise.all([
       fetch(`../beats6-v${VID}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch(A + "logo.svg").then((r) => r.text()),
-      FOOT ? fetch(F + "frames/manifest.json").then((r) => r.json()) : Promise.resolve({}),
+      fetch(F + "frames/manifest.json").then((r) => r.json()),
     ]);
     if (beats) { BTS = beats.beats; PER = beats.period; }
     MAN = man;
