@@ -323,6 +323,8 @@ const advance = (cur, next) => STATUSES.indexOf(next) > STATUSES.indexOf(cur) ? 
 const NOT_CONTACTED = new Set(['To be called','Frank doit contacter']);
 const REPLIED = new Set(['Replied','Meeting booked','Client']);
 const TEMPS = ['Cold','Warm','Hot'];
+// Leads removed from the dashboard (normalized names); also dropped from copies saved in a viewer's browser.
+const REMOVED = new Set(['anthonystpierrecourtierimmobilierremax']);
 
 // Macro category -> tier + base virality score
 const CATS = {
@@ -458,6 +460,7 @@ function load() {
   if (!Array.isArray(d) || !d.length) return seed();
   // Keep the viewer's edits, and append leads published since their last visit.
   const k = l => String(l.name).toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + String(l.phone || '').replace(/\D/g, '').slice(-7);
+  d = d.filter(l => !REMOVED.has(String(l.name).toLowerCase().replace(/[^a-z0-9]/g, ''))); // leads taken off the list stay off
   const have = new Set(d.map(k)); let n = Math.max(0, ...d.map(l => parseInt(String(l.id).slice(1)) || 0));
   const pub = new Map(seed().map(l => [k(l), l]));
   for (const l of d) { const p = pub.get(k(l)); if (p) for (const f of ['sig', 'igKnown', 'gmaps', 'rating', 'reviews', 'gcategory', 'lat', 'lng', 'geoExact', 'instagram', 'facebook', 'siteKind', 'linkedin', 'linkedinCo', 'liWho', 'liVerified']) if (l[f] == null && p[f] != null) l[f] = p[f]; }
