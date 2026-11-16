@@ -176,7 +176,7 @@
   const T1 = VID !== "1" ? null : { s2: w(3) - 0.07, s3: w(6) - 0.16, s4: w(11) - 0.12, s5: w(22) - 0.2, s6: w(30) - 0.24, end: SC.len };
   // footage plan for k=b: [shot, film start, film end, in-point, speed]
   const SHOTS1 = VID !== "1" ? null : [["pr_rebel", 0, T1.s2, 0.3, 1], ["pr_boxes", T1.s2, T1.s3, 0.3, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
-    ["s4", T1.s4, w(14) - 0.08, 0.2, 1], ["qc", w(14) - 0.08, w(18) - 0.1, 0.3, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["s6", w(20) + 0.18, T1.s5, 0.9, 1],
+    ["s4", T1.s4, w(14) - 0.08, 0.2, 1], ["qc", w(14) - 0.08, w(18) - 0.1, 0.3, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["pr_bowls", w(20) + 0.18, T1.s5, 0.4, 1],
     ["pr_group", T1.s5, T1.s6, 0.3, 0.5, "blur"]];
 
   function buildFootage() {
@@ -707,7 +707,7 @@
       ["v3src", c.s2, c.s3, 0.3, 1], ["v3usine", c.s3, st[1], 0.3, 1], ["v3qc", st[1], st[2], 0.0, 1], ["v3s3", st[2], st[3], 0.5, 1],
       ["s5", st[3], st[4], 0.4, 1], ["v3s5", st[4], st[5], 0.5, 1], ["v3s6", st[5], c.s4, 0.3, 1],
       ["v3s10", c.s4, au[1], 0.4, 1], ["v3s11", au[1], au[2], 0.4, 1], ["fu_column", au[2], au[3], 0.4, 1], ["v3s12", au[3], c.s5, 0.4, 1],
-      ["pr_bowls", c.s5, c.s6, 0.4, 0.6, "blur"], ["v3s7", c.s6, c.end + 0.3, 0.6, 1]];
+      ["pr_bowls", c.s5, c.s6, 0.4, 0.6, "blur"], ["fu_bossini", c.s6, c.end + 0.3, 0.3, 1]];
     const X = {};
     const ROWS3 = [["LUMINAIRES DEL", "800"], ["CARTONS D'EXPÉDITION", "12 000"], ["VIS INOX 8 MM", "50 000"], ["ARTICLES DE CUISINE", "3 000"]];
 
