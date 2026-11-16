@@ -122,9 +122,13 @@
     LOGO.parts = { glyph: [18], importW: [19, 20, 21, 22, 23, 24], rama: [25, 26, 27, 28], tag: [...Array(18).keys()] };
     const probe = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     probe.setAttribute("viewBox", LOGO.vb.join(" ")); probe.style.cssText = "position:absolute;left:-9999px;width:1168px;height:296px";
-    probe.innerHTML = `<g id="gg">${LOGO.paths[18]}</g>`; document.body.appendChild(probe);
-    const bb = probe.querySelector("#gg").getBBox(); probe.remove();
+    probe.innerHTML = `<g id="gg">${LOGO.paths[18]}</g><g id="rr">${LOGO.parts.rama.map((i) => LOGO.paths[i]).join("")}</g>`; document.body.appendChild(probe);
+    const bb = probe.querySelector("#gg").getBBox(), rb = probe.querySelector("#rr").getBBox(); probe.remove();
     LOGO.glyphBox = [bb.x, bb.y, bb.width, bb.height];
+    // French tagline (team correction): "PAYEZ MOINS POUR TOUT" from the new logo, placed under RAMA as in the source artwork
+    const k = rb.height / 363, tx = rb.x + 3 * k, ty = rb.y + rb.height + 61 * k, tw = 2014 * k, th = 75 * k;
+    LOGO.tagBox = [tx, ty, tw, th]; LOGO.paths[0] = "";
+    LOGO.parts.tag = [0];
   }
   function logoSVG(parent, part, width, fill = null) {
     const [x, y, w_, h_] = part === "glyphOnly" ? LOGO.glyphBox : LOGO.vb;
@@ -132,6 +136,13 @@
     const hh = (width * h_) / w_;
     const d = el(parent, { width: width + "px", height: hh + "px" });
     let inner = ids.map((i) => LOGO.paths[i]).join("");
+    if (part === "tag") {                       // the French tagline is a bitmap, tinted to the ink on a canvas
+      const col = fill || "#1a1a1a", im = LOGO.tagImg;
+      if (!LOGO.tagCache[col]) { const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const g = cv.getContext("2d");
+        g.drawImage(im, 0, 0); g.globalCompositeOperation = "source-in"; g.fillStyle = col; g.fillRect(0, 0, cv.width, cv.height); LOGO.tagCache[col] = cv.toDataURL(); }
+      const [tx, ty, tw, th] = LOGO.tagBox;
+      inner = `<image href="${LOGO.tagCache[col]}" x="${tx}" y="${ty}" width="${tw}" height="${th}" preserveAspectRatio="none"/>`;
+    }
     if (fill) inner = inner.replace(/fill:#[0-9a-fA-F]{6}/g, `fill:${fill}`).replace(/fill="#[0-9a-fA-F]{6}"/g, `fill="${fill}"`);
     d.innerHTML = `<svg viewBox="${x} ${y} ${w_} ${h_}" width="${width}" height="${hh}" style="display:block;overflow:visible">${inner}</svg>`;
     return { d, w: width, h: hh };
@@ -164,9 +175,9 @@
      ========================================================================================= */
   const T1 = VID !== "1" ? null : { s2: w(3) - 0.07, s3: w(6) - 0.16, s4: w(11) - 0.12, s5: w(22) - 0.2, s6: w(30) - 0.24, end: SC.len };
   // footage plan for k=b: [shot, film start, film end, in-point, speed]
-  const SHOTS1 = VID !== "1" ? null : [["s1", 0, T1.s2, 0.5, 1], ["s2", T1.s2, T1.s3, 0.35, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
+  const SHOTS1 = VID !== "1" ? null : [["pr_rebel", 0, T1.s2, 0.3, 1], ["pr_boxes", T1.s2, T1.s3, 0.3, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
     ["s4", T1.s4, w(14) - 0.08, 0.2, 1], ["qc", w(14) - 0.08, w(18) - 0.1, 0.3, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["s6", w(20) + 0.18, T1.s5, 0.9, 1],
-    ["s2", T1.s5, T1.s6, 0.2, 0.5, "blur"]];
+    ["pr_group", T1.s5, T1.s6, 0.3, 0.5, "blur"]];
 
   function buildFootage() {
     if (!FOOT) return;
@@ -529,8 +540,8 @@
   function V2() {
     const c = { s2: wt("Chaises") - 0.1, s3: wt("on") - 0.12, s4: wt("Un") - 0.12, end: wt("Prends") - 0.24 };
     const tv = wt("vaisselle,") - 0.06, tj = wt("jusqu'à") - 0.1;
-    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["v2s2", c.s2, tv, 0.3, 1], ["v2s3", tv, c.s3, 1.7, 1], ["v2s4", c.s3, c.s4, 0.4, 1],
-      ["v2s5", c.s4, tj, 0.5, 1], ["v2s6", tj, c.end + 0.3, 0.2, 1]];
+    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["fu_terrace", c.s2, tv, 0.3, 1], ["fu_flowers", tv, c.s3, 0.3, 1], ["v2s3", c.s3, c.s4, 1.7, 1],
+      ["v2s5", c.s4, tj, 0.5, 1], ["fu_bossini", tj, c.end + 0.3, 0.2, 1]];
     const ITEMS = [["CHAISES", "Chaises"], ["TABLES", "tables,"], ["VAISSELLE", "vaisselle,"], ["DÉCO", "déco…"]];
     const X = {};
 
@@ -670,7 +681,7 @@
       X.r.at2.forEach((a) => cue(a - 0.05, "slam", 0.45));
     }
     return {
-      end: c.end, shots, endLines: ["PRENDS", "RENDEZ-VOUS"], button: "FORMULAIRE", build, paint, cues,
+      end: c.end, shots, endLines: ["PRENDS", "RENDEZ-VOUS"], button: "CONTACTEZ-NOUS", build, paint, cues,
       kicks: [[wt("Tu"), 0.03], [wt("ou"), 0.03], [wt("ton"), 0.05], ...ITEMS.map(([, tk]) => [wt(tk), 0.025]), [wt("fabriquer."), 0.05], [wt("Un"), 0.03], [wt("contact,"), 0.04], [wt("salle."), 0.04]],
       flashes: [[wt("ton"), 0.18], [c.s2, 0.22], [c.s4, 0.3]],
       shakes: [[wt("ton"), 14], [wt("fabriquer."), 12], [wt("salle."), 10]],
@@ -684,13 +695,13 @@
   function V3() {
     const c = { s1: wt("Ce") - 0.12, s2: wt("Import-Rama") - 0.12, s3: wt("on") - 0.12, s4: wt("Commerçant,") - 0.12, s5: wt("envoie-nous") - 0.12, s6: wt("Toi,") - 0.12, end: wt("Premier") - 0.24 };
     const STEPS = [["01", "ON TROUVE L'USINE", "trouve"], ["02", "ON VÉRIFIE LA QUALITÉ", "vérifie"], ["03", "ON NÉGOCIE", "négocie,"], ["04", "LE BATEAU", "bateau,"], ["05", "LES DOUANES", "douanes"], ["06", "LA LIVRAISON", "livraison."]];
-    const AUD = [["COMMERÇANT", "Commerçant,", "v3s10"], ["GROSSISTE", "grossiste,", "v3s11"], ["RESTAURATEUR", "restaurateur", "v2s6"], ["MANUFACTURIER", "manufacturier", "v3s12"]];
+    const AUD = [["COMMERÇANT", "Commerçant,", "v3s10"], ["GROSSISTE", "grossiste,", "v3s11"], ["RESTAURATEUR", "restaurateur", "fu_column"], ["MANUFACTURIER", "manufacturier", "v3s12"]];
     const st = STEPS.map(([, , tk]) => wt(tk) - 0.06), au = AUD.map(([, tk]) => wt(tk) - 0.06);
     const shots = [["v3s1", 0, c.s1, 0.2, 0.9], ["s4", c.s1, wt("puis") - 0.08, 0.0, 0.9], ["v3s8", wt("puis") - 0.08, c.s2, 0.15, 1],
       ["v3src", c.s2, c.s3, 0.3, 1], ["v3usine", c.s3, st[1], 0.3, 1], ["v3qc", st[1], st[2], 0.0, 1], ["v3s3", st[2], st[3], 0.5, 1],
       ["s5", st[3], st[4], 0.4, 1], ["v3s5", st[4], st[5], 0.5, 1], ["v3s6", st[5], c.s4, 0.3, 1],
-      ["v3s10", c.s4, au[1], 0.4, 1], ["v3s11", au[1], au[2], 0.4, 1], ["v2s6", au[2], au[3], 1.4, 1], ["v3s12", au[3], c.s5, 0.4, 1],
-      ["v3s11", c.s5, c.s6, 1.0, 0.6, "blur"], ["v3s7", c.s6, c.end + 0.3, 0.6, 1]];
+      ["v3s10", c.s4, au[1], 0.4, 1], ["v3s11", au[1], au[2], 0.4, 1], ["fu_column", au[2], au[3], 0.4, 1], ["v3s12", au[3], c.s5, 0.4, 1],
+      ["pr_bowls", c.s5, c.s6, 0.4, 0.6, "blur"], ["v3s7", c.s6, c.end + 0.3, 0.6, 1]];
     const X = {};
     const ROWS3 = [["LUMINAIRES DEL", "800"], ["CARTONS D'EXPÉDITION", "12 000"], ["VIS INOX 8 MM", "50 000"], ["ARTICLES DE CUISINE", "3 000"]];
 
@@ -860,7 +871,7 @@
       cue(c.s6 - 0.2, "air", 0.5, 0, { dir: 1 }); X.z.at.forEach((a, i) => cue(a - 0.05, "slam", 0.55 + 0.1 * i)); cue(X.z.at[2] - 0.03, "thump", 0.7);
     }
     return {
-      end: c.end, shots, endLines: ["PREMIER", "RENDEZ-VOUS", "GRATUIT"], button: "FORMULAIRE", build, paint, cues,
+      end: c.end, shots, endLines: ["PREMIER", "RENDEZ-VOUS", "GRATUIT"], button: "CONTACTEZ-NOUS", build, paint, cues,
       kicks: [[wt("Ton"), 0.03], [wt("fournisseur…"), 0.05], [wt("personne"), 0.025], [wt("challengé?"), 0.05], [wt("Ce"), 0.02], [wt("en"), 0.03],
         [wt("toi."), 0.04], [wt("Import-Rama"), 0.04], [wt("va"), 0.02], [wt("à"), 0.035], ...st.map((x) => [x + 0.06, 0.022]),
         ...au.map((x) => [x + 0.06, 0.03]), [wt("envoie-nous"), 0.02], [wt("on", 4), 0.02], [wt("ton"), 0.03], [wt("actuel."), 0.05], [wt("Toi,"), 0.03], [wt("t'as"), 0.03], [wt("gérer."), 0.05]],
@@ -874,7 +885,7 @@
   let VX = null;
   const VIDEOS = {
     "1": () => ({
-      end: T1.s6, shots: SHOTS1, endLines: ["PRENEZ", "RENDEZ-VOUS", "GRATUITEMENT"], button: "FORMULAIRE",
+      end: T1.s6, shots: SHOTS1, endLines: ["PRENEZ", "RENDEZ-VOUS", "GRATUITEMENT"], button: "CONTACTEZ-NOUS",
       build() { buildHook(); buildProducts(); buildMonthly(); buildSource(); buildList(); },
       paint(t) { hook(t); products(t); monthly(t); source(t); list(t); },
       cues: cues1,
@@ -906,6 +917,8 @@
     for (const wt of ["500", "600", "700", "800"]) await document.fonts.load(`${wt} 100px "Barlow Condensed"`);
     for (const wt of ["400", "500"]) await document.fonts.load(`${wt} 100px Barlow`);
     await document.fonts.ready;
+    LOGO.tagURI = await fetch(A + "tag-fr.png").then((r) => r.blob()).then((b) => new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }));
+    { const im = new Image(); im.src = LOGO.tagURI; await im.decode(); LOGO.tagImg = im; LOGO.tagCache = {}; }
     buildLogoParts(svg);
     VX = VIDEOS[VID]();
     buildFootage(); VX.build(); buildEnd(); buildCaptions(); buildFX(); VX.cues(); cuesEnd();
