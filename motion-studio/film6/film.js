@@ -175,7 +175,7 @@
      ========================================================================================= */
   const T1 = VID !== "1" ? null : { s2: w(3) - 0.07, s3: w(6) - 0.16, s4: w(11) - 0.12, s5: w(22) - 0.2, s6: w(30) - 0.24, end: SC.len };
   // footage plan for k=b: [shot, film start, film end, in-point, speed]
-  const SHOTS1 = VID !== "1" ? null : [["pr_rebel", 0, T1.s2, 0.3, 1], ["pr_boxes", T1.s2, T1.s3, 0.3, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
+  const SHOTS1 = VID !== "1" ? null : [["pr_boxes", 0, T1.s2, 0.3, 1], ["pr_group", T1.s2, w(4) - 0.07, 0.3, 1], ["pr_ust", w(4) - 0.07, w(5) - 0.07, 0.3, 1], ["pr_rebel", w(5) - 0.07, T1.s3, 0.3, 1], ["s3", T1.s3, T1.s4, 0.55, 1],
     ["s4", T1.s4, w(14) - 0.08, 0.2, 1], ["qc", w(14) - 0.08, w(18) - 0.1, 0.3, 1], ["s5", w(18) - 0.1, w(20) + 0.18, 0.6, 1], ["pr_bowls", w(20) + 0.18, T1.s5, 0.4, 1],
     ["pr_group", T1.s5, T1.s6, 0.3, 0.5, "blur"]];
 
@@ -206,7 +206,7 @@
     if (!FOOT) { const wm = logoSVG(root, "glyphOnly", 900, "#1A1817"); T(wm.d, { x: W - 760, y: H - 820 }); S.hwm = wm; }
     const z1 = 190, z2 = fit("RESTO?", W - 2 * M, 800, 470);
     const y = FOOT ? 300 : 620;
-    S.h = { root, l1: line(root, "DANS LE", z1, C.white, M, y), l2: line(root, `RESTO${dot(C.red, ",")}`, z2, C.white, M, y + z1 * 0.9) };
+    S.h = { root, l1: line(root, "TU AS UN", z1, C.white, M, y), l2: line(root, `RESTO${dot(C.red, ",")}`, z2, C.white, M, y + z1 * 0.9) };
   }
   function hook(t) {
     const H_ = S.h, on = t < T1.s2;
@@ -217,13 +217,13 @@
   }
 
   /* ----- S2 the three products ----- */
-  const PRODS = [["CONTENANTS", "pr_boxes"], ["USTENSILES", "pr_group"], ["SACS", "pr_rebel"]];   // real client packaging (team correction)
+  const PRODS = [["CONTENANTS", "pr_group"], ["USTENSILES", "ustensiles.webp"], ["SACS", "pr_rebel"]];   // real client packaging (team correction)
   function buildProducts() {
     const root = layer(11, { background: FOOT ? "transparent" : C.paper });
     const z = fit("USTENSILES.", W - 2 * M, 800, 250), y0 = FOOT ? 200 : 170, lh = z * 0.9;
     const lines = PRODS.map(([word], i) => line(root, `${word}${dot()}`, z, INK, M, y0 + i * lh));
     const cy = y0 + 3 * lh + 70, ch = H - cy - 150;
-    const cells = FOOT ? [] : PRODS.map(([, sh]) => { const c = cellFoot(root, M, cy, W - 2 * M, ch); c.sh = sh; return c; });
+    const cells = FOOT ? [] : PRODS.map(([, sh]) => { if (sh.includes(".")) { const c = imgCell(root, A + "img/" + sh, W - 2 * M, ch); T(c.box, { x: M, y: cy }); return c; } const c = cellFoot(root, M, cy, W - 2 * M, ch); c.sh = sh; return c; });
     S.p = { root, lines, cells, cy, ch, z };
   }
   function products(t) {
@@ -241,7 +241,7 @@
       c.box.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`;
       c.box.style.zIndex = i;
       c.img.style.transform = `scale(${1.12 - 0.1 * k})`;
-      vis(c.box, t >= at[i] - 0.06); if (t >= at[i] - 0.06 && i >= cur - 1) shotFrame(c, c.sh, 0.3 + Math.max(0, t - at[i]));
+      vis(c.box, t >= at[i] - 0.06); if (c.sh && t >= at[i] - 0.06 && i >= cur - 1) shotFrame(c, c.sh, 0.3 + Math.max(0, t - at[i]));
     });
   }
 
@@ -540,7 +540,7 @@
   function V2() {
     const c = { s2: wt("Chaises") - 0.1, s3: wt("on") - 0.12, s4: wt("Un") - 0.12, end: wt("Prends") - 0.24 };
     const tv = wt("vaisselle,") - 0.06, tj = wt("jusqu'à") - 0.1;
-    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["fu_terrace", c.s2, tv, 0.3, 1], ["fu_flowers", tv, c.s3, 0.3, 1], ["v2s3", c.s3, c.s4, 1.7, 1],
+    const shots = [["v2s1", 0, c.s2, 0.3, 1], ["fu_terrace", c.s2, wt("tables,") - 0.06, 0.3, 1], ["fu_column", wt("tables,") - 0.06, tv, 0.3, 1], ["v2s4", tv, wt("déco…") - 0.06, 0.4, 1], ["fu_flowers", wt("déco…") - 0.06, c.s3, 0.3, 1], ["v2s3", c.s3, c.s4, 1.7, 1],
       ["v2s5", c.s4, tj, 0.5, 1], ["fu_bossini", tj, c.end + 0.3, 0.2, 1]];
     const ITEMS = [["CHAISES", "Chaises"], ["TABLES", "tables,"], ["VAISSELLE", "vaisselle,"], ["DÉCO", "déco…"]];
     const X = {};
@@ -640,8 +640,9 @@
       const zi = fit("VAISSELLE.", W - 2 * M, 800, 200), yi = FOOT ? 200 : 140;
       r.ls = ITEMS.map(([wd], i) => line(r.root, `${wd}${dot()}`, zi, INK, M, yi + i * zi * 0.9));
       r.at = ITEMS.map(([, tk]) => wt(tk));
-      if (!FOOT) { const y0 = yi + 4 * zi * 0.9 + 50, h_ = H - 130 - y0;   // real client furniture (team correction)
-        r.cells = [["fu_terrace", wt("Chaises")], ["fu_flowers", wt("vaisselle,")]].map(([sh, a]) => { const f = cellFoot(r.root, M, y0, W - 2 * M, h_); f.sh = sh; f.a = a; return f; }); }
+      if (!FOOT) { const y0 = yi + 4 * zi * 0.9 + 50, h_ = H - 130 - y0;   // chaises: terrace photo, tables + vaisselle: the plan, déco: flower wall
+        buildPlan(r, y0);
+        r.cells = [["fu_terrace", wt("Chaises"), wt("tables,") - 0.06], ["fu_flowers", wt("déco…"), 99]].map(([sh, a, b]) => { const f = cellFoot(r.root, M, y0, W - 2 * M, h_); f.sh = sh; f.a = a; f.b = b; f.box.style.zIndex = 5; return f; }); }
 
       r = X.f = { root: layer(12, { background: FOOT ? "transparent" : C.red }) };
       const zf = fit("FABRIQUER.", W - 2 * M, 800, 330), zs = fit("ON PEUT AUSSI", W - 2 * M, 700, 170), yf = FOOT ? 240 : 360;
@@ -664,9 +665,9 @@
       let r = X.h, on = t < c.s2; disp(r.root, on);
       if (on) riseAll(r.ls, r.at, t);
       r = X.p; on = inR(t, c.s2, c.s3 + 0.25); disp(r.root, on);
-      if (on) { stackSwap(r.ls, r.at, t);
-        if (r.cells) r.cells.forEach((f, i) => { const k = ez.outExpo(pr(t, f.a - 0.06, 0.45)); f.box.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`; f.box.style.zIndex = i;
-          vis(f.box, t >= f.a - 0.06); f.img.style.transform = `scale(${1.12 - 0.1 * k})`; if (t >= f.a - 0.06) shotFrame(f, f.sh, 0.3 + Math.max(0, t - f.a)); }); }
+      if (on) { const cur = stackSwap(r.ls, r.at, t); if (r.items) planPaint(r, t, cur);
+        if (r.cells) r.cells.forEach((f, i) => { const k = ez.outExpo(pr(t, f.a - 0.06, 0.45)); f.box.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`;
+          vis(f.box, t >= f.a - 0.06 && t < f.b); f.img.style.transform = `scale(${1.12 - 0.1 * k})`; if (t >= f.a - 0.06) shotFrame(f, f.sh, 0.3 + Math.max(0, t - f.a)); }); }
       r = X.f; on = inR(t, c.s3, c.s4); disp(r.root, on);
       if (on) { wipeUp(r.root, t, c.s3); riseAll(r.ls, r.at, t); marqueePaint(r.band, t, c.s3); }
       r = X.r; on = inR(t, c.s4, c.end + 0.3); disp(r.root, on);
