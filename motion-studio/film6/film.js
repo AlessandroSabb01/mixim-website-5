@@ -286,8 +286,8 @@
     if (!FOOT) { const wm = logoSVG(root, "glyphOnly", 900, "#1A1817"); T(wm.d, { x: W - 760, y: H - 820 }); }
     S.s = { root, lock: lockup(root, lw, C.white) };
     S.s.lx = (W - lw) / 2; S.s.ly = FOOT ? 330 : 700;
-    const A1 = FOOT ? "LES FAIT FABRIQUER" : "FABRIQUÉ";   // 1B: "Import-Rama les fait fabriquer à la source"
-    const z = fit(FOOT ? A1 : "À LA SOURCE.", W - 2 * M, 800, 260), y = FOOT ? 260 : 360;
+    const A1 = "LES FAIT FABRIQUER";   // "Import-Rama les fait fabriquer à la source"
+    const z = fit(A1, W - 2 * M, 800, 260), y = FOOT ? 260 : 360;
     S.s.a1 = line(root, A1, z, C.white, M, y); S.s.a2 = line(root, `À LA SOURCE${dot()}`, z, C.white, M, y + z * 0.9);
     const z2 = fit("ON S'OCCUPE", W - 2 * M, 800, 260);
     S.s.b1 = line(root, "ON S'OCCUPE", z2, C.white, M, y); S.s.b2 = line(root, `DE TOUT${dot()}`, z2, C.white, M, y + z2 * 0.9);
