@@ -23,12 +23,18 @@ const CFG = {
   film3: { score: "audio/music3m.py", mixer: "audio/mix6.py", len: 31, tag: "-v5", music: "build/music3m.wav", beats: "beats3.json", bpm: 118 },
   film4: { score: "audio/music4.py", len: 30, tag: "-ir", music: "build/music4.wav", beats: "beats4.json", bpm: 128 },
   film8: { score: "audio/music8.py", mixer: "audio/mix8.py", len: 21.3, tag: "-v6", music: "build/music8.wav", beats: "beats8.json", bpm: 159, nogrid: true },
-}[FILM] || (FILM === "film6" ? film6Cfg() : film5Cfg());
+}[FILM] || (FILM === "film6" ? film6Cfg() : FILM === "film9" ? film9Cfg() : film5Cfg());
 // film5: the three text films; --qs "v=1&k=a" picks film and hook, each has its own score and tempo
 function film5Cfg() {
   const q = new URLSearchParams(String(opt("qs", "v=1&k=a"))), v = q.get("v") || "1", k = q.get("k") || "a";
   process.env.FILM_V = v; process.env.FILM_K = k;
   return { score: "audio/music5.py", len: 20, tag: `-text${v}${k}`, music: `build/music5-v${v}${k}.wav`, beats: `beats5-v${v}.json`, bpm: { 1: 122, 2: 128, 3: 134 }[v] };
+}
+// film9: Création Virale narrated films, --qs "v=1|2|3"; music = the text film's own score, voice-over from window.VO
+function film9Cfg() {
+  const v = new URLSearchParams(String(opt("qs", "v=1"))).get("v") || "1";
+  process.env.FILM_V = v;
+  return { score: "audio/music9.py", mixer: "audio/mix9.py", len: { 1: 19.41, 2: 20.69, 3: 21.97 }[v], tag: `-cv9-${v}`, music: `build/music9-v${v}.wav`, beats: `beats9-v${v}.json`, nogrid: true };
 }
 // film6: Import-Rama ads, --qs "v=1&k=a" (a = motion design, b = AI b-roll); score + voice-over
 function film6Cfg() {
