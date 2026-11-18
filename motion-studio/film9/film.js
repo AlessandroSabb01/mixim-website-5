@@ -425,7 +425,7 @@
       } else if (s.kind === "stack") {
         cue(s.b0, PAL.rise, 0.45);
         if (s.box) { PAL.slam.forEach((ty, k) => cue(s.b0 + 0.75, ty, k ? 0.6 : 0.8)); cue(s.b0 + 1.1, PAL.box, 0.7); }
-        else keys(s.b0 + 0.75, Math.min(s.tb.total, 40), TYPE_CPS);
+        else keys(s.b0 + 0.3, Math.min(s.tb.total, 40), TYPE_CPS);
         if (s.sub) cue(s.b0 + 1.75, PAL.rise, 0.45);
       } else if (s.kind === "swap") {
         const n = s.items.length, seg = s.d / n;
