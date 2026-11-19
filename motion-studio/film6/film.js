@@ -4,7 +4,9 @@
    window.seek(t) paints frame t (pure function of t). */
 (() => {
   const P = new URLSearchParams(location.search);
-  const W = +(P.get("w") || 1080), H = +(P.get("h") || 1920);
+  // other formats: lay out on a 1920-tall logical canvas (same y grid as 9:16) and scale it to the real frame
+  const PW = +(P.get("w") || 1080), PH = +(P.get("h") || 1920), H = 1920, W = Math.round(1920 * PW / PH), SCL = PH / 1920;
+  const CW = Math.min(W, 1500);   // text/content column width (wide formats keep a readable column on the left)
   const VID = P.get("v") || "1", K = P.get("k") || "a", FOOT = K === "b";
   const A = "../assets/importrama/", F = "../assets/imp-ads/";
   const C = { red: "#BD2A20", black: "#0A0A0A", ink: "#111111", warm: "#2A2725", paper: "#F3F1EE", white: "#FFFFFF", grey: "#C9C3BB", mid: "#57514C" };
@@ -58,7 +60,7 @@
 
   /* ---------- DOM ---------- */
   const stage = document.getElementById("stage");
-  Object.assign(stage.style, { width: W + "px", height: H + "px" });
+  Object.assign(stage.style, { width: W + "px", height: H + "px", transform: `scale(${SCL})`, transformOrigin: "0 0" });
   const el = (parent, css = {}, tag = "div", cls = "a") => { const e = document.createElement(tag); e.className = cls; Object.assign(e.style, css); parent.appendChild(e); return e; };
   const vis = (e, v) => { e.style.visibility = v ? "visible" : "hidden"; };
   const disp = (e, v) => { e.style.display = v ? "" : "none"; };
@@ -204,7 +206,7 @@
   function buildHook() {
     const root = layer(10, { background: FOOT ? "transparent" : C.black });
     if (!FOOT) { const wm = logoSVG(root, "glyphOnly", 900, "#1A1817"); T(wm.d, { x: W - 760, y: H - 820 }); S.hwm = wm; }
-    const z1 = 190, z2 = fit("RESTO?", W - 2 * M, 800, 470);
+    const z1 = 190, z2 = fit("RESTO?", CW - 2 * M, 800, 470);
     const y = FOOT ? 300 : 620;
     S.h = { root, l1: line(root, "TU AS UN", z1, C.white, M, y), l2: line(root, `RESTO${dot(C.red, ",")}`, z2, C.white, M, y + z1 * 0.9) };
   }
@@ -220,10 +222,10 @@
   const PRODS = [["CONTENANTS", "pr_group"], ["USTENSILES", "ustensiles.webp"], ["SACS", "pr_rebel"]];   // real client packaging (team correction)
   function buildProducts() {
     const root = layer(11, { background: FOOT ? "transparent" : C.paper });
-    const z = fit("USTENSILES.", W - 2 * M, 800, 250), y0 = FOOT ? 200 : 170, lh = z * 0.9;
+    const z = fit("USTENSILES.", CW - 2 * M, 800, 250), y0 = FOOT ? 200 : 170, lh = z * 0.9;
     const lines = PRODS.map(([word], i) => line(root, `${word}${dot()}`, z, INK, M, y0 + i * lh));
     const cy = y0 + 3 * lh + 70, ch = H - cy - 150;
-    const cells = FOOT ? [] : PRODS.map(([, sh]) => { if (sh.includes(".")) { const c = imgCell(root, A + "img/" + sh, W - 2 * M, ch); T(c.box, { x: M, y: cy }); return c; } const c = cellFoot(root, M, cy, W - 2 * M, ch); c.sh = sh; return c; });
+    const cells = FOOT ? [] : PRODS.map(([, sh]) => { if (sh.includes(".")) { const c = imgCell(root, A + "img/" + sh, CW - 2 * M, ch); T(c.box, { x: M, y: cy }); return c; } const c = cellFoot(root, M, cy, CW - 2 * M, ch); c.sh = sh; return c; });
     S.p = { root, lines, cells, cy, ch, z };
   }
   function products(t) {
@@ -249,12 +251,12 @@
   const MONTHS = ["JANVIER", "FÉVRIER", "MARS", "AVRIL", "MAI", "JUIN", "JUILLET", "AOÛT", "SEPTEMBRE", "OCTOBRE", "NOVEMBRE", "DÉCEMBRE"];
   function buildMonthly() {
     const root = layer(12, { background: FOOT ? "transparent" : C.red });
-    const zs = 104, zb = fit("CHAQUE", W - 2 * M, 800, 400), y = FOOT ? 250 : 420;
+    const zs = 104, zb = fit("CHAQUE", CW - 2 * M, 800, 400), y = FOOT ? 250 : 420;
     S.m = { root, l0: line(root, "TU LES RACHÈTES", zs, C.white, M, y, 700),
       l1: line(root, "CHAQUE", zb, C.white, M, y + zs * 1.05), l2: line(root, `MOIS${dot(FOOT ? C.red : C.black)}`, zb, C.white, M, y + zs * 1.05 + zb * 0.9) };
     const by = FOOT ? 1220 : 1240, bh = 200;
-    S.m.box = el(root, { left: M + "px", top: by + "px", width: W - 2 * M + "px", height: bh + "px", overflow: "hidden", background: FOOT ? C.red : C.black });
-    S.m.months = MONTHS.map((mo) => el(S.m.box, { left: 0, top: 0, width: W - 2 * M + "px", height: bh + "px", ...fBC(150, 800, bh / 150), color: C.white, textAlign: "center" }, "div"));
+    S.m.box = el(root, { left: M + "px", top: by + "px", width: CW - 2 * M + "px", height: bh + "px", overflow: "hidden", background: FOOT ? C.red : C.black });
+    S.m.months = MONTHS.map((mo) => el(S.m.box, { left: 0, top: 0, width: CW - 2 * M + "px", height: bh + "px", ...fBC(150, 800, bh / 150), color: C.white, textAlign: "center" }, "div"));
     S.m.months.forEach((d, i) => { d.textContent = MONTHS[i]; });
     S.m.x12 = line(root, `× 12 PAR ANNÉE`, 64, C.white, M, by + bh + 40, 700);
     S.m.wipe = el(root, { width: W + "px", height: H + "px", background: FOOT ? C.red : C.red, zIndex: -1 });
@@ -287,9 +289,9 @@
     S.s = { root, lock: lockup(root, lw, C.white) };
     S.s.lx = (W - lw) / 2; S.s.ly = FOOT ? 330 : 700;
     const A1 = "LES FAIT FABRIQUER";   // "Import-Rama les fait fabriquer à la source"
-    const z = fit(A1, W - 2 * M, 800, 260), y = FOOT ? 260 : 360;
+    const z = fit(A1, CW - 2 * M, 800, 260), y = FOOT ? 260 : 360;
     S.s.a1 = line(root, A1, z, C.white, M, y); S.s.a2 = line(root, `À LA SOURCE${dot()}`, z, C.white, M, y + z * 0.9);
-    const z2 = fit("ON S'OCCUPE", W - 2 * M, 800, 260);
+    const z2 = fit("ON S'OCCUPE", CW - 2 * M, 800, 260);
     S.s.b1 = line(root, "ON S'OCCUPE", z2, C.white, M, y); S.s.b2 = line(root, `DE TOUT${dot()}`, z2, C.white, M, y + z2 * 0.9);
     const ry = y + z2 * 0.9 * 2 + (FOOT ? 120 : 150), gap = FOOT ? 130 : 150;
     S.s.rail = el(root, { left: M + 15 + "px", top: ry + 30 + "px", width: "6px", height: gap * 3 + "px", background: C.red, transformOrigin: "50% 0" });
@@ -330,11 +332,11 @@
     const root = layer(14, { background: FOOT ? "transparent" : C.paper });
     S.l = { root };
     const y = FOOT ? 200 : 170;
-    const zA = fit("TA LISTE.", W - 2 * M, 800, 230);
+    const zA = fit("TA LISTE.", CW - 2 * M, 800, 230);
     S.l.a1 = line(root, "ENVOIE", zA, INK, M, y); S.l.a2 = line(root, `TA LISTE${dot()}`, zA, INK, M, y + zA * 0.9);
-    const zB = fit("TON PRIX ACTUEL.", W - 2 * M, 800, 230);
+    const zB = fit("TON PRIX ACTUEL.", CW - 2 * M, 800, 230);
     S.l.b1 = line(root, "ON CHALLENGE", zB, INK, M, y); S.l.b2 = line(root, `TON PRIX ACTUEL${dot()}`, zB, INK, M, y + zB * 0.9);
-    const cy = y + zA * 1.8 + 70, rh = 112, cw = W - 2 * M;
+    const cy = y + zA * 1.8 + 70, rh = 112, cw = CW - 2 * M;
     S.l.card = el(root, { left: M + "px", top: cy + "px", width: cw + "px", height: rh * ROWS.length + 36 + "px", background: C.white, borderTop: `10px solid ${C.ink}`, boxShadow: FOOT ? "0 30px 80px rgba(0,0,0,.45)" : "none" });
     S.l.rows = ROWS.map(([a, b], i) => {
       const r = el(S.l.card, { left: "36px", top: 18 + i * rh + "px", width: cw - 72 + "px", height: rh + "px", borderBottom: i < ROWS.length - 1 ? `2px solid ${C.paper}` : "none", display: "flex", alignItems: "center", justifyContent: "space-between" });
@@ -379,7 +381,7 @@
     const lw = 780;
     S.e.lock = lockup(root, lw, C.ink); S.e.lx = (W - lw) / 2; S.e.ly = 470;
     // the CTA, one line per spoken word; the last line carries the red period
-    const LN = VX.endLines, z = Math.min(...LN.map((x) => fit(x + ".", W - 2 * M, 800, 230))), y = LN.length > 2 ? 860 : 960;
+    const LN = VX.endLines, z = Math.min(...LN.map((x) => fit(x + ".", CW - 2 * M, 800, 230))), y = LN.length > 2 ? 860 : 960;
     S.e.ls = LN.map((x, i) => line(root, i === LN.length - 1 ? `${x}${dot()}` : x, z, C.ink, M, y + i * z * 0.9));
     const yb = y + LN.length * z * 0.9;
     S.e.btn = el(root, { left: M + "px", top: yb + 110 + "px", height: "160px", padding: "0 64px", background: C.red, display: "flex", alignItems: "center", gap: "28px", ...fBC(70, 800, 1, 0.04), color: C.white, transformOrigin: "0 50%" });
@@ -415,7 +417,7 @@
     if (!FOOT) return;
     const root = layer(30);
     S.c = { root, phr: SC.phrases.map(([a, b]) => {
-      const d = el(root, { left: M + "px", top: "1610px", width: W - 2 * M + "px", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 12px" });
+      const d = el(root, { left: M + "px", top: "1610px", width: CW - 2 * M + "px", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 12px" });
       const ws = WT.slice(a, b).map((wd) => { const s = el(d, { position: "relative", padding: "8px 18px 2px", background: "rgba(10,10,10,.82)", ...fBC(86, 800, 1.05, 0.01), color: C.white, whiteSpace: "nowrap" }, "span", ""); s.textContent = wd.w; return s; });
       return { d, ws, a, b };
     }) };
@@ -547,7 +549,7 @@
     const X = {};
 
     function buildPlan(r, y0) {
-      const pw = W - 2 * M, ph = H - 130 - y0;
+      const pw = CW - 2 * M, ph = H - 130 - y0;
       const svg = sv(r.root, "svg", { width: pw, height: ph, viewBox: `0 0 ${pw} ${ph}` });
       svg.setAttribute("class", "a"); svg.style.transform = `translate(${M}px,${y0}px)`;
       const roomH = ph * 0.66, terY = roomH + 34;
@@ -595,7 +597,7 @@
       });
     }
     function buildRoute(r) {
-      const xL = M + 24, xR = W - M - 24, y = r.ry;
+      const xL = M + 24, xR = CW - M - 24, y = r.ry;
       r.xL = xL; r.xR = xR;
       r.track = el(r.root, { left: xL + "px", top: y - 4 + "px", width: xR - xL + "px", height: "8px", background: "rgba(255,255,255,.18)", transformOrigin: "0 50%" });
       r.fill = el(r.root, { left: xL + "px", top: y - 4 + "px", width: xR - xL + "px", height: "8px", background: C.red, transformOrigin: "0 50%" });
@@ -633,34 +635,34 @@
 
     function build() {
       let r = (X.h = { root: layer(10, { background: FOOT ? "transparent" : C.black }) }); WM(r.root);
-      const zA = fit("OU TU RÉNOVES", W - 2 * M, 800, 230), zB = fit("TON RESTO?", W - 2 * M, 800, 330), y = FOOT ? 260 : 460;
+      const zA = fit("OU TU RÉNOVES", CW - 2 * M, 800, 230), zB = fit("TON RESTO?", CW - 2 * M, 800, 330), y = FOOT ? 260 : 460;
       r.ls = [line(r.root, "TU OUVRES", zA, C.white, M, y), line(r.root, "OU TU RÉNOVES", zA, C.white, M, y + zA * 0.9), line(r.root, `TON RESTO${dot(C.red, "?")}`, zB, C.white, M, y + zA * 1.8)];
       r.at = [wt("Tu"), wt("ou"), wt("ton")];
 
       r = X.p = { root: layer(11, { background: FOOT ? "transparent" : C.paper }) };
-      const zi = fit("VAISSELLE.", W - 2 * M, 800, 200), yi = FOOT ? 200 : 140;
+      const zi = fit("VAISSELLE.", CW - 2 * M, 800, 200), yi = FOOT ? 200 : 140;
       r.ls = ITEMS.map(([wd], i) => line(r.root, `${wd}${dot()}`, zi, INK, M, yi + i * zi * 0.9));
       r.at = ITEMS.map(([, tk]) => wt(tk));
       if (!FOOT) { const y0 = yi + 4 * zi * 0.9 + 50, h_ = H - 130 - y0;   // chaises: terrace photo, tables + vaisselle: the plan, déco: flower wall
         buildPlan(r, y0);
-        r.cells = [["fu_terrace", wt("Chaises"), wt("tables,") - 0.06], ["fu_flowers", wt("déco…"), 99]].map(([sh, a, b]) => { const f = cellFoot(r.root, M, y0, W - 2 * M, h_); f.sh = sh; f.a = a; f.b = b; f.box.style.zIndex = 5; return f; }); }
+        if (!P.get("plan")) r.cells = [["fu_terrace", wt("Chaises"), wt("tables,") - 0.06], ["fu_flowers", wt("déco…"), 99]].map(([sh, a, b]) => { const f = cellFoot(r.root, M, y0, CW - 2 * M, h_); f.sh = sh; f.a = a; f.b = b; f.box.style.zIndex = 5; return f; }); }
 
       r = X.f = { root: layer(12, { background: FOOT ? "transparent" : C.red }) };
-      const zf = fit("FABRIQUER.", W - 2 * M, 800, 330), zs = fit("ON PEUT AUSSI", W - 2 * M, 700, 170), yf = FOOT ? 240 : 360;
+      const zf = fit("FABRIQUER.", CW - 2 * M, 800, 330), zs = fit("ON PEUT AUSSI", CW - 2 * M, 700, 170), yf = FOOT ? 240 : 360;
       r.ls = [line(r.root, "ON PEUT AUSSI", zs, C.white, M, yf, 700), line(r.root, "TE LES FAIRE", zs, C.white, M, yf + zs * 0.95, 700), line(r.root, `FABRIQUER${dot(FOOT ? C.red : C.black)}`, zf, C.white, M, yf + zs * 1.95)];
       r.at = [wt("on"), wt("te"), wt("fabriquer.")];
       r.band = marquee(r.root, FOOT ? 1290 : 1420, FOOT ? C.red : C.black, "CHAISES · TABLES · BANQUETTES · VAISSELLE · LUMINAIRES · DÉCO · ");
 
       r = X.r = { root: layer(13, { background: FOOT ? "transparent" : C.black }) }; WM(r.root);
-      const zc = fit("CONTACT,", W - 2 * M, 800, 280), yc = FOOT ? 220 : 240;
+      const zc = fit("CONTACT,", CW - 2 * M, 800, 280), yc = FOOT ? 220 : 240;
       r.ls = [line(r.root, "UN SEUL", zc, C.white, M, yc), line(r.root, `CONTACT${dot(C.red, ",")}`, zc, C.white, M, yc + zc * 0.9)];
       r.at = [wt("Un"), wt("contact,")];
       r.ry = yc + zc * 1.8 + 230;
-      const zd = fit("JUSQU'À TA SALLE.", W - 2 * M, 800, 170);
+      const zd = fit("JUSQU'À TA SALLE.", CW - 2 * M, 800, 170);
       r.ls2 = [line(r.root, "DE L'USINE", zd, C.white, M, r.ry + 200), line(r.root, `JUSQU'À TA SALLE${dot()}`, zd, C.white, M, r.ry + 200 + zd * 0.9)];
       r.at2 = [wt("l'usine"), wt("jusqu'à")];
       buildRoute(r);
-      if (!FOOT) { r.cell = cellFoot(r.root, 0, 0, W, H); r.cell.box.style.zIndex = "-1"; r.cell.img.style.filter = "brightness(.42)"; }   // Bossini chairs, full bleed behind the route
+      if (!FOOT && !P.get("plan")) { r.cell = cellFoot(r.root, 0, 0, W, H); r.cell.box.style.zIndex = "-1"; r.cell.img.style.filter = "brightness(.42)"; }   // Bossini chairs, full bleed behind the route
     }
     function paint(t) {
       let r = X.h, on = t < c.s2; disp(r.root, on);
@@ -716,7 +718,7 @@
     function build() {
       /* S1 hook */
       let r = (X.h = { root: layer(10, { background: FOOT ? "transparent" : C.black }) }); WM(r.root);
-      const zT = 150, zF = fit("FOURNISSEUR…", W - 2 * M, 800, 250), zQ = fit("L'A CHALLENGÉ?", W - 2 * M, 800, 240), y = FOOT ? 190 : 230;
+      const zT = 150, zF = fit("FOURNISSEUR…", CW - 2 * M, 800, 250), zQ = fit("L'A CHALLENGÉ?", CW - 2 * M, 800, 240), y = FOOT ? 190 : 230;
       const yQ1 = y + zT * 0.9 + zF * 0.9 + 110, yQ2 = yQ1 + 2 * 112 + 60;
       r.ls = [line(r.root, "TON", zT, C.white, M, y), line(r.root, `FOURNISSEUR${dot(C.red, "…")}`, zF, C.white, M, y + zT * 0.9),
         line(r.root, "ÇA FAIT COMBIEN", 118, C.white, M, yQ1, 700), line(r.root, "DE TEMPS", 118, C.white, M, yQ1 + 112, 700),
@@ -726,14 +728,14 @@
 
       /* S2 the middlemen chain */
       r = X.m = { root: layer(11, { background: FOOT ? "transparent" : C.paper }) };
-      const zm = fit("CE QUE TU ACHÈTES", W - 2 * M, 800, 160), ym = FOOT ? 190 : 150;
+      const zm = fit("CE QUE TU ACHÈTES", CW - 2 * M, 800, 160), ym = FOOT ? 190 : 150;
       r.ls = [line(r.root, "CE QUE TU ACHÈTES", zm, INK, M, ym), line(r.root, "EST FABRIQUÉ", zm, INK, M, ym + zm * 0.9), line(r.root, `EN ASIE${dot()}`, zm, INK, M, ym + zm * 1.8)];
       r.at = [wt("Ce"), wt("est"), wt("en")];
       const NODES = [["USINE · ASIE", "Asie,", ""], ["INTERMÉDIAIRE", "plusieurs", "+ $"], ["INTERMÉDIAIRE", "intermédiaires", "+ $"], ["INTERMÉDIAIRE", "avant", "+ $"], ["TOI", "toi.", "$$$$"]];
       const y0 = ym + zm * 2.7 + 100, gap = FOOT ? 150 : 175;
       r.rail = el(r.root, { left: M + 15 + "px", top: y0 + 18 + "px", width: "6px", height: gap * (NODES.length - 1) + "px", background: FOOT ? C.white : C.ink, transformOrigin: "50% 0" });
       r.nodes = NODES.map(([lab, tk, tag], i) => {
-        const d = el(r.root, { left: M + "px", top: y0 + i * gap + "px", width: W - 2 * M + "px", height: "40px", display: "flex", alignItems: "center", gap: "34px" });
+        const d = el(r.root, { left: M + "px", top: y0 + i * gap + "px", width: CW - 2 * M + "px", height: "40px", display: "flex", alignItems: "center", gap: "34px" });
         const dt = el(d, { width: "36px", height: "36px", borderRadius: "50%", background: i === 0 || i === 4 ? C.red : FOOT ? C.white : C.ink, position: "relative", flex: "none" }, "i", "");
         const tx = el(d, { ...fBC(i === 4 ? 92 : 70, 700, 1), color: INK, position: "relative", flex: "1" }, "span", ""); tx.textContent = lab;
         const tg = el(d, { ...fBC(i === 4 ? 84 : 66, 800, 1), color: i === 4 ? C.white : C.red, background: i === 4 ? C.red : "transparent", padding: i === 4 ? "14px 22px 8px" : "0", position: "relative" }, "span", ""); tg.textContent = tag;
@@ -743,10 +745,10 @@
       /* S3 Import-Rama, direct to the source */
       r = X.d = { root: layer(12, { background: FOOT ? "transparent" : C.black }) }; WM(r.root);
       const lw = 860; r.lock = lockup(r.root, lw, C.white); r.lx = (W - lw) / 2; r.ly = FOOT ? 230 : 330;
-      const zd = fit("À LA SOURCE.", W - 2 * M, 800, 260), yd = r.ly + 330;
+      const zd = fit("À LA SOURCE.", CW - 2 * M, 800, 260), yd = r.ly + 330;
       r.ls = [line(r.root, "VA DIRECT", zd, C.white, M, yd), line(r.root, `À LA SOURCE${dot()}`, zd, C.white, M, yd + zd * 0.9)];
       r.at = [wt("va"), wt("à")];
-      r.ly2 = yd + zd * 1.8 + 170; const xL = M + 24, xR = W - M - 24; r.xL = xL; r.xR = xR;
+      r.ly2 = yd + zd * 1.8 + 170; const xL = M + 24, xR = CW - M - 24; r.xL = xL; r.xR = xR;
       r.line = el(r.root, { left: xL + "px", top: r.ly2 - 5 + "px", width: xR - xL + "px", height: "10px", background: C.red, transformOrigin: "0 50%" });
       r.ends = [[xL, "USINE", "l"], [xR, "TOI", "r"]].map(([x, lab, al]) => {
         const d = el(r.root, { left: x - 24 + "px", top: r.ly2 - 24 + "px", width: "48px", height: "48px", borderRadius: "50%", background: C.red, transformOrigin: "50% 50%" });
@@ -758,32 +760,32 @@
 
       /* S4 the six steps */
       r = X.s = { root: layer(13, { background: FOOT ? "transparent" : C.paper }) };
-      const rh = FOOT ? 150 : 250, ys = FOOT ? 170 : 190, zn = FOOT ? 84 : 120, lx = FOOT ? 120 : 170, zl = fit("ON VÉRIFIE LA QUALITÉ", W - 2 * M - lx - 90, 800, FOOT ? 76 : 100);
+      const rh = FOOT ? 150 : 250, ys = FOOT ? 170 : 190, zn = FOOT ? 84 : 120, lx = FOOT ? 120 : 170, zl = fit("ON VÉRIFIE LA QUALITÉ", CW - 2 * M - lx - 90, 800, FOOT ? 76 : 100);
       r.rows = STEPS.map(([n, lab], i) => {
         const y_ = ys + i * rh;
-        const bgc = FOOT ? el(r.root, { left: M - 20 + "px", top: y_ - 12 + "px", width: W - 2 * M + 40 + "px", height: rh - 16 + "px", background: "rgba(10,10,10,.62)" }) : null;
+        const bgc = FOOT ? el(r.root, { left: M - 20 + "px", top: y_ - 12 + "px", width: CW - 2 * M + 40 + "px", height: rh - 16 + "px", background: "rgba(10,10,10,.62)" }) : null;
         const num = line(r.root, n, zn, C.red, M, y_);
         const lab_ = line(r.root, lab, zl, INK, M + lx, y_ + (zn - zl) * 0.5, 800);
-        const ck = el(r.root, { left: W - M - 70 + "px", top: y_ + (zn - 80) * 0.5 + "px", width: "80px", height: "80px", ...fBC(80, 800, 1), color: C.red, textAlign: "center", transformOrigin: "50% 50%" }); ck.textContent = "✓";
-        const rule = FOOT ? null : el(r.root, { left: M + "px", top: y_ + rh - 40 + "px", width: W - 2 * M + "px", height: "3px", background: C.ink, transformOrigin: "0 50%" });
+        const ck = el(r.root, { left: CW - M - 70 + "px", top: y_ + (zn - 80) * 0.5 + "px", width: "80px", height: "80px", ...fBC(80, 800, 1), color: C.red, textAlign: "center", transformOrigin: "50% 50%" }); ck.textContent = "✓";
+        const rule = FOOT ? null : el(r.root, { left: M + "px", top: y_ + rh - 40 + "px", width: CW - 2 * M + "px", height: "3px", background: C.ink, transformOrigin: "0 50%" });
         return { bgc, num, lab: lab_, ck, rule, t0: st[i] };
       });
 
       /* S5 who it's for */
       r = X.a = { root: layer(14, { background: FOOT ? "transparent" : C.red }) };
-      const za = fit("MANUFACTURIER.", W - 2 * M, 800, 200), ya = FOOT ? 200 : 150;
+      const za = fit("MANUFACTURIER.", CW - 2 * M, 800, 200), ya = FOOT ? 200 : 150;
       r.ls = AUD.map(([lab], i) => line(r.root, `${lab}${dot(FOOT ? C.red : C.black)}`, za, C.white, M, ya + i * za * 0.9));
       r.at = au.map((x) => x + 0.06);
-      if (!FOOT) { const cy = ya + 4 * za * 0.9 + 60; r.cell = cellFoot(r.root, M, cy, W - 2 * M, H - 140 - cy); }
+      if (!FOOT) { const cy = ya + 4 * za * 0.9 + 60; r.cell = cellFoot(r.root, M, cy, CW - 2 * M, H - 140 - cy); }
 
       /* S6 send us your list, we compare */
       r = X.c = { root: layer(15, { background: FOOT ? "transparent" : C.paper }) };
       const yc = FOOT ? 200 : 160;
-      const zA = fit("CE QUE T'ACHÈTES,", W - 2 * M, 800, 210), zB = fit("TON PRIX ACTUEL.", W - 2 * M, 800, 210);
+      const zA = fit("CE QUE T'ACHÈTES,", CW - 2 * M, 800, 210), zB = fit("TON PRIX ACTUEL.", CW - 2 * M, 800, 210);
       r.a = [line(r.root, "ENVOIE-NOUS", zA, INK, M, yc), line(r.root, `CE QUE T'ACHÈTES${dot(C.red, ",")}`, zA, INK, M, yc + zA * 0.9)];
       r.b = [line(r.root, "ON COMPARE AVEC", zB, INK, M, yc), line(r.root, `TON PRIX ACTUEL${dot()}`, zB, INK, M, yc + zB * 0.9)];
       r.ta = [wt("envoie-nous"), wt("ce")]; r.tb = [wt("on", 4), wt("ton")];
-      const cy = yc + Math.max(zA, zB) * 1.8 + 70, rhh = 112, cw = W - 2 * M;
+      const cy = yc + Math.max(zA, zB) * 1.8 + 70, rhh = 112, cw = CW - 2 * M;
       r.card = el(r.root, { left: M + "px", top: cy + "px", width: cw + "px", height: rhh * ROWS3.length + 36 + "px", background: C.white, borderTop: `10px solid ${C.ink}`, boxShadow: FOOT ? "0 30px 80px rgba(0,0,0,.45)" : "none" });
       r.rows = ROWS3.map(([a, b], i) => {
         const rr = el(r.card, { left: "36px", top: 18 + i * rhh + "px", width: cw - 72 + "px", height: rhh + "px", borderBottom: i < ROWS3.length - 1 ? `2px solid ${C.paper}` : "none", display: "flex", alignItems: "center", justifyContent: "space-between" });
@@ -802,7 +804,7 @@
 
       /* S7 toi, t'as rien à gérer */
       r = X.z = { root: layer(16, { background: FOOT ? "transparent" : C.red }) };
-      const zz = fit("T'AS RIEN", W - 2 * M, 800, 340), yz = FOOT ? 260 : 430;
+      const zz = fit("T'AS RIEN", CW - 2 * M, 800, 340), yz = FOOT ? 260 : 430;
       r.ls = [line(r.root, `TOI${dot(FOOT ? C.red : C.black, ",")}`, 200, C.white, M, yz), line(r.root, "T'AS RIEN", zz, C.white, M, yz + 200 * 0.9), line(r.root, `À GÉRER${dot(FOOT ? C.red : C.black)}`, zz, C.white, M, yz + 180 + zz * 0.9)];
       r.at = [wt("Toi,"), wt("t'as"), wt("gérer.")];
     }
