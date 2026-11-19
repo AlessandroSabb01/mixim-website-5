@@ -911,8 +911,8 @@
   };
 
   /* ---------- wide formats: the visible type + cards block is kept centred vertically ----------
-     each layer's content moves into a wrapper; its block is measured every 0.1 s at build time and the wrapper
-     follows the block's centre with a short trailing average, so a growing list glides up instead of jumping. */
+     each layer's content moves into a wrapper, measured every 0.1 s at build time; the wrapper gets ONE fixed offset
+     so the layer's full block is centred. Nothing moves to stay centred: every element animates in its final place. */
   const CENT = [];
   function centreLayers() {
     const full = (c) => { const r = c.getBoundingClientRect(); return r.width >= W * SCL * 0.95 && r.height >= H * SCL * 0.9; };
@@ -933,19 +933,13 @@
           if (r.bottom / SCL < 0 || r.top / SCL > H || r.height / SCL > H * 0.6) return;
           a = Math.min(a, r.top / SCL); z = Math.max(z, r.bottom / SCL);
         });
-        c.s[k] = z > a && z - a < H * 0.94 ? H / 2 - (a + z) / 2 : null;
+        if (z > a) { c.a = Math.min(c.a ?? 1e9, a); c.z = Math.max(c.z ?? -1e9, z); }
       });
     }
+    // one fixed offset per layer: its whole block (all lines and cards, at every moment) sits in the middle
+    CENT.forEach((c) => { c.off = c.z > c.a && c.z - c.a < H * 0.94 ? Math.round(H / 2 - (c.a + c.z) / 2) : 0; c.wrap.style.transform = `translateY(${c.off}px)`; });
   }
-  function centrePaint(t) {
-    const k = Math.round(t / 0.1);
-    CENT.forEach((c) => {
-      let sum = 0, w = 0;
-      for (let j = Math.max(0, k - 4); j <= k; j++) if (c.s[j] != null) { sum += c.s[j]; w++; }
-      // a layer that just appeared starts at its own centre (no slide-in from 0)
-      c.wrap.style.transform = `translateY(${w ? (sum / w).toFixed(1) : 0}px)`;
-    });
-  }
+  function centrePaint() {}
 
   /* ---------- frame ---------- */
   async function seek(t) {
