@@ -51,43 +51,44 @@
      line: rows separated by "|", **bold**; the final . ? ! , takes the accent colour.
      bg "foot" puts a b-roll clip (clip, off = in-point) full-bleed under white type. */
   // cuts: [clip, start] — the type holds while the footage hypercuts underneath (BTS -> result, team feedback)
+  // every b-roll appears in one film only; crew shots from "B-roll Ambiance de l'équipe" (graded, on tripod)
   const SCRIPT = {
     1: [   // Pourquoi nous
-      { t: 0, bg: "foot", cuts: [["w_room", 0], ["w_gratin", 0.75]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
-      { t: 1.62, bg: "foot", cuts: [["w_girl", 1.62]], line: "C'est ça qu'il avait|en **septembre.**", fx: "type" },
-      { t: 3.52, bg: "foot", cuts: [["c_edit1", 3.52], ["c_photo", 4.3]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
-      { t: 5.2, bg: "blue", kind: "phone", clip: "p_re1", line: "Des vidéos|chaque **semaine.**" },
-      { t: 6.76, bg: "foot", cuts: [["w_girl2", 6.76]], line: "Du monde|qui **commente.**", fx: "rise" },
-      { t: 7.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta.** »" },
+      { t: 0, bg: "foot", cuts: [["w_room", 0], ["w_gratin", 0.62]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
+      { t: 1.62, bg: "foot", cuts: [["lr_girl1", 1.62]], line: "C'est tout ce qu'il|avait en **septembre.**", fx: "type" },
+      { t: 3.52, bg: "foot", cuts: [["tm_a", 3.52], ["tm_d", 4.3]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
+      { t: 5.2, bg: "blue", kind: "phone", clip: "p_re1", line: "Une vidéo|chaque **semaine.**" },
+      { t: 6.76, bg: "foot", cuts: [["lr_food1", 6.76]], line: "Les gens|**commentent.**", fx: "rise" },
+      { t: 7.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta !** »" },
       { t: 10.38, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
-      { t: 11.7, bg: "foot", cuts: [["c_photo", 11.7], ["c_edit1", 12.3]], line: "Une **méthode,**", size: 190, fx: "slam" },
-      { t: 12.9, bg: "foot", cuts: [["g_shrimp", 12.9], ["w_surf", 13.45]], line: "puis une|**équipe.**", fx: "rise" },
-      { t: 14.02, bg: "foot", cuts: [["w_lava2", 14.02], ["w_gratin", 14.45], ["g_sauce", 14.86]], line: "C'est ton|**tour.**", size: 210, fx: "slam" },
+      { t: 11.7, bg: "foot", cuts: [["tm_h", 11.7]], line: "Une **méthode.**", size: 190, fx: "slam" },
+      { t: 12.9, bg: "foot", cuts: [["tm_n", 12.9], ["s_rolls1", 13.45]], line: "Une vraie|**équipe.**", fx: "rise" },
+      { t: 14.02, bg: "foot", cuts: [["w_lava2", 14.02], ["s_rolls3", 14.45], ["w_girl", 14.86]], line: "À ton|**tour.**", size: 230, fx: "slam" },
     ],
     2: [   // Qui on est
       { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
-      { t: 0.42, bg: "foot", cuts: [["w_room", 0.42], ["w_mussels", 1.15], ["w_girl", 1.9]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
-      { t: 3.36, bg: "foot", cuts: [["w_mussels", 3.36]], line: "« J'ai pas|le **temps.** »", fx: "type" },
-      { t: 4.62, bg: "foot", cuts: [["c_photo", 4.62]], line: "On filme|pour **toi.**", fx: "rise" },
-      { t: 5.76, bg: "foot", cuts: [["w_plates", 5.76]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
-      { t: 7.14, bg: "foot", cuts: [["c_edit1", 7.14]], line: "On a|les **idées.**", fx: "rise" },
+      { t: 0.42, bg: "foot", cuts: [["lr_girl2", 0.42], ["w_mussels", 1.9]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
+      { t: 3.36, bg: "foot", cuts: [["sa_tower", 3.36]], line: "« J'ai pas|le **temps.** »", fx: "type" },
+      { t: 4.62, bg: "foot", cuts: [["tm_b", 4.62]], line: "On filme|pour **toi.**", fx: "rise" },
+      { t: 5.76, bg: "foot", cuts: [["w_plates", 5.76], ["sa_burger", 6.5]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
+      { t: 7.14, bg: "foot", cuts: [["tm_e", 7.14]], line: "On a|les **idées.**", fx: "rise" },
       { t: 8.28, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
-      { t: 10.12, bg: "blue", kind: "phone", clip: "p_re2", line: "On te prouve|le **contraire.**" },
-      { t: 12.96, bg: "blue", kind: "phone", clip: "p_bo1", line: "Création **Virale.**" },
-      { t: 14.04, bg: "foot", cuts: [["c_photo", 14.04], ["w_surf", 14.8], ["w_girl2", 15.5]], line: "Ton équipe de contenu|à **Québec.**", fx: "rise" },
+      { t: 10.12, bg: "blue", kind: "phone", clip: "p_re2", line: "On va te prouver|le **contraire.**" },
+      { t: 12.96, bg: "blue", kind: "phone", clip: "p_sx", line: "Création **Virale.**" },
+      { t: 14.04, bg: "foot", cuts: [["tm_k", 14.04], ["lr_pizza", 14.8], ["tm_l", 15.5]], line: "Ton équipe contenu|à **Québec.**", fx: "rise" },
     ],
     3: [   // Ce qu'on fait
       { t: 0, bg: "ink", line: "Pose ton|**cell.**", size: 230, fx: "slam" },
       { t: 1.28, bg: "paper", line: "**Sérieux.**", size: 220, fx: "slam" },
-      { t: 1.74, bg: "foot", cuts: [["w_girl", 1.74]], line: "3 fois que tu|recommences ce **reel.**", fx: "type" },
-      { t: 4.26, bg: "foot", cuts: [["w_room", 4.26], ["w_gratin", 4.9]], line: "T'as déjà ta|business à **gérer.**", fx: "rise" },
-      { t: 6.14, bg: "foot", cuts: [["w_mussels", 6.14], ["w_girl2", 7.16], ["w_plates", 7.92], ["c_edit1", 9.12]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
-      { t: 10.12, bg: "foot", cuts: [["c_photo", 10.12], ["c_edit1", 11.0]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
-      { t: 11.98, bg: "foot", cuts: [["c_edit1", 11.98]], line: "Les **idées,**", size: 190, fx: "slam" },
-      { t: 12.62, bg: "foot", cuts: [["c_photo", 12.62]], line: "le **tournage,**", size: 190, fx: "slam" },
-      { t: 13.34, bg: "foot", cuts: [["c_edit3", 13.34]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 1.74, bg: "foot", cuts: [["lr_girl3", 1.74]], line: "3 fois que tu|refais ce **reel ?**", fx: "type" },
+      { t: 4.26, bg: "foot", cuts: [["sa_poutine", 4.26], ["w_girl2", 5.2]], line: "T'as déjà une|business à **gérer.**", fx: "rise" },
+      { t: 6.14, bg: "foot", cuts: [["lr_food2", 6.14], ["tm_c", 7.16], ["sa_mac", 7.92], ["tm_f", 9.12]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
+      { t: 10.12, bg: "foot", cuts: [["tm_g", 10.12], ["tm_i", 10.9]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
+      { t: 11.98, bg: "foot", cuts: [["tm_j", 11.98]], line: "Les **idées,**", size: 190, fx: "slam" },
+      { t: 12.62, bg: "foot", cuts: [["s_rolls2", 12.62]], line: "le **tournage,**", size: 190, fx: "slam" },
+      { t: 13.34, bg: "foot", cuts: [["tm_m", 13.34]], line: "le **montage,**", size: 190, fx: "slam" },
       { t: 14.12, bg: "blue", kind: "phone", clip: "p_li2", line: "la **publication.**" },
-      { t: 14.98, bg: "foot", cuts: [["w_surf", 14.98], ["g_shrimp", 15.6], ["w_lava2", 16.2], ["w_gratin", 16.8]], line: "Une équipe de Québec|qui connaît ton **monde.**", fx: "rise" },
+      { t: 14.98, bg: "foot", cuts: [["lr_food3", 14.98], ["s_poke", 15.6], ["w_lava", 16.2], ["lr_pizza2", 16.8]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
     ],
   };
   const END_T = { 1: 15.28, 2: 16.34, 3: 17.58 }[VID];   // "Remplis le formulaire ci-dessous…"
@@ -233,14 +234,14 @@
       s.size = parseFloat(s.leadE.style.fontSize) || size; s.gap = 50; s.lx = (W - tot) / 2; s.lw = lw;
     } else if (s.kind === "phone") {   // a finished client reel, posted: inside a phone under the line
       s.tb = textBlock(root, s.line, { size: 120, pal });
-      const pw = 621, ph = 1104, bz = 16;   // iPhone: 9:16 screen, thin titanium bezel, dynamic island, side buttons
-      s.phone = el(root, { width: pw + 2 * bz + "px", height: ph + 2 * bz + "px", borderRadius: "92px", background: "linear-gradient(135deg,#3a3d44,#15161a 40%,#2a2c31)", boxShadow: "0 50px 110px rgba(0,0,0,.4), inset 0 0 0 3px #4a4d55", transformOrigin: "50% 50%" });
+      const pw = 520, ph = 1126, bz = 15;   // iPhone: 9:16 screen, thin titanium bezel, dynamic island, side buttons
+      s.phone = el(root, { width: pw + 2 * bz + "px", height: ph + 2 * bz + "px", borderRadius: "84px", background: "linear-gradient(135deg,#3a3d44,#15161a 40%,#2a2c31)", boxShadow: "0 50px 110px rgba(0,0,0,.4), inset 0 0 0 3px #4a4d55", transformOrigin: "50% 50%" });
       [[-6, 250, 120], [-6, 400, 120], [pw + 2 * bz, 330, 170]].forEach(([x, y, h]) => el(s.phone, { left: x + "px", top: y + "px", width: "6px", height: h + "px", borderRadius: "3px", background: "#2c2e33" }));
-      const scr = el(s.phone, { left: bz + "px", top: bz + "px", width: pw + "px", height: ph + "px", borderRadius: "78px", overflow: "hidden", background: "#000" });
+      const scr = el(s.phone, { left: bz + "px", top: bz + "px", width: pw + "px", height: ph + "px", borderRadius: "70px", overflow: "hidden", background: "#000" });
       s.pimg = el(scr, { width: pw + "px", height: ph + "px", objectFit: "cover" }, "img", "a"); s.pimg.decoding = "sync";
       el(scr, { left: pw / 2 - 95 + "px", top: "26px", width: "190px", height: "54px", borderRadius: "28px", background: "#000" });
       el(scr, { left: pw / 2 - 110 + "px", top: ph - 26 + "px", width: "220px", height: "8px", borderRadius: "4px", background: "rgba(255,255,255,.75)" });
-      s.px = (W - pw - 2 * bz) / 2; s.py = 520; s.ty = 200;
+      s.px = (W - pw - 2 * bz) / 2; s.py = 500; s.ty = 190;
     } else if (s.kind === "count") {
       s.label && (s.labE = el(root, { font: `500 30px/1 ${MONO}`, letterSpacing: "0.18em", color: pal.mute, whiteSpace: "pre" }), s.labE.textContent = s.label);
       s.num = el(root, { font: `800 380px/1 ${FF}`, letterSpacing: "-0.06em", color: pal.ink, whiteSpace: "pre", fontVariantNumeric: "tabular-nums", transformOrigin: "50% 60%" });
@@ -343,7 +344,7 @@
       paintText(s, s.tb, t, "rise", 0, s.ty);
       const e = spring(t - s.b0 - 0.08, 1.6, 7);
       T(s.phone, { x: s.px, y: s.py + (1 - clamp(e, 0, 1.2)) * 500, s: 0.92 + 0.08 * clamp(e, 0, 1.1), r: (1 - clamp(e, 0, 1)) * 6 });
-      const m = MAN[s.clip] || 1, src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, Math.floor(Math.max(0, t - s.b0) * 24) + 1)).padStart(4, "0")}.jpg`;
+      const m = MAN[s.clip] || 1, fi = Math.floor(Math.max(0, t - s.b0) * 24), pp = (m - 1) * 2 || 1, k_ = fi % pp, src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, (k_ < m ? k_ : pp - k_) + 1)).padStart(4, "0")}.jpg`;
       if (s.pimg.dataset.src !== src) { s.pimg.dataset.src = src; s.pimg.src = src; pend2 = s.pimg.decode().catch(() => {}); }
     } else if (s.kind === "count") {
       const c = ez.outExpo(clamp((t - bt(s.b0)) / 0.6));
@@ -364,14 +365,15 @@
     const s = k >= 0 ? SC[k] : null;
     const inEnd = b >= END.b0;
     const pal = s ? s.pal : BG.blue;
-    bgL.style.background = inEnd ? BG.blue.bg : pal.bg;
+    bgL.style.background = inEnd ? "#0B1C4D" : pal.bg;   // end card: deep navy
     SC.forEach((c) => show(c.root, c === s));
     const onFoot = s && s.pal.foot && !inEnd;
     show(footL, onFoot);
     if (onFoot) {
       let cl = s.cuts[0]; s.cuts.forEach((c) => { if (t >= c[1]) cl = c; });
       const m = MAN[cl[0]] || 1, loc = Math.max(0, t - cl[1]) + (cl[0].startsWith("g_") ? 0 : 0.3);
-      const src = `../assets/cv9/frames/${cl[0]}/${String(Math.min(m, Math.floor(loc * 24) + 1)).padStart(4, "0")}.jpg`;
+      const fi = Math.floor(loc * 24), pp = (m - 1) * 2 || 1, k_ = fi % pp, idx = (k_ < m ? k_ : pp - k_) + 1;   // ping-pong: never a frozen frame
+      const src = `../assets/cv9/frames/${cl[0]}/${String(Math.min(m, idx)).padStart(4, "0")}.jpg`;
       if (footImg.dataset.src !== src) { footImg.dataset.src = src; footImg.src = src; pend = footImg.decode().catch(() => {}); }
       const pr_ = clamp((t - cl[1]) / 1.5);
       T(footImg, { s: 1.04 + 0.05 * pr_ });
@@ -409,13 +411,13 @@
     show(endL, inEnd);
     if (inEnd) {
       const d = t - bt(END.b0);
-      const e = spring(d, 1.7, 7.5);
+      // calm end card (no bounce): logo and button ease in and settle
+      const e = ez.outCubic(clamp(d / 0.6));
       const lw = 640, lh = lw * (160 / 221);
-      const bp = Math.exp(-((b - END.b0) % 1) * PER / 0.09) * (b - END.b0 > 1 ? 1 : 0);
-      T(logo, { x: (W - lw) / 2, y: H / 2 - lh / 2 - 190, s: (0.35 + 0.65 * clamp(e, 0, 1.2)) * (1 + 0.03 * bp), r: (1 - clamp(e, 0, 1)) * -8, op: clamp(d / 0.1) });
-      const pp = spring(d - 0.55, 2, 8);
-      T(pill, { x: (W - pill.offsetWidth) / 2, y: H / 2 + 170, s: Math.max(0.001, clamp(pp, 0, 1.15)) * (1 + 0.045 * bp), op: d > 0.55 ? 1 : 0 });
-      pill.style.boxShadow = `0 0 0 ${Math.round(16 * bp)}px rgba(198,255,61,${0.5 * bp})`;
+      T(logo, { x: (W - lw) / 2, y: H / 2 - lh / 2 - 190 + (1 - e) * 30, s: 0.94 + 0.06 * e, op: e });
+      const pe = ez.outCubic(clamp((d - 0.45) / 0.6));
+      T(pill, { x: (W - pill.offsetWidth) / 2, y: H / 2 + 170 + (1 - pe) * 30, op: pe });
+      pill.style.boxShadow = "none";
       const fe = 0 * d;
       show(flash, fe > 0.02); if (fe > 0.02) { flash.style.background = "#FFFFFF"; flash.style.opacity = 0.6 * fe; }
     }
