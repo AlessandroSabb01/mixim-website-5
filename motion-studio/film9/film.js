@@ -50,43 +50,44 @@
   /* ---------- copy, cued on the voice-over (t = seconds, measured with whisper large-v3) ----------
      line: rows separated by "|", **bold**; the final . ? ! , takes the accent colour.
      bg "foot" puts a b-roll clip (clip, off = in-point) full-bleed under white type. */
+  // cuts: [clip, start] — the type holds while the footage hypercuts underneath (BTS -> result, team feedback)
   const SCRIPT = {
     1: [   // Pourquoi nous
-      { t: 0, bg: "ink", kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
-      { t: 1.62, bg: "paper", line: "C'est ça qu'il avait|en **septembre.**", fx: "type" },
-      { t: 3.52, bg: "blue", kind: "stack", top: "Deux mois avec", line: "Création **Virale.**" },
-      { t: 5.2, bg: "foot", clip: "bts_cam3", line: "Des vidéos|chaque **semaine.**", fx: "rise" },
-      { t: 6.76, bg: "foot", clip: "bo_eat", line: "Du monde|qui **commente.**", fx: "rise" },
-      { t: 7.98, bg: "foot", clip: "bo_salle2", line: "« Je t'ai vu|sur **Insta.** »", fx: "rise", off: 0.6 },
+      { t: 0, bg: "foot", cuts: [["bts_edit3", 0]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
+      { t: 1.62, bg: "foot", cuts: [["bts_set", 1.62]], line: "C'est ça qu'il avait|en **septembre.**", fx: "type" },
+      { t: 3.52, bg: "foot", cuts: [["bts_cam1", 3.52], ["bts_photo", 3.9], ["bts_mon", 4.28], ["bts_cam4", 4.7]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
+      { t: 5.2, bg: "foot", cuts: [["bts_cam3", 5.2], ["g_studio", 5.8]], line: "Des vidéos|chaque **semaine.**", fx: "rise" },
+      { t: 6.76, bg: "foot", cuts: [["g_flame", 6.76], ["g_shrimp", 7.3]], line: "Du monde|qui **commente.**", fx: "rise" },
+      { t: 7.98, bg: "blue", kind: "phone", clip: "p_albert", line: "« Je t'ai vu|sur **Insta.** »" },
       { t: 10.38, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
-      { t: 11.7, bg: "paper", line: "Une **méthode.**", size: 190, fx: "slam" },
-      { t: 12.9, bg: "foot", clip: "bts_set", line: "Puis une|**équipe.**", fx: "rise" },
-      { t: 14.02, bg: "foot", clip: "sx_sushi", line: "C'est ton|**tour.**", size: 210, fx: "slam" },
+      { t: 11.7, bg: "foot", cuts: [["bts_edit2", 11.7], ["bts_cam5", 11.94], ["bts_photo", 12.18], ["g_studio", 12.42], ["bts_mon", 12.66]], line: "Une **méthode,**", size: 190, fx: "slam" },
+      { t: 12.9, bg: "foot", cuts: [["bts_mon", 12.9], ["bts_set", 13.45]], line: "puis une|**équipe.**", fx: "rise" },
+      { t: 14.02, bg: "foot", cuts: [["g_sauce", 14.02], ["g_poutine2", 14.44], ["g_pasta", 14.86]], line: "C'est ton|**tour.**", size: 210, fx: "slam" },
     ],
     2: [   // Qui on est
       { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
-      { t: 0.42, bg: "paper", line: "**3** excuses|que t'as déjà dites", fx: "type" },
-      { t: 3.36, bg: "ink", line: "« J'ai pas|le **temps.** »", fx: "type" },
-      { t: 4.62, bg: "foot", clip: "bts_cam1", line: "On filme|pour **toi.**", fx: "rise" },
-      { t: 5.76, bg: "ink", line: "« Je sais pas|quoi **poster.** »", fx: "type" },
-      { t: 7.14, bg: "foot", clip: "bts_edit1", line: "On a|les **idées.**", fx: "rise" },
+      { t: 0.42, bg: "foot", cuts: [["bts_set", 0.42], ["bts_edit3", 1.9]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
+      { t: 3.36, bg: "foot", cuts: [["bts_mon", 3.36]], line: "« J'ai pas|le **temps.** »", fx: "type" },
+      { t: 4.62, bg: "foot", cuts: [["bts_cam1", 4.62], ["bts_cam4", 5.2]], line: "On filme|pour **toi.**", fx: "rise" },
+      { t: 5.76, bg: "foot", cuts: [["bts_edit3", 5.76]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
+      { t: 7.14, bg: "foot", cuts: [["bts_edit1", 7.14], ["g_studio", 7.7]], line: "On a|les **idées.**", fx: "rise" },
       { t: 8.28, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
-      { t: 10.12, bg: "foot", clip: "sa_tower", line: "On te prouve|le **contraire.**", fx: "slam" },
-      { t: 12.96, bg: "paper", kind: "stack", top: "On est", line: "Création **Virale.**" },
-      { t: 14.04, bg: "foot", clip: "bts_photo", line: "Ton équipe de contenu|à **Québec.**", fx: "rise" },
+      { t: 10.12, bg: "foot", cuts: [["bts_cam5", 10.12], ["bts_photo", 10.38], ["bts_mon", 10.64], ["g_flame", 10.9], ["g_sauce", 11.45], ["g_poutine2", 12.0], ["g_pasta", 12.45]], line: "On te prouve|le **contraire.**", fx: "slam" },
+      { t: 12.96, bg: "blue", kind: "phone", clip: "p_tour", line: "Création **Virale.**" },
+      { t: 14.04, bg: "foot", cuts: [["g_studio", 14.04], ["bts_set", 14.8], ["bts_set", 15.5]], line: "Ton équipe de contenu|à **Québec.**", fx: "rise" },
     ],
     3: [   // Ce qu'on fait
       { t: 0, bg: "ink", line: "Pose ton|**cell.**", size: 230, fx: "slam" },
       { t: 1.28, bg: "paper", line: "**Sérieux.**", size: 220, fx: "slam" },
-      { t: 1.74, bg: "paper", line: "3 fois que tu|recommences|ce **reel.**", fx: "type" },
-      { t: 4.26, bg: "blue", line: "T'as déjà ta|business à **gérer.**", fx: "rise" },
-      { t: 6.14, bg: "ink", kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
-      { t: 10.12, bg: "foot", clip: "bts_cam4", line: "Création Virale|s'en **occupe.**", fx: "rise" },
-      { t: 11.98, bg: "foot", clip: "bts_mon", line: "Les **idées,**", size: 190, fx: "slam" },
-      { t: 12.62, bg: "foot", clip: "bts_cam5", line: "le **tournage,**", size: 190, fx: "slam" },
-      { t: 13.34, bg: "foot", clip: "bts_edit2", line: "le **montage,**", size: 190, fx: "slam" },
-      { t: 14.12, bg: "foot", clip: "sa_burger", line: "la **publication.**", size: 170, fx: "slam" },
-      { t: 14.98, bg: "foot", clip: "bo_salle", line: "Une équipe de Québec|qui connaît|ton **monde.**", fx: "rise" },
+      { t: 1.74, bg: "foot", cuts: [["bts_edit3", 1.74], ["bts_mon", 2.9]], line: "3 fois que tu|recommences|ce **reel.**", fx: "type" },
+      { t: 4.26, bg: "foot", cuts: [["bts_set", 4.26]], line: "T'as déjà ta|business à **gérer.**", fx: "rise" },
+      { t: 6.14, bg: "foot", cuts: [["bo_salle2", 6.14], ["g_studio", 7.16], ["bts_edit3", 7.92], ["bts_edit2", 9.12]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
+      { t: 10.12, bg: "foot", cuts: [["bts_cam4", 10.12], ["bts_photo", 10.8], ["bts_cam1", 11.4]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
+      { t: 11.98, bg: "foot", cuts: [["bts_edit1", 11.98]], line: "Les **idées,**", size: 190, fx: "slam" },
+      { t: 12.62, bg: "foot", cuts: [["bts_cam5", 12.62]], line: "le **tournage,**", size: 190, fx: "slam" },
+      { t: 13.34, bg: "foot", cuts: [["bts_edit2", 13.34]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 14.12, bg: "blue", kind: "phone", clip: "p_smash", line: "la **publication.**" },
+      { t: 14.98, bg: "foot", cuts: [["g_flame", 14.98], ["g_shrimp", 15.55], ["g_sauce", 16.1], ["g_poutine", 16.65], ["g_pasta", 17.1]], line: "Une équipe de Québec|qui connaît|ton **monde.**", fx: "rise" },
     ],
   };
   const END_T = { 1: 15.28, 2: 16.34, 3: 17.58 }[VID];   // "Remplis le formulaire ci-dessous…"
@@ -178,7 +179,7 @@
   const footImg = el(footL, { width: W + "px", height: H + "px", objectFit: "cover", transformOrigin: "50% 50%" }, "img", "a");
   footImg.decoding = "sync";
   const footShade = el(footL, { width: W + "px", height: H + "px", background: "linear-gradient(180deg, rgba(8,9,12,.55) 0%, rgba(8,9,12,.38) 40%, rgba(8,9,12,.38) 60%, rgba(8,9,12,.7) 100%)" });
-  let MAN = {}, pend = null;
+  let MAN = {}, pend = null, pend2 = null;
   const cardsL = el(stage, { width: W + "px", height: H + "px" });
   const wipe = el(stage, { width: W + "px", height: H + "px", transformOrigin: "50% 100%" });
   const edge = el(wipe, { width: W + "px", height: "14px", background: "#C6FF3D" });      // the wipe's leading edge
@@ -229,6 +230,14 @@
         lw = s.leadE.offsetWidth; iw = Math.max(...s.itemsE.map((e) => e.offsetWidth)); tot = lw + 60 + iw + 16;
       }
       s.size = parseFloat(s.leadE.style.fontSize) || size; s.gap = 50; s.lx = (W - tot) / 2; s.lw = lw;
+    } else if (s.kind === "phone") {   // a finished client reel, posted: inside a phone under the line
+      s.tb = textBlock(root, s.line, { size: 120, pal });
+      const pw = 560, ph = 1000;
+      s.phone = el(root, { width: pw + 36 + "px", height: ph + 36 + "px", borderRadius: "70px", background: "#0B0C10", boxShadow: "0 40px 90px rgba(0,0,0,.35)", transformOrigin: "50% 50%" });
+      const scr = el(s.phone, { left: "18px", top: "18px", width: pw + "px", height: ph + "px", borderRadius: "54px", overflow: "hidden", background: "#000" });
+      s.pimg = el(scr, { width: pw + "px", height: ph + "px", objectFit: "cover" }, "img", "a"); s.pimg.decoding = "sync";
+      el(scr, { left: pw / 2 - 70 + "px", top: "16px", width: "140px", height: "36px", borderRadius: "20px", background: "#000" });
+      s.px = (W - pw - 36) / 2; s.py = 600; s.ty = 300;
     } else if (s.kind === "count") {
       s.label && (s.labE = el(root, { font: `500 30px/1 ${MONO}`, letterSpacing: "0.18em", color: pal.mute, whiteSpace: "pre" }), s.labE.textContent = s.label);
       s.num = el(root, { font: `800 380px/1 ${FF}`, letterSpacing: "-0.06em", color: pal.ink, whiteSpace: "pre", fontVariantNumeric: "tabular-nums", transformOrigin: "50% 60%" });
@@ -327,6 +336,12 @@
         it.style.color = act && k === n - 1 ? s.pal.acc : s.pal.ink;
         T(it, { x: listX + dist * 8, y: yk, op: (t >= bt(s.b0 + 0.2) ? 1 : 0) * clamp(1 - dist * 0.42, 0.06, 1) });
       });
+    } else if (s.kind === "phone") {
+      paintText(s, s.tb, t, "rise", 0, s.ty);
+      const e = spring(t - s.b0 - 0.08, 1.6, 7);
+      T(s.phone, { x: s.px, y: s.py + (1 - clamp(e, 0, 1.2)) * 500, s: 0.92 + 0.08 * clamp(e, 0, 1.1), r: (1 - clamp(e, 0, 1)) * 6 });
+      const m = MAN[s.clip] || 1, src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, Math.floor(Math.max(0, t - s.b0) * 24) + 1)).padStart(4, "0")}.jpg`;
+      if (s.pimg.dataset.src !== src) { s.pimg.dataset.src = src; s.pimg.src = src; pend2 = s.pimg.decode().catch(() => {}); }
     } else if (s.kind === "count") {
       const c = ez.outExpo(clamp((t - bt(s.b0)) / 0.6));
       const v = s.value * c;
@@ -351,10 +366,11 @@
     const onFoot = s && s.pal.foot && !inEnd;
     show(footL, onFoot);
     if (onFoot) {
-      const m = MAN[s.clip] || 1, loc = Math.max(0, t - s.b0) + (s.off ?? 0.3);
-      const src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, Math.floor(loc * 24) + 1)).padStart(4, "0")}.jpg`;
+      let cl = s.cuts[0]; s.cuts.forEach((c) => { if (t >= c[1]) cl = c; });
+      const m = MAN[cl[0]] || 1, loc = Math.max(0, t - cl[1]) + (cl[0].startsWith("g_") ? 0 : 0.3);
+      const src = `../assets/cv9/frames/${cl[0]}/${String(Math.min(m, Math.floor(loc * 24) + 1)).padStart(4, "0")}.jpg`;
       if (footImg.dataset.src !== src) { footImg.dataset.src = src; footImg.src = src; pend = footImg.decode().catch(() => {}); }
-      const pr_ = clamp((t - s.b0) / Math.max(0.5, s.b1 - s.b0));
+      const pr_ = clamp((t - cl[1]) / 1.5);
       T(footImg, { s: 1.04 + 0.05 * pr_ });
     }
     // camera: a kick punch on every beat, a harder one on the bar
@@ -416,12 +432,15 @@
       const nx = SC[i + 1];
       if (i > 0 && SC[i - 1].pal !== s.pal) cue(s.b0, s.i % 2 ? PAL.wipeU : PAL.wipeS, 0.55, { dir: s.i % 2 ? 1 : -1 });
       else if (i > 0 && s.pal.foot) cue(s.b0, "whoosh", 0.45);
+      if (s.cuts) s.cuts.slice(1).forEach((c, k) => cue(c[1], k % 2 ? "tap" : "zip", 0.35));
       if (!s.kind) {
         if (s.fx === "type") keys(s.b0, Math.min(s.tb.total, 40), TYPE_CPS);
         if (s.fx === "rise") s.tb.rows.flatMap((r) => r.words).forEach((w, k) => cue(s.b0 + tb2(0.045 * k), PAL.rise, 0.45, { pan: (k % 2 ? 0.2 : -0.2) }));
         if (s.fx === "slam") PAL.slam.forEach((ty, k) => cue(s.b0, ty, k ? 0.7 : 0.85));
         if (s.fx === "scroll") { cue(s.b0, PAL.scroll, 0.7); cue(s.b0 + tb2(0.45), PAL.land, 0.6); }
         if (s.fx === "strike") { s.tb.rows.flatMap((r) => r.words).forEach((w, k) => cue(s.b0 + tb2(0.045 * k), PAL.rise, 0.4)); cue(s.strikeAt, PAL.strike, 0.8); }
+      } else if (s.kind === "phone") {
+        cue(s.b0, "whoosh", 0.6); cue(s.b0 + 0.25, "pop", 0.6); cue(s.b0, PAL.rise, 0.4);
       } else if (s.kind === "stack") {
         cue(s.b0, PAL.rise, 0.45);
         if (s.box) { PAL.slam.forEach((ty, k) => cue(s.b0 + 0.75, ty, k ? 0.6 : 0.8)); cue(s.b0 + 1.1, PAL.box, 0.7); }
@@ -462,7 +481,7 @@
     window.CUES = buildCues();
     window.SCENES = SC.map((c) => ({ t0: c.b0, t1: c.b1, kind: c.kind || c.fx, text: c.text0.replace(/\*\*/g, "").replace(/\|/g, " ") }));
     window.DURATION = LEN;
-    window.seek = (t) => { pend = null; seek(t); return pend || Promise.resolve(); };
+    window.seek = (t) => { pend = pend2 = null; seek(t); return Promise.all([pend, pend2]); };
     seek(0);
     return { duration: LEN, scenes: SC.length, endBeat: END.b0 };
   })();
