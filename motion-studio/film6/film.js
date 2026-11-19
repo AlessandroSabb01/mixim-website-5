@@ -168,7 +168,8 @@
 
   /* ---------- layers ---------- */
   const cam = el(stage, { width: W + "px", height: H + "px", transformOrigin: "50% 50%" });
-  const layer = (z, css = {}) => el(cam, { width: W + "px", height: H + "px", zIndex: z, overflow: "hidden", ...css });
+  const LAYERS = [];
+  const layer = (z, css = {}) => { const e = el(cam, { width: W + "px", height: H + "px", zIndex: z, overflow: "hidden", ...css }); LAYERS.push(e); return e; };
   const S = {};
   const INK = FOOT ? C.white : C.ink;           // text over footage is white
 
@@ -506,7 +507,7 @@
   const bare = (s) => s.replace(/ :$/, "");
   const ix = (tok, n = 0) => { let c = -1; for (let i = 0; i < WT.length; i++) if (bare(WT[i].w) === tok && ++c === n) return i; throw new Error("no word " + tok); };
   const wt = (tok, n = 0) => w(ix(tok, n));
-  const WM = (root) => { if (!FOOT) { const wm = logoSVG(root, "glyphOnly", 900, "#1A1817"); T(wm.d, { x: W - 760, y: H - 820 }); } };
+  const WM = (root) => { if (!FOOT) { const wm = logoSVG(root, "glyphOnly", 900, "#1A1817"); T(wm.d, { x: W - 760, y: H - 820 }); wm.d.dataset.nc = 1; } };
   const wipeUp = (root, t, t0, d = 0.24) => { const k = ez.inOutExpo(pr(t, t0, d)); root.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`; };
   const riseAll = (ls, at, t, lastStretch = 0.45) => ls.forEach((l, i) => rise(l, pr(t, at[i] - 0.08, RISE), 0, i === ls.length - 1 ? lastStretch : 0.3));
   function stackSwap(ls, at, t, ink = INK) {      // a list where the spoken item is lit and the others are greyed
@@ -909,10 +910,47 @@
     "3": () => V3(),
   };
 
+  /* ---------- wide formats: the visible type + cards block is kept centred vertically ----------
+     each layer's content moves into a wrapper; its block is measured every 0.1 s at build time and the wrapper
+     follows the block's centre with a short trailing average, so a growing list glides up instead of jumping. */
+  const CENT = [];
+  function centreLayers() {
+    const full = (c) => { const r = c.getBoundingClientRect(); return r.width >= W * SCL * 0.95 && r.height >= H * SCL * 0.9; };
+    LAYERS.forEach((L) => {
+      const wrap = document.createElement("div"); wrap.className = "a";
+      Object.assign(wrap.style, { width: W + "px", height: H + "px" });
+      [...L.children].forEach((c) => { if (!c.dataset.nc && !full(c)) wrap.appendChild(c); });
+      L.appendChild(wrap); CENT.push({ L, wrap, s: [] }); window.__C = CENT;
+    });
+    const DT = 0.1, N = Math.ceil((SC.len + 0.6) / DT);
+    for (let k = 0; k <= N; k++) {
+      const t = k * DT; pending.length = 0; footPaint(t); VX.paint(t); end(t); captions(t); fx(t);
+      CENT.forEach((c) => {
+        let a = 1e9, z = -1e9;
+        if (getComputedStyle(c.L).display !== "none") [...c.wrap.children].forEach((e) => {
+          const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+          if (r.width < 2 || r.height < 2 || cs.display === "none" || cs.visibility === "hidden" || +cs.opacity < 0.05) return;
+          if (r.bottom / SCL < 0 || r.top / SCL > H || r.height / SCL > H * 0.6) return;
+          a = Math.min(a, r.top / SCL); z = Math.max(z, r.bottom / SCL);
+        });
+        c.s[k] = z > a && z - a < H * 0.94 ? H / 2 - (a + z) / 2 : null;
+      });
+    }
+  }
+  function centrePaint(t) {
+    const k = Math.round(t / 0.1);
+    CENT.forEach((c) => {
+      let sum = 0, w = 0;
+      for (let j = Math.max(0, k - 4); j <= k; j++) if (c.s[j] != null) { sum += c.s[j]; w++; }
+      // a layer that just appeared starts at its own centre (no slide-in from 0)
+      c.wrap.style.transform = `translateY(${w ? (sum / w).toFixed(1) : 0}px)`;
+    });
+  }
+
   /* ---------- frame ---------- */
   async function seek(t) {
     pending.length = 0;
-    footPaint(t); VX.paint(t); end(t); captions(t); fx(t);
+    footPaint(t); VX.paint(t); end(t); captions(t); fx(t); if (CENT.length) centrePaint(t);
     await Promise.all(pending);
   }
   window.DURATION = SC.len;
@@ -935,6 +973,7 @@
     await Promise.all([...document.images].map((im) => (im.complete ? 0 : im.decode().catch(() => {}))));
     window.CUES = CUES.map((c) => ({ ...c, t: BTS[0] + c.beat * PER }));
     window.VO = { file: `assets/imp-ads/vo${VID}.mp3`, offset: OFF };
+    if (W !== 1080) centreLayers();
     window.seek = seek;
     await seek(0);
     return { W, H, FMT: "portrait", cues: CUES.length };
