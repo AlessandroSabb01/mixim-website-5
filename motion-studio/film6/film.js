@@ -937,7 +937,14 @@
       });
     }
     // one fixed offset per layer: its whole block (all lines and cards, at every moment) sits in the middle
-    CENT.forEach((c) => { c.off = c.z > c.a && c.z - c.a < H * 0.94 ? Math.round(H / 2 - (c.a + c.z) / 2) : 0; c.wrap.style.transform = `translateY(${c.off}px)`; });
+    // ?big=1 (horizontal v3): each block is also scaled up around the frame centre to fill more of the frame
+    const BIG = P.get("big") ? Math.min(1.45, (W * 0.86) / CW) : 1;
+    CENT.forEach((c) => {
+      c.off = c.z > c.a && c.z - c.a < H * 0.94 ? Math.round(H / 2 - (c.a + c.z) / 2) : 0;
+      const k = c.z > c.a ? Math.max(1, Math.min(BIG, (H * 0.86) / (c.z - c.a))) : 1;
+      c.wrap.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+      c.wrap.style.transform = `translateY(${c.off}px) scale(${k.toFixed(3)})`;
+    });
   }
   function centrePaint() {}
 
