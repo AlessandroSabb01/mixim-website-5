@@ -53,41 +53,41 @@
   // cuts: [clip, start] — the type holds while the footage hypercuts underneath (BTS -> result, team feedback)
   const SCRIPT = {
     1: [   // Pourquoi nous
-      { t: 0, bg: "foot", cuts: [["bts_edit3", 0]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
-      { t: 1.62, bg: "foot", cuts: [["bts_set", 1.62]], line: "C'est ça qu'il avait|en **septembre.**", fx: "type" },
-      { t: 3.52, bg: "foot", cuts: [["bts_cam1", 3.52], ["bts_photo", 3.9], ["bts_mon", 4.28], ["bts_cam4", 4.7]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
-      { t: 5.2, bg: "foot", cuts: [["bts_cam3", 5.2], ["g_studio", 5.8]], line: "Des vidéos|chaque **semaine.**", fx: "rise" },
-      { t: 6.76, bg: "foot", cuts: [["g_flame", 6.76], ["g_shrimp", 7.3]], line: "Du monde|qui **commente.**", fx: "rise" },
-      { t: 7.98, bg: "blue", kind: "phone", clip: "p_albert", line: "« Je t'ai vu|sur **Insta.** »" },
+      { t: 0, bg: "foot", cuts: [["w_room", 0], ["w_gratin", 0.75]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
+      { t: 1.62, bg: "foot", cuts: [["w_girl", 1.62]], line: "C'est ça qu'il avait|en **septembre.**", fx: "type" },
+      { t: 3.52, bg: "foot", cuts: [["c_edit1", 3.52], ["c_photo", 4.3]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
+      { t: 5.2, bg: "blue", kind: "phone", clip: "p_re1", line: "Des vidéos|chaque **semaine.**" },
+      { t: 6.76, bg: "foot", cuts: [["w_girl2", 6.76]], line: "Du monde|qui **commente.**", fx: "rise" },
+      { t: 7.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta.** »" },
       { t: 10.38, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
-      { t: 11.7, bg: "foot", cuts: [["bts_edit2", 11.7], ["bts_cam5", 11.94], ["bts_photo", 12.18], ["g_studio", 12.42], ["bts_mon", 12.66]], line: "Une **méthode,**", size: 190, fx: "slam" },
-      { t: 12.9, bg: "foot", cuts: [["bts_mon", 12.9], ["bts_set", 13.45]], line: "puis une|**équipe.**", fx: "rise" },
-      { t: 14.02, bg: "foot", cuts: [["g_sauce", 14.02], ["g_poutine2", 14.44], ["g_pasta", 14.86]], line: "C'est ton|**tour.**", size: 210, fx: "slam" },
+      { t: 11.7, bg: "foot", cuts: [["c_photo", 11.7], ["c_edit1", 12.3]], line: "Une **méthode,**", size: 190, fx: "slam" },
+      { t: 12.9, bg: "foot", cuts: [["g_shrimp", 12.9], ["w_surf", 13.45]], line: "puis une|**équipe.**", fx: "rise" },
+      { t: 14.02, bg: "foot", cuts: [["w_lava2", 14.02], ["w_gratin", 14.45], ["g_sauce", 14.86]], line: "C'est ton|**tour.**", size: 210, fx: "slam" },
     ],
     2: [   // Qui on est
       { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
-      { t: 0.42, bg: "foot", cuts: [["bts_set", 0.42], ["bts_edit3", 1.9]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
-      { t: 3.36, bg: "foot", cuts: [["bts_mon", 3.36]], line: "« J'ai pas|le **temps.** »", fx: "type" },
-      { t: 4.62, bg: "foot", cuts: [["bts_cam1", 4.62], ["bts_cam4", 5.2]], line: "On filme|pour **toi.**", fx: "rise" },
-      { t: 5.76, bg: "foot", cuts: [["bts_edit3", 5.76]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
-      { t: 7.14, bg: "foot", cuts: [["bts_edit1", 7.14], ["g_studio", 7.7]], line: "On a|les **idées.**", fx: "rise" },
+      { t: 0.42, bg: "foot", cuts: [["w_room", 0.42], ["w_mussels", 1.15], ["w_girl", 1.9]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
+      { t: 3.36, bg: "foot", cuts: [["w_mussels", 3.36]], line: "« J'ai pas|le **temps.** »", fx: "type" },
+      { t: 4.62, bg: "foot", cuts: [["c_photo", 4.62]], line: "On filme|pour **toi.**", fx: "rise" },
+      { t: 5.76, bg: "foot", cuts: [["w_plates", 5.76]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
+      { t: 7.14, bg: "foot", cuts: [["c_edit1", 7.14]], line: "On a|les **idées.**", fx: "rise" },
       { t: 8.28, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
-      { t: 10.12, bg: "foot", cuts: [["bts_cam5", 10.12], ["bts_photo", 10.38], ["bts_mon", 10.64], ["g_flame", 10.9], ["g_sauce", 11.45], ["g_poutine2", 12.0], ["g_pasta", 12.45]], line: "On te prouve|le **contraire.**", fx: "slam" },
-      { t: 12.96, bg: "blue", kind: "phone", clip: "p_tour", line: "Création **Virale.**" },
-      { t: 14.04, bg: "foot", cuts: [["g_studio", 14.04], ["bts_set", 14.8], ["bts_set", 15.5]], line: "Ton équipe de contenu|à **Québec.**", fx: "rise" },
+      { t: 10.12, bg: "blue", kind: "phone", clip: "p_re2", line: "On te prouve|le **contraire.**" },
+      { t: 12.96, bg: "blue", kind: "phone", clip: "p_bo1", line: "Création **Virale.**" },
+      { t: 14.04, bg: "foot", cuts: [["c_photo", 14.04], ["w_surf", 14.8], ["w_girl2", 15.5]], line: "Ton équipe de contenu|à **Québec.**", fx: "rise" },
     ],
     3: [   // Ce qu'on fait
       { t: 0, bg: "ink", line: "Pose ton|**cell.**", size: 230, fx: "slam" },
       { t: 1.28, bg: "paper", line: "**Sérieux.**", size: 220, fx: "slam" },
-      { t: 1.74, bg: "foot", cuts: [["bts_edit3", 1.74], ["bts_mon", 2.9]], line: "3 fois que tu|recommences|ce **reel.**", fx: "type" },
-      { t: 4.26, bg: "foot", cuts: [["bts_set", 4.26]], line: "T'as déjà ta|business à **gérer.**", fx: "rise" },
-      { t: 6.14, bg: "foot", cuts: [["bo_salle2", 6.14], ["g_studio", 7.16], ["bts_edit3", 7.92], ["bts_edit2", 9.12]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
-      { t: 10.12, bg: "foot", cuts: [["bts_cam4", 10.12], ["bts_photo", 10.8], ["bts_cam1", 11.4]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
-      { t: 11.98, bg: "foot", cuts: [["bts_edit1", 11.98]], line: "Les **idées,**", size: 190, fx: "slam" },
-      { t: 12.62, bg: "foot", cuts: [["bts_cam5", 12.62]], line: "le **tournage,**", size: 190, fx: "slam" },
-      { t: 13.34, bg: "foot", cuts: [["bts_edit2", 13.34]], line: "le **montage,**", size: 190, fx: "slam" },
-      { t: 14.12, bg: "blue", kind: "phone", clip: "p_smash", line: "la **publication.**" },
-      { t: 14.98, bg: "foot", cuts: [["g_flame", 14.98], ["g_shrimp", 15.55], ["g_sauce", 16.1], ["g_poutine", 16.65], ["g_pasta", 17.1]], line: "Une équipe de Québec|qui connaît|ton **monde.**", fx: "rise" },
+      { t: 1.74, bg: "foot", cuts: [["w_girl", 1.74]], line: "3 fois que tu|recommences ce **reel.**", fx: "type" },
+      { t: 4.26, bg: "foot", cuts: [["w_room", 4.26], ["w_gratin", 4.9]], line: "T'as déjà ta|business à **gérer.**", fx: "rise" },
+      { t: 6.14, bg: "foot", cuts: [["w_mussels", 6.14], ["w_girl2", 7.16], ["w_plates", 7.92], ["c_edit1", 9.12]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [6.4, 7.16, 7.92, 9.12] },
+      { t: 10.12, bg: "foot", cuts: [["c_photo", 10.12], ["c_edit1", 11.0]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
+      { t: 11.98, bg: "foot", cuts: [["c_edit1", 11.98]], line: "Les **idées,**", size: 190, fx: "slam" },
+      { t: 12.62, bg: "foot", cuts: [["c_photo", 12.62]], line: "le **tournage,**", size: 190, fx: "slam" },
+      { t: 13.34, bg: "foot", cuts: [["c_edit3", 13.34]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 14.12, bg: "blue", kind: "phone", clip: "p_li2", line: "la **publication.**" },
+      { t: 14.98, bg: "foot", cuts: [["w_surf", 14.98], ["g_shrimp", 15.6], ["w_lava2", 16.2], ["w_gratin", 16.8]], line: "Une équipe de Québec|qui connaît ton **monde.**", fx: "rise" },
     ],
   };
   const END_T = { 1: 15.28, 2: 16.34, 3: 17.58 }[VID];   // "Remplis le formulaire ci-dessous…"
@@ -178,7 +178,7 @@
   const footL = el(stage, { width: W + "px", height: H + "px", overflow: "hidden" });
   const footImg = el(footL, { width: W + "px", height: H + "px", objectFit: "cover", transformOrigin: "50% 50%" }, "img", "a");
   footImg.decoding = "sync";
-  const footShade = el(footL, { width: W + "px", height: H + "px", background: "linear-gradient(180deg, rgba(8,9,12,.55) 0%, rgba(8,9,12,.38) 40%, rgba(8,9,12,.38) 60%, rgba(8,9,12,.7) 100%)" });
+  const footShade = el(footL, { width: W + "px", height: H + "px", background: "linear-gradient(180deg, rgba(8,9,12,.32) 0%, rgba(8,9,12,.16) 35%, rgba(8,9,12,.2) 65%, rgba(8,9,12,.42) 100%)" });
   let MAN = {}, pend = null, pend2 = null;
   const cardsL = el(stage, { width: W + "px", height: H + "px" });
   const wipe = el(stage, { width: W + "px", height: H + "px", transformOrigin: "50% 100%" });
@@ -191,6 +191,7 @@
     const cy = H / 2;
     if (!s.kind) {
       s.tb = textBlock(root, s.line, { size: s.size || 150, pal });
+      if (pal.foot) s.tb.root.style.textShadow = "0 4px 24px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.5)";
       s.ty = cy - s.tb.h / 2;
       const r0 = s.tb.rows.reduce((a, r) => (r.w > a.w ? r : a));
       s.G = guides(root, pal, (W - r0.w) / 2 - 18, (W + r0.w) / 2 + 18, s.ty - 6, s.ty + s.tb.h + 6);
@@ -232,12 +233,14 @@
       s.size = parseFloat(s.leadE.style.fontSize) || size; s.gap = 50; s.lx = (W - tot) / 2; s.lw = lw;
     } else if (s.kind === "phone") {   // a finished client reel, posted: inside a phone under the line
       s.tb = textBlock(root, s.line, { size: 120, pal });
-      const pw = 560, ph = 1000;
-      s.phone = el(root, { width: pw + 36 + "px", height: ph + 36 + "px", borderRadius: "70px", background: "#0B0C10", boxShadow: "0 40px 90px rgba(0,0,0,.35)", transformOrigin: "50% 50%" });
-      const scr = el(s.phone, { left: "18px", top: "18px", width: pw + "px", height: ph + "px", borderRadius: "54px", overflow: "hidden", background: "#000" });
+      const pw = 621, ph = 1104, bz = 16;   // iPhone: 9:16 screen, thin titanium bezel, dynamic island, side buttons
+      s.phone = el(root, { width: pw + 2 * bz + "px", height: ph + 2 * bz + "px", borderRadius: "92px", background: "linear-gradient(135deg,#3a3d44,#15161a 40%,#2a2c31)", boxShadow: "0 50px 110px rgba(0,0,0,.4), inset 0 0 0 3px #4a4d55", transformOrigin: "50% 50%" });
+      [[-6, 250, 120], [-6, 400, 120], [pw + 2 * bz, 330, 170]].forEach(([x, y, h]) => el(s.phone, { left: x + "px", top: y + "px", width: "6px", height: h + "px", borderRadius: "3px", background: "#2c2e33" }));
+      const scr = el(s.phone, { left: bz + "px", top: bz + "px", width: pw + "px", height: ph + "px", borderRadius: "78px", overflow: "hidden", background: "#000" });
       s.pimg = el(scr, { width: pw + "px", height: ph + "px", objectFit: "cover" }, "img", "a"); s.pimg.decoding = "sync";
-      el(scr, { left: pw / 2 - 70 + "px", top: "16px", width: "140px", height: "36px", borderRadius: "20px", background: "#000" });
-      s.px = (W - pw - 36) / 2; s.py = 600; s.ty = 300;
+      el(scr, { left: pw / 2 - 95 + "px", top: "26px", width: "190px", height: "54px", borderRadius: "28px", background: "#000" });
+      el(scr, { left: pw / 2 - 110 + "px", top: ph - 26 + "px", width: "220px", height: "8px", borderRadius: "4px", background: "rgba(255,255,255,.75)" });
+      s.px = (W - pw - 2 * bz) / 2; s.py = 520; s.ty = 200;
     } else if (s.kind === "count") {
       s.label && (s.labE = el(root, { font: `500 30px/1 ${MONO}`, letterSpacing: "0.18em", color: pal.mute, whiteSpace: "pre" }), s.labE.textContent = s.label);
       s.num = el(root, { font: `800 380px/1 ${FF}`, letterSpacing: "-0.06em", color: pal.ink, whiteSpace: "pre", fontVariantNumeric: "tabular-nums", transformOrigin: "50% 60%" });
