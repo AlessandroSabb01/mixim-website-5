@@ -91,8 +91,9 @@ meter = pyln.Meter(SR)
 vtrack = np.zeros_like(music)
 if os.environ.get("VO_FILE"): place(vtrack, load(os.environ["VO_FILE"]), float(os.environ.get("VO_OFF", "0")))
 lv = meter.integrated_loudness(vtrack) if os.environ.get("VO_FILE") else -16.0
-music = music * db(lv - 9 - meter.integrated_loudness(music))
-sfx = sfx * db(lv - 7 - meter.integrated_loudness(sfx))
+VL = os.environ.get("VO_LEAD") == "1"          # narrated brand films: the voice is the star, bed and SFX tucked lower
+music = music * db(lv - (15 if VL else 9) - meter.integrated_loudness(music))
+sfx = sfx * db(lv - (12 if VL else 7) - meter.integrated_loudness(sfx))
 e = np.abs(vtrack).max(axis=1); kk = n(0.12); e = np.convolve(e, np.ones(kk) / kk, mode="same")
 speak = np.clip(e / (e.max() * 0.08 + 1e-9), 0, 1); gg = np.zeros_like(speak); cur = 0.0
 for i in range(0, len(speak), 64):

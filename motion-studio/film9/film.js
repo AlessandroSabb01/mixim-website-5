@@ -101,17 +101,17 @@
       { t: 6.02, bg: "foot", cuts: [["lr_food1", 6.02]], line: "Les gens|**commentent.**", fx: "rise" },
       { t: 6.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta !** »" },
       { t: 10.08, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
-      { t: 11.38, bg: "foot", cuts: [["ai_script", 11.38]], line: "Une **méthode.**", size: 190, fx: "slam" },
+      { t: 11.38, bg: "foot", cuts: [["fm_47", 11.38]], line: "Une **méthode.**", size: 190, fx: "slam" },
       { t: 12.16, bg: "foot", cuts: [["tm_n", 12.16], ["s_rolls1", 12.55]], line: "Une vraie|**équipe.**", fx: "rise" },
       { t: 12.84, bg: "foot", cuts: [["w_lava2", 12.84], ["s_rolls3", 13.4], ["w_girl", 13.85]], line: "À ton|**tour.**", size: 230, fx: "slam" },
     ],
     2: [   // Qui on est — partner take 3
       { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
-      { t: 0.96, bg: "foot", cuts: [["lr_girl2", 0.96], ["w_mussels", 2.4]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
+      { t: 0.96, bg: "foot", cuts: [["lr_girl2", 0.96], ["w_mussels", 2.4], ["w_surf", 3.3]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
       { t: 3.98, bg: "foot", cuts: [["sa_tower", 3.98]], line: "« J'ai pas|le **temps.** »", fx: "type" },
-      { t: 5.14, bg: "foot", cuts: [["ai_film", 5.14]], line: "On filme|pour **toi.**", fx: "rise" },
+      { t: 5.14, bg: "foot", cuts: [["fm_84", 5.14]], line: "On filme|pour **toi.**", fx: "rise" },
       { t: 6.6, bg: "foot", cuts: [["w_plates", 6.6], ["sa_burger", 7.3]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
-      { t: 8.02, bg: "foot", cuts: [["ai_ideas", 8.02]], line: "On a|les **idées.**", fx: "rise" },
+      { t: 8.02, bg: "foot", cuts: [["tm_e", 8.02]], line: "On a|les **idées.**", fx: "rise" },
       { t: 9.72, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
       { t: 11.42, bg: "blue", kind: "phone", clip: "p_re2", line: "On va te prouver|le **contraire.**" },
       { t: 14.08, bg: "foot", cuts: [["tm_k", 14.08], ["lr_pizza", 15.0], ["tm_l", 15.7]], line: "Création Virale,|ton équipe à **Québec.**", fx: "rise" },
@@ -123,10 +123,10 @@
       { t: 3.72, bg: "foot", cuts: [["sa_poutine", 3.72], ["w_girl2", 4.7]], line: "T'as déjà une|business à **gérer.**", fx: "rise" },
       { t: 5.5, bg: "foot", cuts: [["lr_food2", 5.5], ["tm_c", 6.66], ["sa_mac", 7.66], ["tm_f", 8.58]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [5.84, 6.66, 7.66, 8.58] },
       { t: 9.54, bg: "foot", cuts: [["tm_g", 9.54], ["tm_i", 10.3]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
-      { t: 10.98, bg: "foot", cuts: [["ai_script", 10.98]], line: "Les **idées,**", size: 190, fx: "slam" },
-      { t: 11.9, bg: "foot", cuts: [["ai_film", 11.9]], line: "le **tournage,**", size: 190, fx: "slam" },
-      { t: 12.8, bg: "foot", cuts: [["ai_edit", 12.8]], line: "le **montage,**", size: 190, fx: "slam" },
-      { t: 13.4, bg: "foot", cuts: [["ai_publish", 13.4]], line: "la **publication.**", size: 170, fx: "slam" },
+      { t: 10.98, bg: "foot", cuts: [["fm_48", 10.98]], line: "Les **idées,**", size: 190, fx: "slam" },
+      { t: 11.9, bg: "foot", cuts: [["fm_87", 11.9]], line: "le **tournage,**", size: 190, fx: "slam" },
+      { t: 12.8, bg: "foot", cuts: [["tm_m", 12.8]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 13.4, bg: "blue", kind: "phone", clip: "p_li2", line: "la **publication.**" },
       { t: 14.48, bg: "foot", cuts: [["lr_food3", 14.48], ["s_poke", 15.2], ["w_lava", 15.9], ["lr_pizza2", 16.5]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
     ],
   };
@@ -384,7 +384,7 @@
       paintText(s, s.tb, t, "rise", 0, s.ty);
       const e = spring(t - s.b0 - 0.08, 1.6, 7);
       T(s.phone, { x: s.px, y: s.py + (1 - clamp(e, 0, 1.2)) * 500, s: 0.92 + 0.08 * clamp(e, 0, 1.1), r: (1 - clamp(e, 0, 1)) * 6 });
-      const m = MAN[s.clip] || 1, fi = Math.floor(Math.max(0, t - s.b0) * 24), pp = (m - 1) * 2 || 1, k_ = fi % pp, src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, (k_ < m ? k_ : pp - k_) + 1)).padStart(4, "0")}.jpg`;
+      const m = MAN[s.clip] || 1, src = `../assets/cv9/frames/${s.clip}/${String(Math.min(m, Math.floor(Math.max(0, t - s.b0) * 24) + 1)).padStart(4, "0")}.jpg`;
       if (s.pimg.dataset.src !== src) { s.pimg.dataset.src = src; s.pimg.src = src; pend2 = s.pimg.decode().catch(() => {}); }
     } else if (s.kind === "count") {
       const c = ez.outExpo(clamp((t - bt(s.b0)) / 0.6));
@@ -411,8 +411,8 @@
     show(footL, onFoot);
     if (onFoot) {
       let cl = s.cuts[0]; s.cuts.forEach((c) => { if (t >= c[1]) cl = c; });
-      const m = MAN[cl[0]] || 1, loc = Math.max(0, t - cl[1]) + (cl[0].startsWith("g_") ? 0 : 0.3);
-      const fi = Math.floor(loc * 24), pp = (m - 1) * 2 || 1, k_ = fi % pp, idx = (k_ < m ? k_ : pp - k_) + 1;   // ping-pong: never a frozen frame
+      const m = MAN[cl[0]] || 1, loc = Math.max(0, t - cl[1]) + (/^(g_|w_|s_)/.test(cl[0]) ? 0 : 0.3);
+      const idx = Math.floor(loc * 24) + 1;   // forward only; every cut is shorter than its clip (checked at build)
       const src = `../assets/cv9/frames/${cl[0]}/${String(Math.min(m, idx)).padStart(4, "0")}.jpg`;
       if (footImg.dataset.src !== src) { footImg.dataset.src = src; footImg.src = src; pend = footImg.decode().catch(() => {}); }
       const pr_ = clamp((t - cl[1]) / 1.5);
