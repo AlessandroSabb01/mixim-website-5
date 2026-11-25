@@ -98,12 +98,12 @@
       { t: 1.62, bg: "foot", cuts: [["lr_girl1", 1.62]], line: "C'est tout ce qu'il|avait en **septembre.**", fx: "type" },
       { t: 3.26, bg: "foot", cuts: [["tm_a", 3.26], ["tm_d", 4.0]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
       { t: 4.76, bg: "blue", kind: "phone", clip: "p_re1", line: "Une vidéo|chaque **semaine.**" },
-      { t: 6.02, bg: "foot", cuts: [["lr_food1", 6.02]], line: "Les gens|**commentent.**", fx: "rise" },
+      { t: 6.02, bg: "foot", cuts: [["lr_food1", 6.02]], kind: "count", value: 158561, suf: "", sub: "interactions.", label: "NOS CLIENTS · 2026" },
       { t: 6.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta !** »" },
       { t: 10.08, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
       { t: 11.38, bg: "foot", cuts: [["fm_47", 11.38]], line: "Une **méthode.**", size: 190, fx: "slam" },
       { t: 12.16, bg: "foot", cuts: [["tm_n", 12.16], ["s_rolls1", 12.55]], line: "Une vraie|**équipe.**", fx: "rise" },
-      { t: 12.84, bg: "foot", cuts: [["w_lava2", 12.84], ["s_rolls3", 13.4], ["w_girl", 13.85]], line: "À ton|**tour.**", size: 230, fx: "slam" },
+      { t: 12.84, bg: "foot", cuts: [["w_lava2", 12.84], ["g_shrimp", 13.4], ["w_girl", 13.85]], kind: "count", value: 10.9, dec: 1, suf: " M", sub: "de vues. À ton tour.", label: "NOS CLIENTS · MARS → OCT. 2026" },
     ],
     2: [   // Qui on est — partner take 3
       { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
@@ -111,9 +111,10 @@
       { t: 3.98, bg: "foot", cuts: [["sa_tower", 3.98]], line: "« J'ai pas|le **temps.** »", fx: "type" },
       { t: 5.14, bg: "foot", cuts: [["fm_84", 5.14]], line: "On filme|pour **toi.**", fx: "rise" },
       { t: 6.6, bg: "foot", cuts: [["w_plates", 6.6], ["sa_burger", 7.3]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
-      { t: 8.02, bg: "foot", cuts: [["tm_e", 8.02]], line: "On a|les **idées.**", fx: "rise" },
+      { t: 8.02, bg: "foot", cuts: [["tm_b", 8.02]], line: "On a|les **idées.**", fx: "rise" },
       { t: 9.72, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
       { t: 11.42, bg: "blue", kind: "phone", clip: "p_re2", line: "On va te prouver|le **contraire.**" },
+      { t: 13.0, bg: "foot", cuts: [["w_surf", 13.0]], kind: "count", value: 6475, pre: "+", suf: " %", sub: "de vues Facebook.", label: "AU PETIT CHALET · 7 MOIS" },
       { t: 14.08, bg: "foot", cuts: [["tm_k", 14.08], ["lr_pizza", 15.0], ["tm_l", 15.7]], line: "Création Virale,|ton équipe à **Québec.**", fx: "rise" },
     ],
     3: [   // Ce qu'on fait — partner take 2
@@ -121,13 +122,14 @@
       { t: 1.3, bg: "paper", line: "**Sérieux.**", size: 220, fx: "slam" },
       { t: 1.76, bg: "foot", cuts: [["lr_girl3", 1.76]], line: "3 fois que tu|refais ce **reel ?**", fx: "type" },
       { t: 3.72, bg: "foot", cuts: [["sa_poutine", 3.72], ["w_girl2", 4.7]], line: "T'as déjà une|business à **gérer.**", fx: "rise" },
-      { t: 5.5, bg: "foot", cuts: [["lr_food2", 5.5], ["tm_c", 6.66], ["sa_mac", 7.66], ["tm_f", 8.58]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [5.84, 6.66, 7.66, 8.58] },
-      { t: 9.54, bg: "foot", cuts: [["tm_g", 9.54], ["tm_i", 10.3]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
+      { t: 5.5, bg: "foot", cuts: [["lr_food2", 5.5], ["tm_c", 6.66], ["tm_j", 7.66], ["tm_i", 8.58]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [5.84, 6.66, 7.66, 8.58] },
+      { t: 9.54, bg: "foot", cuts: [["tm_l", 9.54], ["tm_k", 10.3]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
       { t: 10.98, bg: "foot", cuts: [["fm_48", 10.98]], line: "Les **idées,**", size: 190, fx: "slam" },
       { t: 11.9, bg: "foot", cuts: [["fm_87", 11.9]], line: "le **tournage,**", size: 190, fx: "slam" },
-      { t: 12.8, bg: "foot", cuts: [["tm_m", 12.8]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 12.8, bg: "foot", cuts: [["c_edit1", 12.8]], line: "le **montage,**", size: 190, fx: "slam" },
       { t: 13.4, bg: "blue", kind: "phone", clip: "p_li2", line: "la **publication.**" },
-      { t: 14.48, bg: "foot", cuts: [["lr_food3", 14.48], ["s_poke", 15.2], ["w_lava", 15.9], ["lr_pizza2", 16.5]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
+      { t: 14.48, bg: "foot", cuts: [["lr_food3", 14.48], ["g_sauce", 15.2]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
+      { t: 15.9, bg: "foot", cuts: [["w_lava", 15.9], ["lr_pizza2", 16.5]], kind: "count", value: 3540342, suf: "", sub: "vues pour Sushi X.", label: "MARS → OCTOBRE 2026" },
     ],
   };
   if (DK) Object.assign(SCRIPT, SCRIPT_DK);
@@ -286,14 +288,14 @@
       s.label && (s.labE = el(root, { font: `500 30px/1 ${MONO}`, letterSpacing: "0.18em", color: pal.mute, whiteSpace: "pre" }), s.labE.textContent = s.label);
       s.num = el(root, { font: `800 380px/1 ${FF}`, letterSpacing: "-0.06em", color: pal.ink, whiteSpace: "pre", fontVariantNumeric: "tabular-nums", transformOrigin: "50% 60%" });
       s.subE = el(root, { font: `500 84px/1 ${FF}`, letterSpacing: "-0.03em", color: pal.ink, whiteSpace: "pre" }); s.subE.textContent = s.sub;
-      s.num.innerHTML = `${fmtNum(s.value, s.dec)}<span style="color:${pal.acc}">${s.suf}</span>`;
+      s.num.innerHTML = `${s.pre || ""}${fmtNum(s.value, s.dec)}<span style="color:${pal.acc}">${s.suf}</span>`;
       s.numW = s.num.offsetWidth;
       if (s.numW > W - 130) { s.numSize = 380 * (W - 130) / s.numW; s.num.style.fontSize = s.numSize + "px"; s.numW = s.num.offsetWidth; } else s.numSize = 380;
       s.subW = s.subE.offsetWidth;
     }
     show(root, false);
   }
-  const fmtNum = (v, dec = 0) => v.toFixed(dec).replace(".", ",");
+  const fmtNum = (v, dec = 0) => v.toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F").replace(".", ",");
 
   // end card: the logo on brand blue, the DM line as a pill
   const endL = el(stage, { width: W + "px", height: H + "px" });
@@ -389,7 +391,7 @@
     } else if (s.kind === "count") {
       const c = ez.outExpo(clamp((t - bt(s.b0)) / 0.6));
       const v = s.value * c;
-      s.num.innerHTML = `${fmtNum(s.dec ? Math.round(v * 10) / 10 : Math.round(v), s.dec)}<span style="color:${s.pal.acc}">${s.suf}</span>`;
+      s.num.innerHTML = `${s.pre || ""}${fmtNum(s.dec ? Math.round(v * 10) / 10 : Math.round(v), s.dec)}<span style="color:${s.pal.acc}">${s.suf}</span>`;
       const pop = 1 + 0.08 * Math.exp(-Math.max(0, t - bt(s.b0) - 0.6) / 0.12) * (c > 0.995 ? 1 : 0);
       const ny = H / 2 - 260 + (380 - s.numSize) * 0.5;
       T(s.num, { x: (W - s.numW) / 2, y: ny, s: lerp(1.25, 1, ez.outExpo(clamp(d / 0.35))) * pop });
