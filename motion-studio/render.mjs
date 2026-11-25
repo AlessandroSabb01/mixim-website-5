@@ -32,9 +32,9 @@ function film5Cfg() {
 }
 // film9: Création Virale narrated films, --qs "v=1|2|3"; music = the text film's own score, voice-over from window.VO
 function film9Cfg() {
-  const v = new URLSearchParams(String(opt("qs", "v=1"))).get("v") || "1";
+  const q = new URLSearchParams(String(opt("qs", "v=1"))), v = q.get("v") || "1", dk = q.get("vo") === "dk";
   process.env.FILM_V = v;
-  return { score: "audio/music9.py", mixer: "audio/mix9.py", len: { 1: 19.41, 2: 20.69, 3: 21.97 }[v], tag: `-cv9-${v}`, music: `build/music9-v${v}.wav`, beats: `beats9-v${v}.json`, nogrid: true };
+  return { score: "audio/music9.py", mixer: "audio/mix9.py", len: (dk ? { 1: 17.8, 2: 20.0, 3: 20.7 } : { 1: 19.41, 2: 20.69, 3: 21.97 })[v], tag: `-cv9${dk ? "dk" : ""}-${v}`, music: `build/music9-v${v}.wav`, beats: `beats9-v${v}.json`, nogrid: true };
 }
 // film6: Import-Rama ads, --qs "v=1&k=a" (a = motion design, b = AI b-roll); score + voice-over
 function film6Cfg() {

@@ -29,7 +29,8 @@
 
   /* ---------- beat grid ---------- */
   // time is in seconds: one "beat" = 1 s, so every card starts on its spoken word
-  const VO_LEN = { 1: 18.21, 2: 19.49, 3: 20.77 }[VID], LEN = VO_LEN + 1.2;
+  const DK = P.get("vo") === "dk";   // v5: the partner's own voice (assets/cv-vo/dk{1,2,3}.wav), timings re-measured
+  const VO_LEN = (DK ? { 1: 16.6, 2: 18.8, 3: 19.5 } : { 1: 18.21, 2: 19.49, 3: 20.77 })[VID], LEN = VO_LEN + 1.2;
   let BTS = [0], PER = 1;
   const bt = (b) => BTS[0] + b * PER;
   const tb = (t) => (t - BTS[0]) / PER;
@@ -91,7 +92,46 @@
       { t: 14.98, bg: "foot", cuts: [["lr_food3", 14.98], ["s_poke", 15.6], ["w_lava", 16.2], ["lr_pizza2", 16.8]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
     ],
   };
-  const END_T = { 1: 15.28, 2: 16.34, 3: 17.58 }[VID];   // "Remplis le formulaire ci-dessous…"
+  const SCRIPT_DK = {
+    1: [   // Pourquoi nous — partner take 1
+      { t: 0, bg: "foot", cuts: [["w_room", 0], ["w_gratin", 0.62]], kind: "count", value: 3, suf: "", sub: "likes.", label: "SEPTEMBRE" },
+      { t: 1.62, bg: "foot", cuts: [["lr_girl1", 1.62]], line: "C'est tout ce qu'il|avait en **septembre.**", fx: "type" },
+      { t: 3.26, bg: "foot", cuts: [["tm_a", 3.26], ["tm_d", 4.0]], line: "Deux mois avec|Création **Virale.**", fx: "rise" },
+      { t: 4.76, bg: "blue", kind: "phone", clip: "p_re1", line: "Une vidéo|chaque **semaine.**" },
+      { t: 6.02, bg: "foot", cuts: [["lr_food1", 6.02]], line: "Les gens|**commentent.**", fx: "rise" },
+      { t: 6.98, bg: "blue", kind: "phone", clip: "p_li1", line: "« Je t'ai vu|sur **Insta !** »" },
+      { t: 10.08, bg: "ink", line: "Pas de la **magie.**", fx: "strike", strikeAt: 10.9 },
+      { t: 11.38, bg: "foot", cuts: [["ai_script", 11.38]], line: "Une **méthode.**", size: 190, fx: "slam" },
+      { t: 12.16, bg: "foot", cuts: [["tm_n", 12.16], ["s_rolls1", 12.55]], line: "Une vraie|**équipe.**", fx: "rise" },
+      { t: 12.84, bg: "foot", cuts: [["w_lava2", 12.84], ["s_rolls3", 13.4], ["w_girl", 13.85]], line: "À ton|**tour.**", size: 230, fx: "slam" },
+    ],
+    2: [   // Qui on est — partner take 3
+      { t: 0, bg: "ink", line: "**STOP.**", size: 330, fx: "slam" },
+      { t: 0.96, bg: "foot", cuts: [["lr_girl2", 0.96], ["w_mussels", 2.4]], line: "**3** excuses|que t'as déjà dites", fx: "type" },
+      { t: 3.98, bg: "foot", cuts: [["sa_tower", 3.98]], line: "« J'ai pas|le **temps.** »", fx: "type" },
+      { t: 5.14, bg: "foot", cuts: [["ai_film", 5.14]], line: "On filme|pour **toi.**", fx: "rise" },
+      { t: 6.6, bg: "foot", cuts: [["w_plates", 6.6], ["sa_burger", 7.3]], line: "« Je sais pas|quoi **poster.** »", fx: "type" },
+      { t: 8.02, bg: "foot", cuts: [["ai_ideas", 8.02]], line: "On a|les **idées.**", fx: "rise" },
+      { t: 9.72, bg: "ink", line: "« Ça donne|**rien.** »", fx: "type" },
+      { t: 11.42, bg: "blue", kind: "phone", clip: "p_re2", line: "On va te prouver|le **contraire.**" },
+      { t: 14.08, bg: "foot", cuts: [["tm_k", 14.08], ["lr_pizza", 15.0], ["tm_l", 15.7]], line: "Création Virale,|ton équipe à **Québec.**", fx: "rise" },
+    ],
+    3: [   // Ce qu'on fait — partner take 2
+      { t: 0, bg: "ink", line: "Dépose ton|**cell.**", size: 230, fx: "slam" },
+      { t: 1.3, bg: "paper", line: "**Sérieux.**", size: 220, fx: "slam" },
+      { t: 1.76, bg: "foot", cuts: [["lr_girl3", 1.76]], line: "3 fois que tu|refais ce **reel ?**", fx: "type" },
+      { t: 3.72, bg: "foot", cuts: [["sa_poutine", 3.72], ["w_girl2", 4.7]], line: "T'as déjà une|business à **gérer.**", fx: "rise" },
+      { t: 5.5, bg: "foot", cuts: [["lr_food2", 5.5], ["tm_c", 6.66], ["sa_mac", 7.66], ["tm_f", 8.58]], kind: "wheel", lead: "Tes", items: ["clients", "équipe", "factures", "réseaux sociaux"], at: [5.84, 6.66, 7.66, 8.58] },
+      { t: 9.54, bg: "foot", cuts: [["tm_g", 9.54], ["tm_i", 10.3]], line: "Création Virale|s'en **occupe.**", fx: "rise" },
+      { t: 10.98, bg: "foot", cuts: [["ai_script", 10.98]], line: "Les **idées,**", size: 190, fx: "slam" },
+      { t: 11.9, bg: "foot", cuts: [["ai_film", 11.9]], line: "le **tournage,**", size: 190, fx: "slam" },
+      { t: 12.8, bg: "foot", cuts: [["ai_edit", 12.8]], line: "le **montage,**", size: 190, fx: "slam" },
+      { t: 13.4, bg: "foot", cuts: [["ai_publish", 13.4]], line: "la **publication.**", size: 170, fx: "slam" },
+      { t: 14.48, bg: "foot", cuts: [["lr_food3", 14.48], ["s_poke", 15.2], ["w_lava", 15.9], ["lr_pizza2", 16.5]], line: "Une équipe d'ici qui|connaît ton **monde.**", fx: "rise" },
+    ],
+  };
+  if (DK) Object.assign(SCRIPT, SCRIPT_DK);
+  const END_T = (DK ? { 1: 14.3, 2: 16.48, 3: 17.16 } : { 1: 15.28, 2: 16.34, 3: 17.58 })[VID];   // "Remplis le formulaire ci-dessous…"
 
   /* ---------- timeline ---------- */
   const SC = SCRIPT[VID].map((s, i, a) => ({ ...s, i, b0: s.t, b1: i + 1 < a.length ? a[i + 1].t : END_T, d: (i + 1 < a.length ? a[i + 1].t : END_T) - s.t,
@@ -479,7 +519,7 @@
     const svg = await fetch("../assets/brand/logo-white.svg").then((r) => r.text());
     // the score is synthesized on this exact grid; a measured grid (if rendered) only confirms it
     MAN = await fetch("../assets/cv9/frames/manifest.json").then((r) => r.json());
-    window.VO = { file: `assets/cv-vo/raw${VID}.mp3`, offset: 0 };
+    window.VO = { file: DK ? `assets/cv-vo/dk${VID}.wav` : `assets/cv-vo/raw${VID}.mp3`, offset: 0 };
     await Promise.all(["400 100px Geist", "500 100px Geist", "600 100px Geist", "700 100px Geist", "800 100px Geist", '500 20px "Geist Mono"'].map((f) => document.fonts.load(f)));
     logo.innerHTML = svg.replace("<svg ", '<svg width="640" height="463" viewBox="0 0 221 160" ');
     SC.forEach(build);
